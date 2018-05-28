@@ -4,7 +4,7 @@
 #   Test Package:              'Cmd + Shift + T'
 #' @export
 
-Lasso.bag <- function(mat,out.mat,bootN=100,imputeN=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F) {
+Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F) {
   if(nrow(mat)!=length(out.mat)){
       warning("incoporate length of matrix and outVarianbles, plz check your input ")
       break
@@ -23,17 +23,27 @@ Lasso.bag <- function(mat,out.mat,bootN=100,imputeN=100,boot.rep=TRUE,a.family=c
     out.vec<-rep(0,length(marker_candidate))
     names(out.vec)<-marker_candidate
     selecVlist1=c()
+
+    #index list for lapply
+    index.list.bootonce<-list()
     for(i in 1:bootN){
       sampleindex2=sample(1:nrow(runData),1*nrow(runData),rep=boot.rep)
-      effectdata=runData[sampleindex2,]
+      index.list.bootonce[[i]]<-sampleindex2
+    }
 
+    # apply function
+    boot.indiv<-function(sampleIdex){
+      effectdata=runData[sampleIdex,]
       glmmod<-glmnet(as.matrix(effectdata[,marker_candidate]), effectdata$out, family = a.family)
       cv.glmmod<-cv.glmnet(as.matrix(effectdata[,marker_candidate]), effectdata$out, family = a.family)
       best_lambda <- cv.glmmod$lambda.1se
       result<-coef(glmmod, s = best_lambda)
-      selecVlist1=c(selecVlist1,result@Dimnames[[1]][which(result != 0)])
+      return(result@Dimnames[[1]][which(result != 0)])
     }
-    tablecount1=table(selecVlist1)
+
+    selecVlist1=lapply(index.list.bootonce, boot.indiv)
+
+    tablecount1=table(unlist(selecVlist1))
     out.vec[intersect(names(tablecount1), names(out.vec))] <- tablecount1[intersect(names(tablecount1), names(out.vec))]
     return(out.vec)
   }
@@ -64,7 +74,11 @@ Lasso.bag <- function(mat,out.mat,bootN=100,imputeN=100,boot.rep=TRUE,a.family=c
   pvalue.list<-c()
   for(i in 1:length(observed.fre)){
     temp.list<-out.df[names(observed.fre)[i],]
-    pvalue.list<-c(pvalue.list,length(temp.list[temp.list>observed.fre[i]])/imputeN)
+    #avoid p=0
+    p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/imputeN
+    #avoid p>1
+    p.value<-ifelse(p.value>1,1,p.value)
+    pvalue.list<-c(pvalue.list,p.value)
   }
   #FDR calculation
   cat(paste(date(), "", sep=" -- Pvalue adjusting "), '\n')
