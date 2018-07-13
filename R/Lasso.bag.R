@@ -1,7 +1,5 @@
 #Lasso-bagging  main analysis function
 
-
-#   Test Package:              'Cmd + Shift + T'
 #' @export
 
 Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F) {
