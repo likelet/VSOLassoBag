@@ -8,6 +8,6 @@ a permutation test to obtain P values of variables. In addition, it supports sev
 * via github
 ```R
 install.packages("devtools")
-devtools::install_github("likselet/lassoBag")
+devtools::install_github("likelet/lassoBag")
 ```
 
