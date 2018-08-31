@@ -1,4 +1,5 @@
 #permutation GLM beta
+#reference from http://jmlr.org/papers/volume16/wang15a/wang15a.pdf
 permGLMbeta<-function(mat,out.mat,imputeN=1000,glmthred.p=0.2){
   out.mat.mt<-as.matrix(out.mat)
   mat.mt<-as.matrix(mat)
