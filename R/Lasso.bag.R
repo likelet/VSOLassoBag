@@ -1,6 +1,10 @@
-#Lasso-bagging  main analysis function
+#' LASSO-bagging: a lasso based variable selecting CART framework
 
-
+#' @param mat sample matrix that each column represent a variable and rows represent sample data points
+#' @param out.mat vector with the same length as the sample size from `mat`
+#' @param a.family a string vector
+#' @param universe total number of all strings that vec1 and vec2 comes from
+#' @return  a P value
 #   Test Package:              'Cmd + Shift + T'
 #' @export
 

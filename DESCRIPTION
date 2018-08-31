@@ -14,5 +14,6 @@ LazyData: TRUE
 Suggests: Parallel
 Imports: survival,
     glmnet,
-    limma
+    limma,
+    POT
 
