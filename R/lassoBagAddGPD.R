@@ -9,8 +9,9 @@
 
 #' @export
 library(glmnet)
+library(parallel)
 source("lessPermutation.R")
-Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=50,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F) {
+Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=10,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F) {
   # bootN is the size of resample sample
   # mat is independent variable
   # out.mat is dependent variable
@@ -21,20 +22,52 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
   # permut.increase is: if the initial imputeN times of permutation doesn't meet the requirement, then we add permut.increase times of permutation to get more random values
   # if a.family == "multinomial", then the number of each class of dependent vars should be more than 1
   
+  rownames(mat) <- c(1:length(rownames(mat)))
+  # rownames(out.mat) <- c(1:length(rownames(out.mat)))
   # a simple input judgement and transformation
   out.mat <- as.matrix(out.mat)
-  colnames(out.mat) <- "out"
+  if (a.family!="cox") {
+    colnames(out.mat) <- "out"
+  }
   
   # to keep the same type of each column, default is force them to be "numeric"
+  zeromat <- matrix(0,length(rownames(mat)),length(colnames(mat)))
+  colnames(zeromat) <- colnames(mat)
+  rownames(zeromat) <- rownames(mat)
   for (i in colnames(mat)) {
-    mat[,i] <- as.numeric(mat[,i])
+    zeromat[,i] <- as.numeric(mat[,i])
   }
+  mat <- zeromat  # it's necessary to substitute in this way for there will be some mistake in later handling if we don't do this
+  
+  if (a.family!="cox") {
+    zeromat <- matrix(0,length(out.mat),length(colnames(out.mat)))
+    colnames(zeromat) <- colnames(out.mat)
+  } else {
+    zeromat <- matrix(0,length(rownames(out.mat)),length(colnames(out.mat)))
+    colnames(zeromat) <- colnames(out.mat)
+    rownames(zeromat) <- rownames(out.mat)
+  }
+  
+  for (j in colnames(out.mat)) {
+    zeromat[,j] <- as.numeric(out.mat[,j])
+  }
+  out.mat <- zeromat
+  
   # simply judge whether dependent vars has the same size of independent vars
-  if(nrow(mat)!=length(out.mat)){  # TODO: i think that it should be dataframe for that will be more adjustable
-                                  # and it allows us to store different types of data in one mat/df
-    warning("incoporate length of matrix and outVarianbles, plz check your input ")
-    break
+  if (a.family!="cox") {
+    if(nrow(mat)!=length(out.mat)){  # TODO: i think that it should be dataframe for that will be more adjustable
+      # and it allows us to store different types of data in one mat/df
+      warning("incoporate length of matrix and outVarianbles, plz check your input ")
+      break
+    }
+  } else {
+    if(nrow(mat)!=length(out.mat[,"time"])){  # TODO: i think that it should be dataframe for that will be more adjustable
+      # and it allows us to store different types of data in one mat/df
+      warning("incoporate length of matrix and outVarianbles, plz check your input ")
+      break
+    }
   }
+  
   
   # lasso bag function in individual iteration
   # boot for one time.
@@ -44,7 +77,11 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     }else{
       new.out.mat<-out.mat
     }
-    runData=cbind(mat,out=new.out.mat)
+    if (a.family!="cox") {
+      runData=cbind(mat,out=new.out.mat)
+    } else {
+      runData=cbind(mat,new.out.mat)
+    }
     marker_candidate=colnames(mat)
     out.vec<-rep(0,length(marker_candidate))
     names(out.vec)<-marker_candidate
@@ -60,8 +97,13 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     # apply function
     boot.indiv<-function(sampleIdex){
       effectdata=runData[sampleIdex,]  # the sample we use in permutation, x and y have been matched
-      glmmod<-glmnet(as.matrix(effectdata[,marker_candidate]), effectdata$out, family = a.family)
-      cv.glmmod<-cv.glmnet(as.matrix(effectdata[,marker_candidate]), effectdata$out, family = a.family)
+      if (a.family!="cox") {
+        glmmod<-glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,"out"], family = a.family)
+        cv.glmmod<-cv.glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,"out"], family = a.family)
+      } else {
+        glmmod<-glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,c("time","status")], family = a.family)
+        cv.glmmod<-cv.glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,c("time","status")], family = a.family)
+      }
       best_lambda <- cv.glmmod$lambda.1se
       result<-coef(glmmod, s = best_lambda)
       return(result@Dimnames[[1]][which(result != 0)])  # return the coef of each feature
@@ -140,7 +182,6 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value)},
                error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
                print("no data is bigger than threshold, we will use traditional p-value")})
-      
       
       #avoid p>1
       p.value<-ifelse(p.value>1,1,p.value)
