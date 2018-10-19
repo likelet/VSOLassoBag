@@ -182,7 +182,9 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value)},
                error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
                print("no data is bigger than threshold, we will use traditional p-value")})
-      
+      if (!exists("p.value")) {
+        p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N
+      }
       #avoid p>1
       p.value<-ifelse(p.value>1,1,p.value)
       pvalue.list<-c(pvalue.list,p.value) # for every feature, there will be a p-value, for later adjustment
@@ -205,7 +207,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
   # TODO: to add more permutation here
   total.imputeN <- imputeN
   if (add.more) {
-    total.imputeN <- total.imputeN + permut.increase
+    
     new.permut.list <-c(permut.list)
     while (add.more & total.imputeN<=imputeN.max) {
       new.perm <- get.permutation(permut.increase)
@@ -215,6 +217,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       total.imputeN <- total.imputeN + permut.increase
       pvalue.list <- new.judgement[[2]]
     }
+    total.imputeN <- total.imputeN + permut.increase
   } else {
     pvalue.list <- judgement[[2]]
   }
