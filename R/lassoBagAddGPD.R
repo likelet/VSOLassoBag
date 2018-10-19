@@ -11,7 +11,7 @@
 library(glmnet)
 library(parallel)
 source("lessPermutation.R")
-Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=10,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F) {
+Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F) {
   # bootN is the size of resample sample
   # mat is independent variable
   # out.mat is dependent variable
