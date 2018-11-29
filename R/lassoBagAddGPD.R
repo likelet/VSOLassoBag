@@ -179,11 +179,14 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       observed.value <- observed.fre[i]
       # to use GPD to fit right tail of distribution, but sometimes it will throw error because there is no
       # data that meets the requirement for fitting GPD
-      tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value)},
+      tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value,fitting.method = "gd")},
                error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
                print("no data is bigger than threshold, we will use traditional p-value")})
       if (!exists("p.value")) {
         p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N
+      }
+      if (p.value==0) {
+        p.value <- (length(temp.list[temp.list>observed.fre[i]])+1)/N
       }
       #avoid p>1
       p.value<-ifelse(p.value>1,1,p.value)
