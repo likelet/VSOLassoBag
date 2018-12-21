@@ -64,6 +64,7 @@ each_Xi <- function (n, distribution_box, parameter_box) {
 origin_X <- function (p, n, distribution_box, parameter_box) {
   # a funtion that generate a feature matrix of p columns with n samples
   # CONTROL OF THE MODULE 
+  
   X <- c()
   X_type <- c()
   X_para <- c()
@@ -73,9 +74,10 @@ origin_X <- function (p, n, distribution_box, parameter_box) {
     col_type <- col$distri_info$type
     col_para <- col$distri_info$para
     
-    X <- c(X, col_distri)
-    X_type <- c(X_type, col_type) 
-    X_para <- c(X_para, col_para)
+    X <- cbind(X, col_distri)
+    X_type <- cbind(X_type, col_type) 
+    print(col_type)
+    X_para <- cbind(X_para, col_para)
     
   }
   
