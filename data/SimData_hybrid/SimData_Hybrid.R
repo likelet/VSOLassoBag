@@ -18,11 +18,13 @@ parameter_box <- list(
 ## Generate feature matrix
 choose_distri <- function (distribution_box, pattern="random") {
   # function to determine how distribution will be chosen from the box, default is random i.e. no preferred method of drawing data
+  probs <- 0
   if (pattern == "random") { probs <- rep(1/length(distribution_box), length(distribution_box)) }
-  else {
-    probs <- c(0.1, 0.2, 0.1, 0.2, 0.4)
+  else if (pattern == "guassian") {
+    probs <- c(1, 0, 0, 0, 0)
     stopifnot( length(probs) == length(distribution_box) )
   }
+  stopifnot(probs != c())
   dice <- rmultinom(1, 1, probs)
   for (i in 1:length(dice)) {
     if (dice[i] == 1) {return (distribution_box[i])}
@@ -30,9 +32,9 @@ choose_distri <- function (distribution_box, pattern="random") {
 }
 
 
-each_Xi <- function (n, distribution_box, parameter_box) {
+each_Xi <- function (n, distribution_box, parameter_box, pattern="random") {
   # return a vector of data that draw samples according to different situations
-  this_distribution <- choose_distri(distribution_box)
+  this_distribution <- choose_distri(distribution_box, pattern)
   if (this_distribution == "guassian") {
     guassian_mean <- runif(1, parameter_box$guassian$mean[1], parameter_box$guassian$mean[2])
     guassian_std <- runif(1, parameter_box$guassian$std[1], parameter_box$guassian$std[2])
@@ -87,14 +89,145 @@ origin_X <- function (p, n, distribution_box, parameter_box) {
 
 
 ## =================================================================================================
-## Generate lists of coefficient vectors that control the synthesis of petients' Y value and 
-groud_coeff <- function () {
-  # generates a ground coefficient vector based on the order in partation group
+## Generate lists of coefficient vectors that control the synthesis of petients' Y value
+
+without_space <- function (vect) {
+  # return continuous integers of the input in groups with sorted order
+  # c(1,2,3,5) -> list(c(1,2,3), c(5))
+  # c(1,3,4) -> list(c(1), c(3,4))
   
+  # no empty vect is allowed 
+  stopifnot(length(vect) != 0)
+  
+  # sorted and distinct vector
+  vect <- unique(sort(vect))
+  
+  # pre-set
+  current=list(c())
+  first <- vect[[1]]
+  out <- list(c(first))
+  rest_vect <- tail(vect, -1)
+  recent <- first
+  index <- 1
+  
+  # check
+  for (i in rest_vect) {
+    if (i == (recent + 1)) {
+      new_index_group <- list(c(out[[index]], i))
+      out <- replace(out, index, new_index_group)
+    } else {
+      index <- index + 1
+      new_index_group <- c(i)
+      out <- append(out, new_index_group)
+    }
+    recent <- i
+  }
+  return (out)
+}
+  
+
+
+coeff_order <- function (i, partitions, realpre_num) {
+  # input number and return the instruction of building the order list
+  # Return c(1,1,0,0,1) or c(1,0,0,1,1) or c(0,0,1,1,1)
+  order <- c()
+  for (m in 0:(realpre_num - 1)) {
+    if ((i + m) %% 5 ==0) {
+      order <- c(order, 5)
+    } else {
+      order <- c(order, (i + m) %% 5)
+    }
+  }
+  
+  coeff_or <- c()
+  for (r in 1:partitions) {
+    if (any(r == order)) {
+      coeff_or <- c(coeff_or, 1)
+    } else {
+      coeff_or <- c(coeff_or, 0)
+    }
+  }
+  
+  return (coeff_or)
+  
+  # seperate with without_space function -> list(c(1), c(3,4,5))
+  # lst_sep <- without_space(order)
+  # # synthesis with "blank"
+  # result <- c()
+  # for (e in lst_sep) {
+  #   if (length(result) == 0) {
+  #     result <- c(result, e)
+  #   } else {
+  #     result <- c(result, 0, e)
+  #   }
+  # }
+  # return(result)
 }
 
-groud_coeffs <- function () {
-  # generates a list of ground coeff vectors 
+
+groud_coeff <- function (p, number, partition_length, partitions=5, realpre_num=3) {
+  # generates a ground coefficient vector based on the order in partation groups
+  # assert parameters are in right shape
+  stopifnot(number <= partitions)
+  stopifnot(realpre_num < partitions)
+  stopifnot(partition_length > 0 && p - partition_length * realpre_num >= 1)
+  stopifnot(partition_length == as.integer(partition_length))
+  stopifnot(p == as.integer(p))
+  
+  # instructions and zeros
+  coeff_how <- coeff_order(number, partitions, realpre_num)
+  zero_seps <- partitions - realpre_num
+  each_zeros_length <- (p - partition_length * realpre_num) / zero_seps
+  zeros_lengths <- c()
+  last_length <- (p - partition_length * realpre_num) - (zero_seps - 1) * as.integer(each_zeros_length)
+  
+  # zero lengths except the last one
+  if (zero_seps > 1) {
+    for (time in 1:(zero_seps-1)) {
+      zeros_lengths <- c(zeros_lengths, as.integer(each_zeros_length))
+    }
+  }
+  # last one
+  if (as.integer(each_zeros_length) != each_zeros_length) {
+    zeros_lengths <- c(zeros_lengths, last_length)
+  } else {
+    zeros_lengths <- c(zeros_lengths, each_zeros_length)
+  }
+
+  # synthesis coefficient vector
+  ground_coeff_out <- c()
+  zero_pointer <- 1
+  for (i in coeff_how) {
+    if (i == 1) {
+      stopifnot(i <= partitions)
+      ground_coeff_out <- c(ground_coeff_out, each_Xi(partition_length, distribution_box, parameter_box, pattern = "guassian")$distri)
+    } else if (i == 0) {
+      zeros <- rep(0, zeros_lengths[zero_pointer])
+      ground_coeff_out <- c(ground_coeff_out, zeros)
+      zero_pointer <- zero_pointer + 1
+    }
+  }
+  
+  return (ground_coeff_out)
+}
+
+
+
+
+
+groud_coeffs <- function (p, partitions=5, realpre_num=3) {
+  # Generates a list of ground coeff vectors 
+  stopifnot(realpre_num < partitions)
+  # basic info
+  partition_length <- as.integer(p / partitions)
+  
+  # groud coefficients
+  g_coeffs <- c()
+  for (i in 1:partitions) {
+    each_coeff <- groud_coeff(p, i, partition_length, partitions, realpre_num)
+    g_coeffs <- cbind(g_coeffs, each_coeff)
+  }
+  return (g_coeffs)
 }
 
 multi_c_coeffs <- function () {
