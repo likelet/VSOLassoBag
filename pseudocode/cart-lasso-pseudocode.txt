@@ -1,0 +1,31 @@
+# The package written in R renders a feature selection method with less sensitivity to variant data. Procedure is implemented based on CART framework before which we added Lasso for primary feature filteration. Bagging method and is also used in the package for boosting up the performance of the model. Finally, permutation test is introduced in order to decide the final selection of important features.
+
+
+## functions used in the package
+
+function bagging(data, times=1000, replace=True, operation){
+  total_features_number = read numbers of features from data
+  feature_box = [0] * total_feature_number # initiate the a ZERO list
+  for bagging_time in times:
+    sub_data = drawing with/without replacement
+    each_result = operation(subset) # a result of feature numbers that appears after each operation
+    for feature_number in each_result:
+      feature_box[feature_number] += 1
+  return feature_box
+}
+
+function lasso(){
+
+}
+
+function cart(){
+
+}
+
+function permutation(){
+
+}
+
+## main()
+
+
