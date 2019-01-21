@@ -329,19 +329,28 @@ saveRDS_all <- function (X, level_packs, dir_name="lassoBag_hybrid") {
 }
 
 ## =================================================================================================
-## BEGINNING OF GENERATION
+## BEGINNING OF GENERATION Function
+main <- function() {
+  # generating X object
+  X <- origin_X(p, n, distribution_box, parameter_box)
+  
+  print("X has been generated")
+  
+  # generating coefficients 
+  coeffs <- generate_coeffs(p, partitions, realpre_num)
+  
+  # generating coefficients-Y packs
+  levels_packs_lst <- level_packs(X$X_Matrix, coeffs)
+  
+  # save all
+  saveRDS_all(X, levels_packs_lst, dir_name)
+  
+}
 
-# generating X object
-X <- origin_X(p, n, distribution_box, parameter_box)
+## END OF GENERATION Function
+## =================================================================================================
+# Measure runtime
 
-# generating coefficients 
-coeffs <- generate_coeffs(p, partitions, realpre_num)
+system.time(main())
 
-# generating coefficients-Y packs
-levels_packs_lst <- level_packs(X$X_Matrix, coeffs)
-
-# save all
-saveRDS_all(X, levels_packs_lst, dir_name)
-
-## END OF GENERATION
 ## =================================================================================================
