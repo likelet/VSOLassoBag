@@ -70,21 +70,18 @@ origin_X <- function (p, n, distribution_box, parameter_box) {
   # CONTROL OF THE MODULE 
   
   X <- c()
-  X_type <- c()
-  X_para <- c()
+  X_info <- list()
   for (i in 1:p) {
     col <- each_Xi(n, distribution_box, parameter_box)
     col_distri <- col$distri
-    col_type <- col$distri_info$type
-    col_para <- col$distri_info$para
+    col_info <- list("type"=col$distri_info$type, "para"= col$distri_info$para)
     
     X <- cbind(X, col_distri)
-    X_type <- cbind(X_type, col_type) 
-    X_para <- cbind(X_para, col_para)
+    X_info <- append(X_info, col_info)
     
   }
   
-  return (list("X"=X, "X_type"=X_type, "X_para"=X_para))
+  return (list("X"=X, "X_info"=X_info))
 
 }
 
