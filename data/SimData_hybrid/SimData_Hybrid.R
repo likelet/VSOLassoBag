@@ -330,7 +330,7 @@ saveRDS_all <- function (X, level_packs, dir_name="lassoBag_hybrid") {
 
 ## =================================================================================================
 ## BEGINNING OF GENERATION Function
-main <- function() {
+main <- function(p, n, distribution_box, parameter_box, partitions, realpre_num, dir_name) {
   # generating X object
   X <- origin_X(p, n, distribution_box, parameter_box)
   
@@ -351,6 +351,6 @@ main <- function() {
 ## =================================================================================================
 # Measure runtime
 
-system.time(main())
+system.time(main(p, n, distribution_box, parameter_box, partitions, realpre_num, dir_name))
 
 ## =================================================================================================
