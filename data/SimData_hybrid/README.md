@@ -1,30 +1,33 @@
----
-title: "Dataformat for simulated data"
-author: "Tianqin Li"
-date: "1/21/2019"
-output: html_document
----
+# Simulation Experiments for LassoBag Framework
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
+This is a README file for Simulation Experiments for LassoBag Framework. For your further understanding of our Simulation results, we document the detailed data format we used in simulation experiments as well as the way to amend your own version to do the test for yourself. More information can be referred to . 
 
-## R Markdown
+We store the simulation data as RDS file during the simulation. However, we also support using cvs format. 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Simulation Data Format 
+1. __X__ (Independent variables, stored in `X.rds`):
 
-```{r cars}
-summary(cars)
-```
+   - `$X_Matrix`: 
+   
+      A matrix with `ncol` and `nrow` that can be defined by input. Simplely change `p` (for number of column, aka **Predictors**) and `n` (for number of rows, aka **Sample numbers**)
+   - `$X_info`: 
+   
+      A list each of which is corresponded to a dimension in __X_Matrix__ with sub-attribute `$type` as the distribution **type** that generated the column data and `$para` as corresponding **parameters** used.
+   
 
-## Including Plots
+2. **coY_level** (Dependent Variable and corresponding coeffients, stored in `coY_level_n.rds`):
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+    - `$matrix_coeffs`:
+    
+       A **matrix** that contain the coefficients that used to generate the __Y values__. It was generated in a __cross-validation__ fashion in order to test the performance of the framework in handling high dimensional data with **multipul overlap** across all the dimensions.  
+       
+       **Note**: there are some basic level coefficient vectors from which multipul level of combination was used to generate the rest of the coefficient vectors. The way they combine is documented as the column name in the matrix.
+     
+    - `$matrix_Y`:
+    
+       A **matrix** that comtain the __Y value__ (*Dependent variables*) that generated from **X_Matrix** and **cofficient vectors**. Each column represents a Y vector that is used for learning and training. Therefore the number of columns of this matrix should be equal to the number of **Predictors** and the number of rows should be the same as the **Sample numbers**.   
+       
+       **Note**: The column name also contained the information with which you can trace back to the exact coefficient vector that generates it.
+       
+## Try yourself
