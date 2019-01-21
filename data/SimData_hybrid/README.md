@@ -1,8 +1,8 @@
 # Simulation Experiments for LassoBag Framework
 
-This is a README file for Simulation Experiments for LassoBag Framework. For your further understanding of our Simulation results, we document the detailed data format we used in simulation experiments as well as the way to amend your own version to do the test for yourself. More information can be referred to . 
+This is a README file for **Simulation Experiments for LassoBag Framework**. For your further understanding of our Simulation results, we document the __detailed data format__ we used in simulation experiments as well as the way to amend your own version of simulation data according to different choice of distribution. More information can be referred to . 
 
-We store the simulation data as RDS file during the simulation. However, we also support using cvs format. 
+We store the simulation data as __RDS__ file during the simulation. However, we will also support using __cvs__ or __txt__ format in the future. 
 
 
 ## Simulation Data Format 
