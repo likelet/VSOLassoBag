@@ -65,23 +65,21 @@ each_Xi <- function (n, distribution_box, parameter_box, pattern="random") {
   }
 }
 
-origin_X <- function (p, n, distribution_box, parameter_box) {
+origin_X <- function (p, n, distribution_box, parameter_box, distri_name = "distri", distri_info_name = "distri_info") {
   # a funtion that generate a feature matrix of p columns with n samples
   # CONTROL OF THE MODULE 
   
   X <- c()
-  X_info <- list()
-  for (i in 1:p) {
-    col <- each_Xi(n, distribution_box, parameter_box)
-    col_distri <- col$distri
-    col_info <- list("type"=col$distri_info$type, "para"= col$distri_info$para)
-    
-    X <- cbind(X, col_distri)
-    X_info <- append(X_info, col_info)
-    
-  }
+  X_all <- replicate(p, each_Xi(n, distribution_box, parameter_box))
   
-  return (list("X"=X, "X_info"=X_info))
+  # build X matrix
+  X <- X_all[distri_name,]
+  X_Matrix <- matrix(unlist(X), ncol=p)
+  
+  # build X info
+  X_info <- X_all[distri_info_name, ]
+  
+  return (list("X_Matrix"=X_Matrix, "X_info"=X_info))
 
 }
 
@@ -340,7 +338,7 @@ X <- origin_X(p, n, distribution_box, parameter_box)
 coeffs <- generate_coeffs(p, partitions, realpre_num)
 
 # generating coefficients-Y packs
-levels_packs_lst <- level_packs(X$X, coeffs)
+levels_packs_lst <- level_packs(X$X_Matrix, coeffs)
 
 # save all
 saveRDS_all(X, levels_packs_lst, dir_name)
