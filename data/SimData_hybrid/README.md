@@ -20,7 +20,7 @@ We store the simulation data as __RDS__ file during the simulation. However, we 
 
     - `$matrix_coeffs`:
     
-       A **matrix** that contain the coefficients that used to generate the __Y values__. It was generated in a __cross-validation__ fashion in order to test the performance of the framework in handling high dimensional data with **multipul overlap** across all the dimensions.  
+       A **matrix** that contain the coefficients that used to generate the __Y values__. It was generated in a __cross-validation__ fashion in order to test the performance of the framework in handling high dimensional data with **multipul overlap** across dimensions.  
        
        **Note**: there are some basic level coefficient vectors from which multipul level of combination was used to generate the rest of the coefficient vectors. The way they combine is documented as the column name in the matrix.
      
