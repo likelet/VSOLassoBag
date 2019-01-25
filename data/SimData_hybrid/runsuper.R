@@ -7,16 +7,14 @@
 
 
 # 3 parts for this script:
-# 1) Functions of Reading data 
+# 1) Functions of Reading data
 # 2) Functions of Feeding data into lassoBagAddGPD
-# 3) Functions of Report 
+# 3) Functions of Report
 
 
 # =================================================================================================================================
 # Functions of Reading data
-readRDSData <- function(datafile) {
-  
-}
+
 
 
 # =================================================================================================================================
