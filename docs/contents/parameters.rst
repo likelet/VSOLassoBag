@@ -2,14 +2,51 @@ Parameters and Configuration
 ====
 
 
-System parameters
+Lasso.bag
 ----
+
+.. confval:: mat
+
+    :type: data.frame
+    :default: ``none``
+    *independent variables
+
+.. confval:: out.mat
+
+    :type: data.frame
+    :default: ``none``
+    *dependent variables, which contains one column or two columns
+
+.. confval:: bootN
+
+    :type: string
+    :default: ``none``
+    *using predefined profile in your ``conf`` folder*
+    
+.. confval:: -profile
+
+    :type: string
+    :default: ``none``
+    *using predefined profile in your ``conf`` folder*
 
 .. confval:: -profile
 
     :type: string
     :default: ``none``
     *using predefined profile in your ``conf`` folder*
+
+.. confval:: -profile
+
+    :type: string
+    :default: ``none``
+    *using predefined profile in your ``conf`` folder*
+
+.. confval:: -profile
+
+    :type: string
+    :default: ``none``
+    *using predefined profile in your ``conf`` folder*
+
 
 Mandatery parameters 
 ----
