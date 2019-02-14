@@ -17,8 +17,7 @@ lassoBag can be run in both Windows system and most POSIX systems. The follow co
 2 Usage Example
 --------------------
 
-2.1 Lasso.bag_
-.. _contents/parameters
+2.1 `Lasso.bag <contents/parameters>`_
 ^^^^^^^^^^^^^^^  
 
 The whole pipeline is hosted in github. To install, you'll need to download and transfer the pipeline files manually:
