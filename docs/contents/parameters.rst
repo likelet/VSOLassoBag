@@ -9,103 +9,87 @@ Lasso.bag
 
     :type: data.frame
     :default: ``none``
-    *independent variables
+    *independent variables*
 
 .. confval:: out.mat
 
     :type: data.frame
     :default: ``none``
-    *dependent variables, which contains one column or two columns
+    *dependent variables, which contains one column or two columns*
 
 .. confval:: bootN
 
-    :type: string
-    :default: ``none``
-    *using predefined profile in your ``conf`` folder*
+    :type: numeric
+    :default: ``1000``
+    *the size of resample sample*
     
-.. confval:: -profile
+.. confval:: imputeN
+
+    :type: numeric
+    :default: ``1000``
+    *the initial permutation times*
+
+.. confval:: imputeN.max
+
+    :type: numeric
+    :default: ``2000``
+    *the max permutation times. Regardless of whether p has meet the requirement*
+
+.. confval:: permut.increase
+
+    :type: numeric
+    :default: ``1000``
+    *if the initial imputeN times of permutation doesn't meet the requirement, then we add ¡®permut.increase times of permutation¡¯ to get more random/permutation values*
+
+.. confval:: boot.rep
+
+    :type: bool
+    :default: ``TRUE``
+    *whether :"sampling with return" or not*
+
+.. confval:: a.family
 
     :type: string
     :default: ``none``
-    *using predefined profile in your ``conf`` folder*
-
-.. confval:: -profile
-
-    :type: string
-    :default: ``none``
-    *using predefined profile in your ``conf`` folder*
-
-.. confval:: -profile
-
-    :type: string
-    :default: ``none``
-    *using predefined profile in your ``conf`` folder*
-
-.. confval:: -profile
-
-    :type: string
-    :default: ``none``
-    *using predefined profile in your ``conf`` folder*
+    *what kind of regression method to use, it should match the type of out.mat*
 
 
-Mandatery parameters 
+
+LessPermutation 
 ----
 
-.. confval:: --reads
+.. confval:: X
 
-    :type: string
+    :type: vector
     :default: ``none``
-    *need to specified to parsing input reads*
+    *a union of input data, e.g. c(1,2,3,4,5,6).*
 
-.. confval:: --designfile
+.. confval:: x0
+
+    :type: numeric
+    :default: ``none``
+    *the observed value* 
+
+.. confval:: fitting.method
 
     :type: string
-    :default: ``false``
-    *optional when need to perform comparison between conditions* 
+    :default: ``gd``
+    *the fitting method of General Pareto Distribution(GPD)* 
 
-.. confval:: --comparefile
+.. confval:: search.step
 
-    :type: string
-    :default: ``false``
-    *optional when need to perform comparison between conditions* 
+    :type: numeric
+    :default: ``0.01``
+    *the length of step (this param * length(X)) to find threshold, default 0.01* 
 
+.. confval:: fit.cutoff
 
-optional parameters 
-----
+    :type: numeric
+    :default: ``0.05``
+    *the cutoff of p value to judge whether it fits well to GPD, default 0.05* 
+ 
+.. confval:: when.to.fit
 
-.. confval:: --singleEnd
-
-    :type: boolean
-    :default: ``false``
-    *set ``true`` to run analysis on single end data set * 
-
-.. confval:: --skip_qc
-
-    :type: boolean
-    :default: ``false``
-    *set ``true`` to skip fastp processing step * 
-
-.. confval:: --strand
-
-    :type: boolean
-    :default: ``false``
-    *set ``true`` to run analysis in strand specific mode * 
-
-.. confval:: --skip_multiqc
-
-    :type: boolean
-    :default: ``false``
-    *set ``true`` to skip multiqc report section from multisamples * 
-
-.. confval:: --without_replicate
-
-    :type: boolean
-    :default: ``false``
-    *set ``true`` to perform comparison without replicate, using a poisson sourced test instead* 
-
-.. confval:: --skip_gsea
-
-    :type: boolean
-    :default: ``false``
-    *set ``true`` to skip Gene Set Enrichment Analysis step * 
-    
+    :type: numeric
+    :default: ``0.05``
+    *a cutoff to tell how many sample values are bigger than the observed value then we don't need to fit GPD. it is a portion.* 
