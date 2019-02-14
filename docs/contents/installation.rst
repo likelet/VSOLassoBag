@@ -1,29 +1,24 @@
-SYSUCC-RNAseqPipe installation 
+lassoBag installation and usage
 ============================
 
-1 Install NextFlow
+1 Install lassoBag
 ----------------
 
-Nextflow runs on most POSIX systems (Linux, Mac OSX etc). It can be installed by running the following commands:
+lassoBag can be run in both Windows system and most POSIX systems. The follow codes should be run in R.
 
  .. code-block:: bash   
     
-    # Make sure that Java v8+ is installed
-    java -version 
-    # Install Nextflow
-    curl -fsSL get.nextflow.io | bash
-    # Add Nextflow binary to your PATH:
-    mv nextflow ~/bin/
-    # OR system-wide installation:
-    # sudo mv nextflow /usr/local/bin
+    via github
+    install.packages("devtools")
+    devtools::install_github("likelet/lassoBag")
 
 
-See `nextflow.io <https://www.nextflow.io/>`_ for further instructions on how to install and configure Nextflow.
 
-2 Install the pipeline  
+2 Usage Example
 --------------------
 
-2.1 Get project code
+2.1 Lasso.bag_
+.. _contents/parameters:
 ^^^^^^^^^^^^^^^  
 
 The whole pipeline is hosted in github. To install, you'll need to download and transfer the pipeline files manually:
