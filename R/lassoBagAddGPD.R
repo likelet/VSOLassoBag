@@ -12,7 +12,7 @@ library(glmnet)
 library(parallel)
 library(POT)
 source("LessPermutation.R")
-Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F) {
+Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE) {
   # bootN is the size of resample sample
   # mat is independent variable
   # out.mat is dependent variable
@@ -124,114 +124,105 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
   cat(paste(date(), "", sep=" -- permutate index "), '\n')
   index.list<-list()
   
-  # how many zeros after the decimal point
-  # prec <- function(number) {
-  #   string <- as.character(number)
-  #   need <- strsplit(string,"[.]")[[1]][2]
-  #   count <- 0
-  #   for (to in 1:nchar(need)){
-  #     zero.num <- substr(need,to,to)
-  #     zero.not <- grepl("0",zero.num)
-  #     if (zero.not) {
-  #       count <- count + 1
-  #     }else {
-  #       break
-  #     }
-  #   }
-  #   return(10**-(count+1))
-  # }
-  
-  get.permutation <- function(N) {
-    # N is how many times to do permutations at this function
-    # returns out.df
-    for (i in 1:N) {
-      temp.index=sample(1:nrow(mat),nrow(mat),rep=F)
-      index.list[[i]]<-temp.index
-    }  # index.list is of length:imputeN, each index is the random order of the original matrix
+  if (permutation==TRUE) {
+    get.permutation <- function(N) {
+      # N is how many times to do permutations at this function
+      # returns out.df
+      for (i in 1:N) {
+        temp.index=sample(1:nrow(mat),nrow(mat),rep=F)
+        index.list[[i]]<-temp.index
+      }  # index.list is of length:imputeN, each index is the random order of the original matrix
+      
+      cat(paste(date(), "", sep=" -- permutating "), '\n')
+      # do permutation
+      if(!parallel){  # multiprocessing
+        permut.list<-lapply(index.list,boot.once)
+      }else{
+        permut.list<-mclapply(index.list,boot.once)
+      }
+      
+      return(permut.list)
+    }
     
-    cat(paste(date(), "", sep=" -- permutating "), '\n')
-    # do permutation
-    if(!parallel){  # multiprocessing
-      permut.list<-lapply(index.list,boot.once)
-    }else{
-      permut.list<-mclapply(index.list,boot.once)
+    get.plist <- function(permut.list,N) {
+      # permut.list is from permutation
+      # N is the total permutation times
+      
+      out.df<-do.call(cbind.data.frame, permut.list)  # output as a data frame
+      # features saved in df will be shown else the entities will be 0
+      colnames(out.df)<-c(1:N)
+      cat(paste(date(), "", sep=" -- getting pvalue "), '\n')
+      
+      #get permutation pvalue
+      pvalue.list<-c()
+      add.more <- F
+      for(i in 1:length(observed.fre)){
+        temp.list<-out.df[names(observed.fre)[i],]
+        #avoid p=0
+        # p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N  # how much is bigger than observed value
+        observed.value <- observed.fre[i]
+        # to use GPD to fit right tail of distribution, but sometimes it will throw error because there is no
+        # data that meets the requirement for fitting GPD
+        tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value,fitting.method = fit.pareto)},
+                 error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
+                 print("no data is bigger than threshold, we will use traditional p-value")})
+        if (!exists("p.value")) {
+          p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N
+        }
+        if (p.value==0) {
+          p.value <- (length(temp.list[temp.list>observed.fre[i]])+1)/N
+        }
+        #avoid p>1
+        p.value<-ifelse(p.value>1,1,p.value)
+        pvalue.list<-c(pvalue.list,p.value) # for every feature, there will be a p-value, for later adjustment
+        # judge whether we need to add more permutation, using good of fit test(ad test for gpd)
+        # only if one feature doesn't meet the requirement then we should add more permutations
+        # if (!length(temp.list[temp.list>observed.fre[i]])>=10) {
+        #   add.more <- T
+        # }
+        good.fit <- adtest.gpd(temp.list,observed.fre[i],fitting.method = fit.pareto)
+        if (good.fit!="fit_good_enough") {
+          add.more <- T
+        }
+      }
+      return(list(add.more,pvalue.list))
     }
     
     
-    return(permut.list)
-  }
-  
-  get.plist <- function(permut.list,N) {
-    # permut.list is from permutation
-    # N is the total permutation times
+    # TODO: to add GPD here to reduce permutation times.
+    # we must first do imputeN times permutation
+    permut.list <- get.permutation(imputeN)
+    judgement <- get.plist(permut.list,imputeN)
+    add.more <- judgement[[1]]
     
-    out.df<-do.call(cbind.data.frame, permut.list)  # output as a data frame
-    # features saved in df will be shown else the entities will be 0
-    colnames(out.df)<-c(1:N)
-    cat(paste(date(), "", sep=" -- getting pvalue "), '\n')
-    
-    #get permutation pvalue
-    pvalue.list<-c()
-    add.more <- F
-    for(i in 1:length(observed.fre)){  #TODO: what i need to do is to rewrite here. to add the GPD process to reduce the permutation times.
-      temp.list<-out.df[names(observed.fre)[i],]
-      #avoid p=0
-      # p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N  # how much is bigger than observed value
-      observed.value <- observed.fre[i]
-      # to use GPD to fit right tail of distribution, but sometimes it will throw error because there is no
-      # data that meets the requirement for fitting GPD
-      tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value,fitting.method = "gd")},
-               error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
-               print("no data is bigger than threshold, we will use traditional p-value")})
-      if (!exists("p.value")) {
-        p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N
+    # TODO: to add more permutation here
+    total.imputeN <- imputeN
+    if (add.more) {
+      
+      new.permut.list <-c(permut.list)
+      while (add.more & total.imputeN<=imputeN.max) {
+        new.perm <- get.permutation(permut.increase)
+        new.permut.list <- c(new.permut.list,new.perm)  # up to then all the permut.list
+        new.judgement <- get.plist(new.permut.list,total.imputeN)
+        add.more <- new.judgement[[1]]
+        total.imputeN <- total.imputeN + permut.increase
+        pvalue.list <- new.judgement[[2]]
       }
-      if (p.value==0) {
-        p.value <- (length(temp.list[temp.list>observed.fre[i]])+1)/N
-      }
-      #avoid p>1
-      p.value<-ifelse(p.value>1,1,p.value)
-      pvalue.list<-c(pvalue.list,p.value) # for every feature, there will be a p-value, for later adjustment
-      # judge whether we need to add more permutation, 10 is the standard by an article:"less permutations, more accurate p-values"
-      # only if one feature doesn't meet the requirement then we should add more permutations
-      if (!length(temp.list[temp.list>observed.fre[i]])>=10) {
-        add.more <- T
-      }
-    }
-    return(list(add.more,pvalue.list))
-  }
-  
-  
-  # TODO: to add GPD here to reduce permutation times.
-  # we must first do imputeN times permutation
-  permut.list <- get.permutation(imputeN)
-  judgement <- get.plist(permut.list,imputeN)
-  add.more <- judgement[[1]]
-  
-  # TODO: to add more permutation here
-  total.imputeN <- imputeN
-  if (add.more) {
-    
-    new.permut.list <-c(permut.list)
-    while (add.more & total.imputeN<=imputeN.max) {
-      new.perm <- get.permutation(permut.increase)
-      new.permut.list <- c(new.permut.list,new.perm)  # up to then all the permut.list
-      new.judgement <- get.plist(new.permut.list,total.imputeN)
-      add.more <- new.judgement[[1]]
       total.imputeN <- total.imputeN + permut.increase
-      pvalue.list <- new.judgement[[2]]
+    } else {
+      pvalue.list <- judgement[[2]]
     }
-    total.imputeN <- total.imputeN + permut.increase
-  } else {
-    pvalue.list <- judgement[[2]]
+    
+    #FDR calculation
+    cat(paste(date(), "", sep=" -- Pvalue adjusting "), '\n')
+    # FDR.list<-p.adjust(pvalue.list,method = "bonferroni")
+    FDR.list <- p.adjust(pvalue.list,method = "fdr")
+    res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre,P.value=pvalue.list,P.adjust=FDR.list)
+    cat(paste(date(), "", sep=" -- Done"), '\n')
+    return(res.df)
+  } else {  # do not permutate and output frequency
+    res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre)
+    cat(paste(date(), "", sep=" -- Done"), '\n')
+    return(res.df)
   }
-  
-  
-  #FDR calculation
-  cat(paste(date(), "", sep=" -- Pvalue adjusting "), '\n')
-  # FDR.list<-p.adjust(pvalue.list,method = "bonferroni")
-  FDR.list <- p.adjust(pvalue.list,method = "fdr")
-  res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre,P.value=pvalue.list,P.adjust=FDR.list)
-  cat(paste(date(), "", sep=" -- Done"), '\n')
-  return(res.df)
 }
