@@ -21,31 +21,31 @@ Lasso.bag
 
     :type: numeric
     :default: ``1000``
-    *the size of resample sample*
+    *the size of resample sample, only valid when permutation set to TRUE*
     
 .. confval:: imputeN
 
     :type: numeric
     :default: ``1000``
-    *the initial permutation times*
+    *the initial permutation times, only valid when permutation set to TRUE*
 
 .. confval:: imputeN.max
 
     :type: numeric
     :default: ``2000``
-    *the max permutation times. Regardless of whether p has meet the requirement*
+    *the max permutation times. Regardless of whether p has meet the requirement,, only valid when permutation set to TRUE*
 
 .. confval:: permut.increase
 
     :type: numeric
     :default: ``1000``
-    *if the initial imputeN times of permutation doesn't meet the requirement, then we add ¡®permut.increase times of permutation¡¯ to get more random/permutation values*
+    *if the initial imputeN times of permutation doesn't meet the requirement, then we add ¡®permut.increase times of permutation¡¯ to get more random/permutation values, only valid when permutation set to TRUE*
 
 .. confval:: boot.rep
 
     :type: bool
     :default: ``TRUE``
-    *whether :"sampling with return" or not*
+    *whether :"sampling with return" or not, only valid when permutation set to TRUE*
 
 .. confval:: a.family
 
@@ -53,6 +53,23 @@ Lasso.bag
     :default: ``none``
     *what kind of regression method to use, it should match the type of out.mat*
 
+.. confval:: parallel
+
+    :type: bool
+    :default: ``FALSE``
+    *whether the script run in parallel, you need to set mc.core in case this package conquers all your cpu resource*
+
+.. confval:: fit.pareto
+
+    :type: string
+    :default: ``mle``
+    *the method of fitting Generalized Pareto Distribution, alternative choice is "gd", for gradient descend*
+
+.. confval:: permutation
+
+    :type: string
+    :default: ``TRUE``
+    *to decide whether to do permutation test, if set TRUE, no p value returns*
 
 
 LessPermutation 
