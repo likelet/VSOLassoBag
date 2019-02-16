@@ -55,6 +55,9 @@ You need to input dependent and independent variables and the function will retu
     x <- df[,which(colnames(df)!="riskscore")]
     y <- df$riskscore
     m<-Lasso.bag(x,y,bootN=3,imputeN=5,imputeN.max = 7,permut.increase = 1,boot.rep = T,a.family = "gaussian",parallel=F)
+    
+    # if you don't need the result of permutation
+    m<-Lasso.bag(x,y,bootN=3,imputeN=5,imputeN.max = 7,permut.increase = 1,boot.rep = T,a.family = "gaussian",parallel=F,permutation=FALSE)
 
 
 2.2 LessPermutation
