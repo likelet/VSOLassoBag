@@ -1,3 +1,0 @@
-FAQ
-====
-not implemented yet 
