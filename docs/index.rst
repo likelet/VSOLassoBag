@@ -18,14 +18,9 @@ This wiki includes several tutorials, plz following the step by step tutorial to
    :maxdepth: 2
    :caption: Contents:
    
-   contents/introdction
    contents/installation
-   contents/userguide
    contents/parameters
-   contents/output
-   contents/faq
    contents/licencing
-   contents/citations
 
 Indices and tables
 ==================
