@@ -20,7 +20,7 @@ lassoBag can be run in both Windows system and most POSIX systems. The follow co
 2.1 Lasso.bag
 ^^^^^^^^^^^^^^^  
 
-You need to input dependent and independent variables and the function will return a data frame which contains the p value and adjusted p value for each features in the dependent variables. The details of its parameters are shown :doc:`here. </parameters>`
+You need to input dependent and independent variables and the function will return a data frame which contains the p value and adjusted p value for each features in the dependent variables. The details of its parameters are shown in parameters section.
 
 .. code-block:: bash
 
@@ -63,7 +63,7 @@ You need to input dependent and independent variables and the function will retu
 2.2 LessPermutation
 ^^^^^^^^^^^^^^^
 
-You need to input a union of number and an observed number, the function will return the p value/the probability of making type ¢ò error
+You need to input a union of number and an observed number, the function will return the p value of permutation test.
 
 .. code-block:: bash
     x <- rgpd(200, 1, 2, 0.25)
