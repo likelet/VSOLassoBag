@@ -24,7 +24,7 @@ from sphinx_rtd_theme import __version__
 
 # -- Project information -----------------------------------------------------
 
-project = 'RNAseqPipe'
+project = 'lassoBag'
 copyright = '2018-2019, Center of Bioinformatics, Sun Yat-sen University Cancer Center'
 author = 'Qi Zhao'
 
@@ -111,7 +111,7 @@ html_theme = 'sphinx_rtd_theme'
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'RNAseqPipedoc'
+htmlhelp_basename = 'lassoBagdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -138,7 +138,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'RNAseqPipe.tex', 'RNAseqPipe Documentation',
+    (master_doc, 'lassoBag.tex', 'lassoBag Documentation',
      'Qi Zhao', 'manual'),
 ]
 
@@ -148,7 +148,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'rnaseqpipe', 'RNAseqPipe Documentation',
+    (master_doc, 'lassobag', 'lassoBag Documentation',
      [author], 1)
 ]
 
@@ -159,8 +159,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'RNAseqPipe', 'RNAseqPipe Documentation',
-     author, 'RNAseqPipe', 'One line description of project.',
+    (master_doc, 'lassoBag', 'lassoBag Documentation',
+     author, 'lassoBag', 'One line description of project.',
      'Miscellaneous'),
 ]
 
