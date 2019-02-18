@@ -66,5 +66,6 @@ You need to input dependent and independent variables and the function will retu
 You need to input a union of number and an observed number, the function will return the p value of permutation test.
 
 .. code-block:: bash
+
     x <- rgpd(200, 1, 2, 0.25)
-    LessPermutation(x,1,fitting.method=¡¯gd¡¯)
+    LessPermutation(x,1,fitting.method='gd')
