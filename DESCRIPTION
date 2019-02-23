@@ -1,19 +1,38 @@
-Package: LassoBag
-Type: Package
+Package: lassoBag
 Title: A cart frame work for screen variable or markers
 Version: 0.1.0
-Date: 2018-05-17
-Author: Qi Zhao
+Authors@R: 
+    c(person(given = "Qi",
+             family = "Zhao",
+             role = c("aut", "cre"),
+             email = "zhaoqi@sysucc.org.cn"),
+      person(given = "Yanru",
+             family = "Zeng",
+             role = "aut",
+             email = "zhaoqi@sysucc.org.cn"),
+      person(given = "Tianqin",
+             family = "Li",
+             role = "aut"))
 Maintainer: Qi Zhao <zhaoqi@sysucc.org.cn>
-Description: LassoBag provided a implementation of a CART frame for selecting markers from multiple models. The main application of this package is to screen limited number of variables that are less dependent to
-train dataset. Basically, this packages was initially deveploped for adjust LASSO selected results from bootstrap sample sets. Variables with the highest frequency among the several
-selected result were considered as stable variables for dataset. However, it usually hard to determine the cutoff frequency when applied in real dataset. In this package, we intrudoced
-an imputation strategy to get P value of each variables. We also performed multiple correction for each P value.
-License: GPL3
-LazyData: TRUE
-Suggests: Parallel
-Imports: survival,
+Description: lassoBag provided a implementation of a CART frame for
+    selecting markers from multiple models. The main application of this
+    package is to screen limited number of variables that are less
+    dependent to train dataset. Basically, this packages was initially
+    deveploped for adjust LASSO selected results from bootstrap sample
+    sets. Variables with the highest frequency among the several selected
+    result were considered as stable variables for dataset. However, it
+    usually hard to determine the cutoff frequency when applied in real
+    dataset. In this package, we intrudoced an imputation strategy to get
+    P value of each variables. We also performed multiple correction for
+    each P value.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports: 
     glmnet,
     limma,
-    POT
-
+    POT,
+    survival
+Suggests: 
+    parallel
+RoxygenNote: 6.1.1

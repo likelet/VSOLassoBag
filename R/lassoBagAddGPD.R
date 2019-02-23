@@ -1,18 +1,65 @@
 #' LASSO-bagging: a lasso based variable selecting CART framework
 
-#' @param mat sample matrix that each column represent a variable and rows represent sample data points
-#' @param out.mat vector with the same length as the sample size from `mat`
-#' @param a.family a string vector
-#' @param universe total number of all strings that vec1 and vec2 comes from
-#' @return  a P value
+#' @param mat sample matrix that each column represent a variable and rows represent sample data points, all the entries in it should be numeric.
+#' @param out.mat vector or dataframe with two columns with the same length as the sample size from `mat`
+#' @param a.family a string vector to determine the data type of out.mat
+#' @param bootN the size of resampled sample, only valid when permutation set to TRUE
+#' @param imputeN the initial permutation times, only valid when permutation set to TRUE
+#' @param imputeN.max the max permutation times. Regardless of whether p has meet the requirement,, only valid when permutation set to TRUE
+#' @param permut.increase if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation’ to get more random/permutation values, only valid when permutation set to TRUE
+#' @param boot.rep whether :"sampling with return" or not, only valid when permutation set to TRUE
+#' @param parallel whether the script run in parallel, you need to set n.cores in case this package conquers all your cpu resource
+#' @param fit.pareto the method of fitting Generalized Pareto Distribution, alternative choice is "gd", for gradient descend
+#' @param permutation to decide whether to do permutation test, if set TRUE, no p value returns
+#' @param n.cores how many cores/process to be assigned for this function, in Windows, you have to set this to 1
+#' @param rd.seed it is the random seed of this function, in case some of the experiments need to be reappeared
+#' @return  a dataframe that contains the frequency, the p value and the adjusted p value of each feature(if you set permutation=T)
+#' @examples
+#' df <- df.test # this is the integrated data of this package
+#' # change those improper format in df
+#' to.numeric1 <- as.character(df$riskscoreStatus)
+#' to.numeric2 <- as.character(df$LeftOrRight)
+#' to.numeric3 <- as.character(df$Sex)
+#' to.numeric1[which(to.numeric1=="Low")] <- 0
+#' to.numeric1[which(to.numeric1=="High")] <- 1
+#' to.numeric2[which(to.numeric2=="Left")] <- 0
+#' to.numeric2[which(to.numeric2=="Right")] <- 1
+#' to.numeric3[which(to.numeric3=="Female")] <- 0
+#' to.numeric3[which(to.numeric3=="Male")] <- 1
+#' df$riskscoreStatus <- to.numeric1
+#' df$LeftOrRight <- to.numeric2
+#' df$Sex <- to.numeric3
+#' rownames(df) <- df$ID
+#' df <- df[,which(colnames(df)!="ID")]
+#'
+#' x <- df[,which(!colnames(df) %in% c("Sex","Age","Osstatus","DFSstatus","OS","DFS","LeftOrRight","LymStatus","NI","VI","Stage","remove","riskscore","riskscoreStatus","ageStatus"))]
+#'
+#' # cox
+#' y <- df[,which(colnames(df) %in% c("Osstatus","OS"))]
+#' y <- y[,c(2,1)]
+#' colnames(y) <- c("time","status")
+#' m<-Lasso.bag(x,y,bootN=3,imputeN=5,imputeN.max = 7,permut.increase = 1,boot.rep = T,a.family = "cox",parallel=F)
+#'
+#' # binomial
+#' y <- df$riskscoreStatus
+#' m<-Lasso.bag(x,y,bootN=3,imputeN=5,imputeN.max = 7,permut.increase = 1,boot.rep = T,a.family = "binomial",parallel=F)
+#'
+#' # gaussian
+#' y <- df$riskscore
+#' m<-Lasso.bag(x,y,bootN=3,imputeN=5,imputeN.max = 7,permut.increase = 1,boot.rep = T,a.family = "gaussian",parallel=F)
+#'
+#' # if you don't need the result of permutation
+#' m<-Lasso.bag(x,y,bootN=3,imputeN=5,imputeN.max = 7,permut.increase = 1,boot.rep = T,a.family = "gaussian",parallel=F,permutation=FALSE)
+
 #   Test Package:              'Cmd + Shift + T'
 
 #' @export
-library(glmnet)
-library(parallel)
-library(POT)
-source("LessPermutation.R")
-Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE) {
+
+# library(glmnet)
+# library(parallel)
+# library(POT)
+# source("LessPermutation.R")
+Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE,n.cores=1,rd.seed=89757) {
   # bootN is the size of resample sample
   # mat is independent variable
   # out.mat is dependent variable
@@ -22,7 +69,8 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
   # imputeN.max is the max permutation times. Regardless of whether p has meet the requirement
   # permut.increase is: if the initial imputeN times of permutation doesn't meet the requirement, then we add permut.increase times of permutation to get more random values
   # if a.family == "multinomial", then the number of each class of dependent vars should be more than 1
-  
+
+  set.seed(rd.seed)
   rownames(mat) <- c(1:length(rownames(mat)))
   # rownames(out.mat) <- c(1:length(rownames(out.mat)))
   # a simple input judgement and transformation
@@ -30,7 +78,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
   if (a.family!="cox") {
     colnames(out.mat) <- "out"
   }
-  
+
   # to keep the same type of each column, default is force them to be "numeric"
   zeromat <- matrix(0,length(rownames(mat)),length(colnames(mat)))
   colnames(zeromat) <- colnames(mat)
@@ -39,7 +87,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     zeromat[,i] <- as.numeric(mat[,i])
   }
   mat <- zeromat  # it's necessary to substitute in this way for there will be some mistake in later handling if we don't do this
-  
+
   if (a.family!="cox") {
     zeromat <- matrix(0,length(out.mat),length(colnames(out.mat)))
     colnames(zeromat) <- colnames(out.mat)
@@ -48,12 +96,12 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     colnames(zeromat) <- colnames(out.mat)
     rownames(zeromat) <- rownames(out.mat)
   }
-  
+
   for (j in colnames(out.mat)) {
     zeromat[,j] <- as.numeric(out.mat[,j])
   }
   out.mat <- zeromat
-  
+
   # simply judge whether dependent vars has the same size of independent vars
   if (a.family!="cox") {
     if(nrow(mat)!=length(out.mat)){  # TODO: i think that it should be dataframe for that will be more adjustable
@@ -68,8 +116,8 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       break
     }
   }
-  
-  
+
+
   # lasso bag function in individual iteration
   # boot for one time.
   boot.once<-function(index=NULL){  # TODO: change here to check the input type and take actions to exact types
@@ -79,22 +127,22 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       new.out.mat<-out.mat
     }
     if (a.family!="cox") {
-      runData=cbind(mat,out=new.out.mat)
+      runData <- cbind(mat,out=new.out.mat)
     } else {
-      runData=cbind(mat,new.out.mat)
+      runData <- cbind(mat,new.out.mat)
     }
     marker_candidate=colnames(mat)
     out.vec<-rep(0,length(marker_candidate))
     names(out.vec)<-marker_candidate
     selecVlist1=c()
-    
+
     #index list for lapply
     index.list.bootonce<-list()
     for(i in 1:bootN){
       sampleindex2=sample(1:nrow(runData),1*nrow(runData),rep=boot.rep)  # re-sampling, same size
       index.list.bootonce[[i]]<-sampleindex2
     }
-    
+
     # apply function
     boot.indiv<-function(sampleIdex){
       effectdata=runData[sampleIdex,]  # the sample we use in permutation, x and y have been matched
@@ -107,23 +155,24 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       }
       best_lambda <- cv.glmmod$lambda.1se
       result<-coef(glmmod, s = best_lambda)
-      return(result@Dimnames[[1]][which(result != 0)])  # return the coef of each feature
+      return(result@Dimnames[[1]][which(as.numeric(result) != 0)])  # return the coef of each feature
     }
-    
+
     selecVlist1=lapply(index.list.bootonce, boot.indiv)
-    
+    print(selecVlist1)
     tablecount1=table(unlist(selecVlist1))
+    print(tablecount1)
     out.vec[intersect(names(tablecount1), names(out.vec))] <- tablecount1[intersect(names(tablecount1), names(out.vec))]
-    return(out.vec)  # the output is "what features have been chosen." 
+    return(out.vec)  # the output is "what features have been chosen."
   }
   # get observed value
   cat(paste(date(), "", sep=" -- start calculating observed frequency "), '\n')
   observed.fre<-boot.once()  # observed frequency. The true freq
-  
+
   #construct datalist with permutation
   cat(paste(date(), "", sep=" -- permutate index "), '\n')
   index.list<-list()
-  
+
   if (permutation==TRUE) {
     get.permutation <- function(N) {
       # N is how many times to do permutations at this function
@@ -132,27 +181,27 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
         temp.index=sample(1:nrow(mat),nrow(mat),rep=F)
         index.list[[i]]<-temp.index
       }  # index.list is of length:imputeN, each index is the random order of the original matrix
-      
+
       cat(paste(date(), "", sep=" -- permutating "), '\n')
       # do permutation
       if(!parallel){  # multiprocessing
         permut.list<-lapply(index.list,boot.once)
       }else{
-        permut.list<-mclapply(index.list,boot.once)
+        permut.list<-mclapply(index.list,boot.once,mc.cores = n.cores)
       }
-      
+
       return(permut.list)
     }
-    
+
     get.plist <- function(permut.list,N) {
       # permut.list is from permutation
       # N is the total permutation times
-      
+
       out.df<-do.call(cbind.data.frame, permut.list)  # output as a data frame
       # features saved in df will be shown else the entities will be 0
       colnames(out.df)<-c(1:N)
       cat(paste(date(), "", sep=" -- getting pvalue "), '\n')
-      
+
       #get permutation pvalue
       pvalue.list<-c()
       add.more <- F
@@ -187,18 +236,18 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       }
       return(list(add.more,pvalue.list))
     }
-    
-    
+
+
     # TODO: to add GPD here to reduce permutation times.
     # we must first do imputeN times permutation
     permut.list <- get.permutation(imputeN)
     judgement <- get.plist(permut.list,imputeN)
     add.more <- judgement[[1]]
-    
+
     # TODO: to add more permutation here
     total.imputeN <- imputeN
     if (add.more) {
-      
+
       new.permut.list <-c(permut.list)
       while (add.more & total.imputeN<=imputeN.max) {
         new.perm <- get.permutation(permut.increase)
@@ -212,7 +261,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     } else {
       pvalue.list <- judgement[[2]]
     }
-    
+
     #FDR calculation
     cat(paste(date(), "", sep=" -- Pvalue adjusting "), '\n')
     # FDR.list<-p.adjust(pvalue.list,method = "bonferroni")

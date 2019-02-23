@@ -21,7 +21,7 @@ Lasso.bag
 
     :type: numeric
     :default: ``1000``
-    *the size of resampled sample, only valid when permutation set to TRUE*
+    *the size of resample sample, only valid when permutation set to TRUE*
     
 .. confval:: imputeN
 
@@ -57,7 +57,7 @@ Lasso.bag
 
     :type: bool
     :default: ``FALSE``
-    *whether the script run in parallel, you need to set n.cores in case this package conquers all your cpu resource*
+    *whether the script run in parallel, you need to set mc.core in case this package conquers all your cpu resource*
 
 .. confval:: fit.pareto
 
@@ -70,18 +70,6 @@ Lasso.bag
     :type: string
     :default: ``TRUE``
     *to decide whether to do permutation test, if set TRUE, no p value returns*
-
-.. confval:: n.cores
-
-    :type: numeric
-    :default: ``1``
-    *how many cores/process to be assigned for this function, in Windows, you have to set this to 1*
-
-.. confval:: rd.seed
-
-    :type: numeric
-    :default: ``89757``
-    *it is the random seed of this function, in case some of the experiments need to be reappeared*
 
 
 LessPermutation 

@@ -24,7 +24,7 @@ You need to input dependent and independent variables and the function will retu
 
 .. code-block:: bash
 
-    df <- df.test # this is the integrated data of this package
+    df <- readRDS("test.rds")
     # change those improper format in df
     to.numeric1 <- as.character(df$riskscoreStatus)
     to.numeric2 <- as.character(df$LeftOrRight)
@@ -38,22 +38,21 @@ You need to input dependent and independent variables and the function will retu
     df$riskscoreStatus <- to.numeric1
     df$LeftOrRight <- to.numeric2
     df$Sex <- to.numeric3
-    rownames(df) <- df$ID
-    df <- df[,which(colnames(df)!="ID")]
 
-    x <- df[,which(!colnames(df) %in% c("Sex","Age","Osstatus","DFSstatus","OS","DFS","LeftOrRight","LymStatus","NI","VI","Stage","remove","riskscore","riskscoreStatus","ageStatus"))]
-    
     # cox
+    x <- df[,which(!colnames(df) %in% c("Osstatus","OS"))]
     y <- df[,which(colnames(df) %in% c("Osstatus","OS"))]
     y <- y[,c(2,1)]
     colnames(y) <- c("time","status")
     m<-Lasso.bag(x,y,bootN=3,imputeN=5,imputeN.max = 7,permut.increase = 1,boot.rep = T,a.family = "cox",parallel=F)
 
     # binomial
+    x <- df[,which(colnames(df)!="riskscoreStatus")]
     y <- df$riskscoreStatus
     m<-Lasso.bag(x,y,bootN=3,imputeN=5,imputeN.max = 7,permut.increase = 1,boot.rep = T,a.family = "binomial",parallel=F)
 
     # gaussian
+    x <- df[,which(colnames(df)!="riskscore")]
     y <- df$riskscore
     m<-Lasso.bag(x,y,bootN=3,imputeN=5,imputeN.max = 7,permut.increase = 1,boot.rep = T,a.family = "gaussian",parallel=F)
     

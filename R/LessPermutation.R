@@ -1,7 +1,19 @@
 # for calculating p value with less permutation.
-source('gradient_descent.R')
-source('pareto_simple_opt_func.R')
+# source('gradient_descent.R')
+# source('pareto_simple_opt_func.R')
+#' LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data
 
+#' @param X a vector of data recording the permutation values
+#' @param x0 observed value
+#' @param fitting.method method to fit GPD, default is "mle", alternative "gd"(gradient descend)
+#' @param search.step the length of step (this param * length(X)) to find threshold. Default 0.01
+#' @param fit.cutoff the cutoff of p value to judge whether it fits well to GPD, default is 0.05
+#' @param when.to.fit a cutoff to tell how many sample values are bigger than the target value then we don't need to fit GPD. it is a portion.Default 0.05
+#' @return  p value of the observed value in the permutation test
+#' @examples
+#' x <- rgpd(200, 1, 2, 0.25)
+#' LessPermutation(x,1,fitting.method='gd')
+#' @export
 
 LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cutoff=0.05, when.to.fit=0.05) {
   # using General Pareto Distribution to fit the exceedances and return an estimated p value
@@ -24,7 +36,7 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
   goodFit <- "Not_good_enough"
   judgeNexc <- "Pareto"
   thresInRange <- "NO"
-  
+
   # Sort out those entries beyond thres
   OverThres <- function(X, thres) {
     X <- sort(X)
@@ -36,7 +48,7 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
     }
     return(out)
   }
-  
+
   # To find threshold according to steps
   FindThres <- function(X, itertime, search.step) {
     ordered_X <- sort(X)
@@ -48,18 +60,18 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
     }
     return((ordered_X[idx] + onemore) / 2) #this is accorded to the paper
   }
-  
-  
+
+
   k_hyb <- function(theta,X){
     right <- sum(log(1-theta*X));
     left <- -1/length(X);
     return(left*right);
   }
-  
+
   sigma_hyb <- function(k_hyb,theta){
     return(k_hyb/theta);
   }
-  
+
   #To estimate k and s in GPD
   adtestGPD.EstKS <- function(X,thres,fitting.method) {
     if(fitting.method=="mgf"){
@@ -87,7 +99,7 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
       return(fitgpd(X, thres, fitting.method)$param);
     }
   }
-  
+
   #GPD function
   GPD.kZero <- function(z, scale) {
     return(1 - exp(-z / scale))
@@ -95,7 +107,7 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
   GPD.kOthers <- function(z, scale, k) {
     return(1 - (1 - k * z / scale)**(1 / k))
   }
-  
+
   #Make a list of F(z) for AD Test
   adtestGPD.MakeZ <- function(X,thres, k, s) {
     union.Z <- OverThres(X,thres)
@@ -114,7 +126,7 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
       return(GPD.kOthers(z, s, k))
     }
   }
-  
+
   #calculate A^2, which is the estimator of AD Test
   adtestGPD.Asqr <- function(zlist) {
     n <- length(zlist)
@@ -136,7 +148,7 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
       return(-1 * n - sum.asqr / n)
     }
   }
-  
+
   #calculate p value and return whether it fits GPD well or not
   p.record <- function(Asqr) {
     #ref http://www.statisticshowto.com/anderson-darling-test/
@@ -151,21 +163,21 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
     } else if (Asqr <= 0.2) {
       pval <- 1 - exp(-13.436 + 101.14 * Asqr - 223.73 * Asqr ** 2);
     }
-    
+
     if (pval > fit.cutoff) {
       return("fit_good_enough");
     } else {
       return("Not_good_enough");
     }
   }
-  
+
   #To see if p meets our requirement
   adtestGPD.IsReach <- function(X, thres, k, s) {
     zlist <- adtestGPD.MakeZ(X,thres, k, s)
     Asqr <- adtestGPD.Asqr(zlist)
     return(p.record(Asqr))
   }
-  
+
   #count p value
   Calp <- function(X, x0, thres) {
     X <- sort(X)
@@ -182,7 +194,7 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
       return(Nexc * (GPD.kOthers(z, s, k)) / N) # according to paper: "Fewer permutations, more accurate P-values"
     }
   }
-  
+
   # main function
   while (idx < length(X) & judgeNexc != "Regular_EDF"
          & goodFit == "Not_good_enough") {
@@ -198,7 +210,7 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
       judgeNexc <- "Pareto"
       itertimes <- itertimes + 1
       idx <- ceiling(1 + (itertimes * search.step) * length(X)) #Update the idx and itertimes
-      
+
       #limit k and s or x0 - threshold to acceptable range
       EstKS <- adtestGPD.EstKS(X, thres, fitting.method)
       k <- as.numeric(EstKS["shape"]) * -1
@@ -289,11 +301,11 @@ adtest.gpd <- function(X,x0,fitting.method="mle",fit.cutoff=0.05){
         colnames(output) <- c("shape","scale")
         return(output)
       }else{
-        
+
         return(fitgpd(X, thres, fitting.method)$param);
       }
     }
-    
+
     #GPD function
     GPD.kZero <- function(z, scale) {
       return(1 - exp(-z / scale))
@@ -301,7 +313,7 @@ adtest.gpd <- function(X,x0,fitting.method="mle",fit.cutoff=0.05){
     GPD.kOthers <- function(z, scale, k) {
       return(1 - (1 - k * z / scale)**(1 / k))
     }
-    
+
     #Make a list of F(z) for AD Test
     adtestGPD.MakeZ <- function(X,thres, k, s) {
       union.Z <- OverThres(X,thres)
@@ -320,7 +332,7 @@ adtest.gpd <- function(X,x0,fitting.method="mle",fit.cutoff=0.05){
         return(GPD.kOthers(z, s, k))
       }
     }
-    
+
     #calculate A^2, which is the estimator of AD Test
     adtestGPD.Asqr <- function(zlist) {
       n <- length(zlist)
@@ -342,7 +354,7 @@ adtest.gpd <- function(X,x0,fitting.method="mle",fit.cutoff=0.05){
         return(-1 * n - sum.asqr / n)
       }
     }
-    
+
     #calculate p value and return whether it fits GPD well or not
     p.record <- function(Asqr) {
       #ref http://www.statisticshowto.com/anderson-darling-test/
@@ -357,7 +369,7 @@ adtest.gpd <- function(X,x0,fitting.method="mle",fit.cutoff=0.05){
       } else if (Asqr <= 0.2) {
         pval <- 1 - exp(-13.436 + 101.14 * Asqr - 223.73 * Asqr ** 2);
       }
-      
+
       if (pval > fit.cutoff) {
         return("fit_good_enough");
       } else {

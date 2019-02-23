@@ -1,5 +1,5 @@
 #this script is for gradient_descent
-source('pareto_simple_opt_func.R')
+# source('pareto_simple_opt_func.R')
 
 derivative <- function(theta,X){
   #X should be like c(1,2,3,4,5)
@@ -16,7 +16,7 @@ target_func <- function(theta,X){
 # want to find a and b to minimize sum(axi^2)
 # example
 # m <- rgpd(200,loc = 0,scale = 1,shape = 0.05)
-# The following function is for minimizing the target function of finding parameters for GPD by Gradient Descent 
+# The following function is for minimizing the target function of finding parameters for GPD by Gradient Descent
 GradientDescent <- function(X,step=0.0001,acc=10e-06,maxIter=500) {
   #step is learning rate
   #acc means acception
