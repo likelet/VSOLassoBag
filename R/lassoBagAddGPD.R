@@ -159,9 +159,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     }
 
     selecVlist1=lapply(index.list.bootonce, boot.indiv)
-    print(selecVlist1)
     tablecount1=table(unlist(selecVlist1))
-    print(tablecount1)
     out.vec[intersect(names(tablecount1), names(out.vec))] <- tablecount1[intersect(names(tablecount1), names(out.vec))]
     return(out.vec)  # the output is "what features have been chosen."
   }
