@@ -83,6 +83,18 @@ Lasso.bag
     :default: ``89757``
     *it is the random seed of this function, in case some of the experiments need to be reappeared*
 
+.. confval:: plot.freq
+
+    :type: string/bool
+    :default: ``FALSE``
+    *whether to show all the non-zero frequency in the final barplot or not. If "full", all the features(including zero frequency) will be plotted. If "part", all the non-zero features will be plotted. If "not", will not print the plot.*
+
+.. confval:: plot.out
+
+    :type: string/bool
+    :default: ``FALSE``
+    *the path or file's name to save the plot. If set to FALSE, no plot will be output. Default to FALSE*
+
 
 LessPermutation 
 ----
