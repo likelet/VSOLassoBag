@@ -24,7 +24,7 @@ You need to input dependent and independent variables and the function will retu
 
 .. code-block:: bash
 
-    df <- readRDS("test.rds")
+    df <- df.test # this is the integrated data of this package
     # change those improper format in df
     to.numeric1 <- as.character(df$riskscoreStatus)
     to.numeric2 <- as.character(df$LeftOrRight)
