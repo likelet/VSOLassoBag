@@ -1,4 +1,5 @@
-#' LASSO-bagging: a lasso based variable selecting CART framework
+#' @title LASSO-bagging
+#' a lasso based variable selecting CART framework
 
 #' @param mat sample matrix that each column represent a variable and rows represent sample data points, all the entries in it should be numeric.
 #' @param out.mat vector or dataframe with two columns with the same length as the sample size from `mat`
