@@ -32,6 +32,8 @@ Imports:
     glmnet,
     limma,
     POT,
-    survival
+    survival,
+    ggplot2
 Suggests: 
     parallel
+RoxygenNote: 6.1.1
