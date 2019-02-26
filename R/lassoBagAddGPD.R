@@ -13,8 +13,15 @@
 #' @param permutation to decide whether to do permutation test, if set TRUE, no p value returns
 #' @param n.cores how many cores/process to be assigned for this function, in Windows, you have to set this to 1
 #' @param rd.seed it is the random seed of this function, in case some of the experiments need to be reappeared
+#' @param plot.freq whether to show all the non-zero frequency in the final barplot or not. If "full", all the features(including zero frequency) will be plotted. If "part", all the non-zero features will be plotted. If "not", will not print the plot.
+#' @param plot.out the path or file's name to save the plot. If set to FALSE, no plot will be output. Default to FALSE.
 #' @return  a dataframe that contains the frequency, the p value and the adjusted p value of each feature(if you set permutation=T)
 #' @examples
+#' require(glmnet)
+#' require(POT)
+#' require(parallel)
+#' require(ggplot2)
+#'
 #' df <- df.test # this is the integrated data of this package
 #' # change those improper format in df
 #' to.numeric1 <- as.character(df$riskscoreStatus)
@@ -59,7 +66,7 @@
 # library(parallel)
 # library(POT)
 # source("LessPermutation.R")
-Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE,n.cores=1,rd.seed=89757) {
+Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE,n.cores=1,rd.seed=89757,plot.freq="full",plot.out=F) {
   # bootN is the size of resample sample
   # mat is independent variable
   # out.mat is dependent variable
@@ -266,10 +273,36 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     FDR.list <- p.adjust(pvalue.list,method = "fdr")
     res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre,P.value=pvalue.list,P.adjust=FDR.list)
     cat(paste(date(), "", sep=" -- Done"), '\n')
-    return(res.df)
   } else {  # do not permutate and output frequency
     res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre)
     cat(paste(date(), "", sep=" -- Done"), '\n')
-    return(res.df)
   }
+
+  res.df.need <- res.df[res.df$Frequency!=0,]
+  if (plot.freq=="part") {
+    plot.df <- res.df.need
+  } else if (plot.freq=="full") {
+    plot.df <- res.df
+  } else if (plot.freq!=FALSE & plot.freq!="part" & plot.freq!="full"){
+    plot.df <- res.df
+    print("Actually you need to set plot.freq correctly, here we will plot all features.")
+  }
+  if (plot.freq!=FALSE) {
+    if (plot.out!=F) {  # for saving files
+      pdf(plot.out)
+      print(ggplot(plot.df, aes(reorder(variate, -Frequency), Frequency)) +
+              geom_bar(stat = "identity") +
+              theme_bw() +
+              theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
+              xlab(label = NULL))
+      dev.off()
+    }
+    # for plot on the screen
+    print(ggplot(plot.df, aes(reorder(variate, -Frequency), Frequency)) +
+            geom_bar(stat = "identity") +
+            theme_bw() +
+            theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
+            xlab(label = NULL))
+  }
+  return(res.df)
 }
