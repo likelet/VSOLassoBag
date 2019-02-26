@@ -166,8 +166,12 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       return(result@Dimnames[[1]][which(as.numeric(result) != 0)])  # return the coef of each feature
     }
 
-    # selecVlist1=mclapply(index.list.bootonce, boot.indiv,mc.cores = n.cores)
-    selecVlist1=lapply(index.list.bootonce, boot.indiv)
+    if (permutation==FALSE){
+      selecVlist1=mclapply(index.list.bootonce, boot.indiv,mc.cores = n.cores)
+    } else {
+      selecVlist1=lapply(index.list.bootonce, boot.indiv)
+    }
+
     tablecount1=table(unlist(selecVlist1))
     out.vec[intersect(names(tablecount1), names(out.vec))] <- tablecount1[intersect(names(tablecount1), names(out.vec))]
     return(out.vec)  # the output is "what features have been chosen."
