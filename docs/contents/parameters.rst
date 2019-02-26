@@ -93,7 +93,7 @@ Lasso.bag
 
     :type: string/bool
     :default: ``FALSE``
-    *the path or file's name to save the plot. If set to FALSE, no plot will be output. Default to FALSE*
+    *the path or file's name to save the plot. If set to FALSE, no plot will be output. If you run this function in Linux command line, you don't have to set this param for the plot.freq will output your plot to your current working directory with name "Rplot.pdf".Default to FALSE*
 
 
 LessPermutation 
