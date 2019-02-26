@@ -24,6 +24,11 @@ You need to input dependent and independent variables and the function will retu
 
 .. code-block:: bash
 
+    require(glmnet)
+    require(POT)
+    require(parallel)
+    require(ggplot2)
+    
     df <- df.test # this is the integrated data of this package
     # change those improper format in df
     to.numeric1 <- as.character(df$riskscoreStatus)

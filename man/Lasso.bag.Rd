@@ -2,13 +2,14 @@
 % Please edit documentation in R/lassoBagAddGPD.R
 \name{Lasso.bag}
 \alias{Lasso.bag}
-\title{LASSO-bagging: a lasso based variable selecting CART framework}
+\title{LASSO-bagging
+a lasso based variable selecting CART framework}
 \usage{
 Lasso.bag(mat, out.mat, bootN = 1000, imputeN = 1000,
   imputeN.max = 2000, permut.increase = 100, boot.rep = TRUE,
   a.family = c("gaussian", "binomial", "poisson", "multinomial", "cox",
   "mgaussian"), parallel = F, fit.pareto = "mle", permutation = TRUE,
-  n.cores = 1, rd.seed = 89757)
+  n.cores = 1, rd.seed = 89757, plot.freq = "full", plot.out = F)
 }
 \arguments{
 \item{mat}{sample matrix that each column represent a variable and rows represent sample data points, all the entries in it should be numeric.}
@@ -36,14 +37,24 @@ Lasso.bag(mat, out.mat, bootN = 1000, imputeN = 1000,
 \item{n.cores}{how many cores/process to be assigned for this function, in Windows, you have to set this to 1}
 
 \item{rd.seed}{it is the random seed of this function, in case some of the experiments need to be reappeared}
+
+\item{plot.freq}{whether to show all the non-zero frequency in the final barplot or not. If "full", all the features(including zero frequency) will be plotted. If "part", all the non-zero features will be plotted. If "not", will not print the plot.}
+
+\item{plot.out}{the path or file's name to save the plot. If set to FALSE, no plot will be output. If you run this function in Linux command line, you don't have to set this param for the plot.freq will output your plot to your current working directory with name "Rplot.pdf".Default to FALSE.}
 }
 \value{
 a dataframe that contains the frequency, the p value and the adjusted p value of each feature(if you set permutation=T)
 }
 \description{
-LASSO-bagging: a lasso based variable selecting CART framework
+LASSO-bagging
+a lasso based variable selecting CART framework
 }
 \examples{
+require(glmnet)
+require(POT)
+require(parallel)
+require(ggplot2)
+
 df <- df.test # this is the integrated data of this package
 # change those improper format in df
 to.numeric1 <- as.character(df$riskscoreStatus)
