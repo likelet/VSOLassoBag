@@ -14,7 +14,7 @@
 #' @param n.cores how many cores/process to be assigned for this function, in Windows, you have to set this to 1
 #' @param rd.seed it is the random seed of this function, in case some of the experiments need to be reappeared
 #' @param plot.freq whether to show all the non-zero frequency in the final barplot or not. If "full", all the features(including zero frequency) will be plotted. If "part", all the non-zero features will be plotted. If "not", will not print the plot.
-#' @param plot.out the path or file's name to save the plot. If set to FALSE, no plot will be output. Default to FALSE.
+#' @param plot.out the path or file's name to save the plot. If set to FALSE, no plot will be output. If you run this function in Linux command line, you don't have to set this param for the plot.freq will output your plot to your current working directory with name "Rplot.pdf".Default to FALSE.
 #' @return  a dataframe that contains the frequency, the p value and the adjusted p value of each feature(if you set permutation=T)
 #' @examples
 #' require(glmnet)
