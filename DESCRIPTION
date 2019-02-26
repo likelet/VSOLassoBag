@@ -13,5 +13,4 @@ Suggests:
 Imports: 
     survival,
     glmnet,
-    limma
-
+RoxygenNote: 6.1.1
