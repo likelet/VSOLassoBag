@@ -11,7 +11,7 @@
 #' @param boot.rep whether :"sampling with return" or not, only valid when permutation set to TRUE
 #' @param parallel whether the script run in parallel, you need to set n.cores in case this package conquers all your cpu resource
 #' @param fit.pareto the method of fitting Generalized Pareto Distribution, alternative choice is "gd", for gradient descend
-#' @param permutation to decide whether to do permutation test, if set TRUE, no p value returns
+#' @param permutation to decide whether to do permutation test, if set FALSE, no p value returns
 #' @param n.cores how many cores/process to be assigned for this function, in Windows, you have to set this to 1
 #' @param rd.seed it is the random seed of this function, in case some of the experiments need to be reappeared
 #' @param plot.freq whether to show all the non-zero frequency in the final barplot or not. If "full", all the features(including zero frequency) will be plotted. If "part", all the non-zero features will be plotted. If "not", will not print the plot.
