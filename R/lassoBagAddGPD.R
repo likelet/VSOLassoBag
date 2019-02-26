@@ -166,7 +166,8 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       return(result@Dimnames[[1]][which(as.numeric(result) != 0)])  # return the coef of each feature
     }
 
-    selecVlist1=mclapply(index.list.bootonce, boot.indiv,mc.cores = n.cores)
+    # selecVlist1=mclapply(index.list.bootonce, boot.indiv,mc.cores = n.cores)
+    selecVlist1=lapply(index.list.bootonce, boot.indiv)
     tablecount1=table(unlist(selecVlist1))
     out.vec[intersect(names(tablecount1), names(out.vec))] <- tablecount1[intersect(names(tablecount1), names(out.vec))]
     return(out.vec)  # the output is "what features have been chosen."
@@ -194,6 +195,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
         permut.list<-lapply(index.list,boot.once)
       }else{
         permut.list<-mclapply(index.list,boot.once,mc.cores = n.cores)
+        # permut.list<-lapply(index.list,boot.once)
       }
 
       return(permut.list)
@@ -255,7 +257,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     if (add.more) {
 
       new.permut.list <-c(permut.list)
-      while (add.more & total.imputeN<=imputeN.max) {
+      while (add.more & total.imputeN<imputeN.max) {
         new.perm <- get.permutation(permut.increase)
         new.permut.list <- c(new.permut.list,new.perm)  # up to then all the permut.list
         new.judgement <- get.plist(new.permut.list,total.imputeN)
