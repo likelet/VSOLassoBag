@@ -7,7 +7,7 @@
 #' @param bootN the size of resampled sample, only valid when permutation set to TRUE
 #' @param imputeN the initial permutation times, only valid when permutation set to TRUE
 #' @param imputeN.max the max permutation times. Regardless of whether p has meet the requirement,, only valid when permutation set to TRUE
-#' @param permut.increase if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation’ to get more random/permutation values, only valid when permutation set to TRUE
+#' @param permut.increase if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation�? to get more random/permutation values, only valid when permutation set to TRUE
 #' @param boot.rep whether :"sampling with return" or not, only valid when permutation set to TRUE
 #' @param parallel whether the script run in parallel, you need to set n.cores in case this package conquers all your cpu resource
 #' @param fit.pareto the method of fitting Generalized Pareto Distribution, alternative choice is "gd", for gradient descend
@@ -139,27 +139,27 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     } else {
       runData <- cbind(mat,new.out.mat)
     }
-    marker_candidate=colnames(mat)
+    marker_candidate <- colnames(mat)
     out.vec<-rep(0,length(marker_candidate))
     names(out.vec)<-marker_candidate
-    selecVlist1=c()
+    selecVlist1 <- c()
 
     #index list for lapply
     index.list.bootonce<-list()
     for(i in 1:bootN){
-      sampleindex2=sample(1:nrow(runData),1*nrow(runData),rep=boot.rep)  # re-sampling, same size
+      sampleindex2 <- sample(1:nrow(runData),1*nrow(runData),rep=boot.rep)  # re-sampling, same size
       index.list.bootonce[[i]]<-sampleindex2
     }
 
     # apply function
     boot.indiv<-function(sampleIdex){
-      effectdata=runData[sampleIdex,]  # the sample we use in permutation, x and y have been matched
+      effectdata <- runData[sampleIdex,]  # the sample we use in permutation, x and y have been matched
       if (a.family!="cox") {
         glmmod<-glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,"out"], family = a.family)
-        cv.glmmod<-cv.glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,"out"], family = a.family)
+        cv.glmmod<-cv.glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,"out"], family = a.family,nfolds = 4)
       } else {
         glmmod<-glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,c("time","status")], family = a.family)
-        cv.glmmod<-cv.glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,c("time","status")], family = a.family)
+        cv.glmmod<-cv.glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,c("time","status")], family = a.family,nfolds = 4)
       }
       best_lambda <- cv.glmmod$lambda.1se
       result<-coef(glmmod, s = best_lambda)
@@ -167,12 +167,12 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     }
 
     if (permutation==FALSE){
-      selecVlist1=mclapply(index.list.bootonce, boot.indiv,mc.cores = n.cores)
+      selecVlist1 <- mclapply(index.list.bootonce, boot.indiv,mc.cores = n.cores)
     } else {
-      selecVlist1=lapply(index.list.bootonce, boot.indiv)
+      selecVlist1 <- lapply(index.list.bootonce, boot.indiv)
     }
 
-    tablecount1=table(unlist(selecVlist1))
+    tablecount1 <- table(unlist(selecVlist1))
     out.vec[intersect(names(tablecount1), names(out.vec))] <- tablecount1[intersect(names(tablecount1), names(out.vec))]
     return(out.vec)  # the output is "what features have been chosen."
   }
@@ -189,7 +189,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       # N is how many times to do permutations at this function
       # returns out.df
       for (i in 1:N) {
-        temp.index=sample(1:nrow(mat),nrow(mat),rep=F)
+        temp.index <- sample(1:nrow(mat),nrow(mat),rep=F)
         index.list[[i]]<-temp.index
       }  # index.list is of length:imputeN, each index is the random order of the original matrix
 
