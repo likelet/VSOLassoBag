@@ -2,11 +2,31 @@
 % Please edit documentation in R/LessPermutation.R
 \name{LessPermutation}
 \alias{LessPermutation}
-\title{LessPermutation calculating precised p value with less permutation by fitting a General Pareto Distribution(GPD)}
+\title{LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data}
 \usage{
 LessPermutation(X, x0, fitting.method = "mle", search.step = 0.01,
   fit.cutoff = 0.05, when.to.fit = 0.05)
 }
+\arguments{
+\item{X}{a vector of data recording the permutation values}
+
+\item{x0}{observed value}
+
+\item{fitting.method}{method to fit GPD, default is "mle", alternative "gd"(gradient descend)}
+
+\item{search.step}{the length of step (this param * length(X)) to find threshold. Default 0.01}
+
+\item{fit.cutoff}{the cutoff of p value to judge whether it fits well to GPD, default is 0.05}
+
+\item{when.to.fit}{a cutoff to tell how many sample values are bigger than the target value then we don't need to fit GPD. it is a portion.Default 0.05}
+}
+\value{
+p value of the observed value in the permutation test
+}
 \description{
-LessPermutation calculating precised p value with less permutation by fitting a General Pareto Distribution(GPD)
+LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data
+}
+\examples{
+x <- rgpd(200, 1, 2, 0.25)
+LessPermutation(x,1,fitting.method='gd')
 }
