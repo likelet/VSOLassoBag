@@ -7,7 +7,7 @@
 #' @param bootN the size of resampled sample, only valid when permutation set to TRUE
 #' @param imputeN the initial permutation times, only valid when permutation set to TRUE
 #' @param imputeN.max the max permutation times. Regardless of whether p has meet the requirement,, only valid when permutation set to TRUE
-#' @param permut.increase if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation�? to get more random/permutation values, only valid when permutation set to TRUE
+#' @param permut.increase if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation??? to get more random/permutation values, only valid when permutation set to TRUE
 #' @param boot.rep whether :"sampling with return" or not, only valid when permutation set to TRUE
 #' @param parallel whether the script run in parallel, you need to set n.cores in case this package conquers all your cpu resource
 #' @param fit.pareto the method of fitting Generalized Pareto Distribution, alternative choice is "gd", for gradient descend
@@ -67,7 +67,7 @@
 # library(parallel)
 # library(POT)
 # source("LessPermutation.R")
-Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE,n.cores=1,rd.seed=89757,plot.freq="full",plot.out=F) {
+Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE,n.cores=1,rd.seed=89757,plot.freq="full",plot.out=F, use.gpd=F) {
   # bootN is the size of resample sample
   # mat is independent variable
   # out.mat is dependent variable
@@ -77,7 +77,6 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
   # imputeN.max is the max permutation times. Regardless of whether p has meet the requirement
   # permut.increase is: if the initial imputeN times of permutation doesn't meet the requirement, then we add permut.increase times of permutation to get more random values
   # if a.family == "multinomial", then the number of each class of dependent vars should be more than 1
-
   set.seed(rd.seed)
   rownames(mat) <- c(1:length(rownames(mat)))
   # rownames(out.mat) <- c(1:length(rownames(out.mat)))
@@ -182,12 +181,13 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
 
   #construct datalist with permutation
   cat(paste(date(), "", sep=" -- permutate index "), '\n')
-  index.list<-list()
+
 
   if (permutation==TRUE) {
     get.permutation <- function(N) {
       # N is how many times to do permutations at this function
       # returns out.df
+      index.list<-list()
       for (i in 1:N) {
         temp.index <- sample(1:nrow(mat),nrow(mat),rep=F)
         index.list[[i]]<-temp.index
@@ -224,9 +224,17 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
         observed.value <- observed.fre[i]
         # to use GPD to fit right tail of distribution, but sometimes it will throw error because there is no
         # data that meets the requirement for fitting GPD
-        tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value,fitting.method = fit.pareto)},
-                 error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
-                 print("no data is bigger than threshold, we will use traditional p-value")})
+        if (use.gpd) {
+          # show if the GPD
+          tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value,fitting.method = fit.pareto)
+          good.fit <- adtest.gpd(temp.list,observed.fre[i],fitting.method = fit.pareto)},
+                   error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
+                   print(p.value)
+                   print("no data is bigger than threshold, we will use traditional p-value")})
+
+        } else {
+          good.fit <- "fit_good_enough"
+        }
         if (!exists("p.value")) {
           p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N
         }
@@ -241,7 +249,8 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
         # if (!length(temp.list[temp.list>observed.fre[i]])>=10) {
         #   add.more <- T
         # }
-        good.fit <- adtest.gpd(temp.list,observed.fre[i],fitting.method = fit.pareto)
+
+
         if (good.fit!="fit_good_enough") {
           add.more <- T
         }
