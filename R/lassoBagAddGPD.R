@@ -79,6 +79,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
   # if a.family == "multinomial", then the number of each class of dependent vars should be more than 1
   set.seed(rd.seed)
   rownames(mat) <- c(1:length(rownames(mat)))
+  all.num <- bootN * imputeN
   # rownames(out.mat) <- c(1:length(rownames(out.mat)))
   # a simple input judgement and transformation
   out.mat <- as.matrix(out.mat)
@@ -128,6 +129,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
   # lasso bag function in individual iteration
   # boot for one time.
   boot.once<-function(index=NULL){  # TODO: change here to check the input type and take actions to exact types
+    print(paste(Sys.time(), "I'm boostraping", sep = "--"))
     if(!is.null(index)){
       new.out.mat<-out.mat[index,]  # re-order the dependent variable
     }else{
@@ -154,18 +156,20 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     boot.indiv<-function(sampleIdex){
       effectdata <- runData[sampleIdex,]  # the sample we use in permutation, x and y have been matched
       if (a.family!="cox") {
-        glmmod<-glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,"out"], family = a.family)
+        glmmod<-glmnet(data.matrix(effectdata[,marker_candidate]), effectdata[,"out"], family = a.family)
         cv.glmmod<-cv.glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,"out"], family = a.family,nfolds = 4)
+        print(paste(Sys.time(), "one Lasso finished...", sep = " ---------**---------"))
       } else {
-        glmmod<-glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,c("time","status")], family = a.family)
-        cv.glmmod<-cv.glmnet(as.matrix(effectdata[,marker_candidate]), effectdata[,c("time","status")], family = a.family,nfolds = 4)
+        glmmod<-glmnet(data.matrix(effectdata[,marker_candidate]), effectdata[,c("time","status")], family = a.family)
+        cv.glmmod<-cv.glmnet(data.matrix(effectdata[,marker_candidate]), effectdata[,c("time","status")], family = a.family,nfolds = 4)
+        print(paste(Sys.time(), "one Lasso finished...", sep = " ---------**---------"))
       }
       best_lambda <- cv.glmmod$lambda.1se
       result<-coef(glmmod, s = best_lambda)
       return(result@Dimnames[[1]][which(as.numeric(result) != 0)])  # return the coef of each feature
     }
 
-    if (permutation==FALSE){
+    if (parallel == FALSE){
       selecVlist1 <- mclapply(index.list.bootonce, boot.indiv,mc.cores = n.cores)
     } else {
       selecVlist1 <- lapply(index.list.bootonce, boot.indiv)
@@ -173,17 +177,17 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
 
     tablecount1 <- table(unlist(selecVlist1))
     out.vec[intersect(names(tablecount1), names(out.vec))] <- tablecount1[intersect(names(tablecount1), names(out.vec))]
+    print(paste(Sys.time(), "One boostrap finished ...", sep = "--"))
     return(out.vec)  # the output is "what features have been chosen."
   }
   # get observed value
   cat(paste(date(), "", sep=" -- start calculating observed frequency "), '\n')
   observed.fre<-boot.once()  # observed frequency. The true freq
 
-  #construct datalist with permutation
-  cat(paste(date(), "", sep=" -- permutate index "), '\n')
-
-
   if (permutation==TRUE) {
+    #construct datalist with permutation
+    cat(paste(date(), "", sep=" -- permutate index "), '\n')
+
     get.permutation <- function(N) {
       # N is how many times to do permutations at this function
       # returns out.df
@@ -235,9 +239,9 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
         } else {
           good.fit <- "fit_good_enough"
         }
-        if (!exists("p.value")) {
-          p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N
-        }
+        #if (!exists("p.value")) {
+        p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N
+        #}
         if (p.value==0) {
           p.value <- (length(temp.list[temp.list>observed.fre[i]])+1)/N
         }
@@ -255,6 +259,14 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
           add.more <- T
         }
       }
+
+
+
+
+
+
+
+
       return(list(add.more,pvalue.list))
     }
 
