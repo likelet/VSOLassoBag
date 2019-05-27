@@ -69,7 +69,7 @@ Lasso.bag
 
     :type: string
     :default: ``TRUE``
-    *to decide whether to do permutation test, if set TRUE, no p value returns*
+    *to decide whether to do permutation test, if set FALSE, no p value returns*
 
 .. confval:: n.cores
 

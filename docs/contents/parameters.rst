@@ -17,6 +17,12 @@ Lasso.bag
     :default: ``none``
     *dependent variables, which contains one column or two columns*
 
+.. confval:: base.exist
+
+    :type: bool
+    :default: ``FALSE``
+    *indicates whether we have an existed frequency data frame. We set it to be FALSE under most condition. If you don't know what it means, leave it to be FALSE(default)*
+
 .. confval:: bootN
 
     :type: numeric
@@ -94,6 +100,12 @@ Lasso.bag
     :type: string/bool
     :default: ``FALSE``
     *the path or file's name to save the plot. If set to FALSE, no plot will be output. If you run this function in Linux command line, you don't have to set this param for the plot.freq will output your plot to your current working directory with name "Rplot.pdf".Default to FALSE*
+
+.. confval:: do.plot
+
+    :type: bool
+    :default: ``FALSE``
+    *whether to print a barplot to show the frequency of the output. This package will show you a barplot when it is TRUE. If it is FALSE, the two plot.* params above will be invalid then.Default to FALSE*
 
 
 LessPermutation 

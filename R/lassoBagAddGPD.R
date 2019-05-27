@@ -3,6 +3,7 @@
 
 #' @param mat sample matrix that each column represent a variable and rows represent sample data points, all the entries in it should be numeric.
 #' @param out.mat vector or dataframe with two columns with the same length as the sample size from `mat`
+#' @param base.exist indicates whether we have an existed frequency data frame. We set it to be FALSE under most condition. If you don't know what it means, leave it to be FALSE(default)
 #' @param a.family a string vector to determine the data type of out.mat
 #' @param bootN the size of resampled sample, only valid when permutation set to TRUE
 #' @param imputeN the initial permutation times, only valid when permutation set to TRUE
@@ -16,6 +17,7 @@
 #' @param rd.seed it is the random seed of this function, in case some of the experiments need to be reappeared
 #' @param plot.freq whether to show all the non-zero frequency in the final barplot or not. If "full", all the features(including zero frequency) will be plotted. If "part", all the non-zero features will be plotted. If "not", will not print the plot.
 #' @param plot.out the path or file's name to save the plot. If set to FALSE, no plot will be output. If you run this function in Linux command line, you don't have to set this param for the plot.freq will output your plot to your current working directory with name "Rplot.pdf".Default to FALSE.
+#' @param do.plot whether to print a barplot to show the frequency of the output. This package will show you a barplot when it is TRUE. If it is FALSE, the two plot.* params above will be invalid then.
 #' @return  a dataframe that contains the frequency, the p value and the adjusted p value of each feature(if you set permutation=T)
 #' @examples
 #' require(glmnet)
@@ -68,7 +70,7 @@
 # library(POT)
 # library(simctest)
 # source("LessPermutation.R")
-Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE,n.cores=1,rd.seed=89757,plot.freq="full",plot.out=F, use.gpd=F, use.simctest = F, do.plot=F) {
+Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE,n.cores=1,rd.seed=89757,plot.freq="full",plot.out=F, use.gpd=F, do.plot=F) {
   # bootN is the size of resample sample
   # mat is independent variable
   # out.mat is dependent variable
@@ -205,17 +207,13 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
 
       cat(paste(date(), "", sep=" -- permutating "), '\n')
       # do permutation
-      if (!use.simctest) {
-        # the origin
-        if(!parallel){  # multiprocessing
-          permut.list<-lapply(index.list,boot.once)
-        }else{
-          permut.list<-mclapply(index.list,boot.once,mc.cores = n.cores)
-          # permut.list<-lapply(index.list,boot.once)
-        }
-      } else {
-        # use simctest
+
+      # the origin
+      if(!parallel){  # multiprocessing
+        permut.list<-lapply(index.list,boot.once)
+      }else{
         permut.list<-mclapply(index.list,boot.once,mc.cores = n.cores)
+        # permut.list<-lapply(index.list,boot.once)
       }
 
       return(permut.list)
@@ -250,10 +248,11 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
         } else {
           good.fit <- "fit_good_enough"
         }
-        #if (!exists("p.value")) {
-
-        p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N
-        #}
+        
+        if (!exists("p.value")) {
+          p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N
+        }
+        
         if (p.value==0) {
           p.value <- (length(temp.list[temp.list>observed.fre[i]])+1)/N
         }
@@ -320,6 +319,7 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
 
   if (do.plot) {
     if (plot.freq=="part") {
+      res.df.need <- res.df[res.df$Frequency!=0,]
       plot.df <- res.df.need
     } else if (plot.freq=="full") {
       plot.df <- res.df
