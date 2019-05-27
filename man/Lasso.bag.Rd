@@ -5,16 +5,19 @@
 \title{LASSO-bagging
 a lasso based variable selecting CART framework}
 \usage{
-Lasso.bag(mat, out.mat, bootN = 1000, imputeN = 1000,
+Lasso.bag(mat, out.mat, base.exist = F, bootN = 1000, imputeN = 1000,
   imputeN.max = 2000, permut.increase = 100, boot.rep = TRUE,
   a.family = c("gaussian", "binomial", "poisson", "multinomial", "cox",
   "mgaussian"), parallel = F, fit.pareto = "mle", permutation = TRUE,
-  n.cores = 1, rd.seed = 89757, plot.freq = "full", plot.out = F)
+  n.cores = 1, rd.seed = 89757, plot.freq = "full", plot.out = F,
+  use.gpd = F, do.plot = F)
 }
 \arguments{
 \item{mat}{sample matrix that each column represent a variable and rows represent sample data points, all the entries in it should be numeric.}
 
 \item{out.mat}{vector or dataframe with two columns with the same length as the sample size from `mat`}
+
+\item{base.exist}{indicates whether we have an existed frequency data frame. We set it to be FALSE under most condition. If you don't know what it means, leave it to be FALSE(default)}
 
 \item{bootN}{the size of resampled sample, only valid when permutation set to TRUE}
 
@@ -22,7 +25,7 @@ Lasso.bag(mat, out.mat, bootN = 1000, imputeN = 1000,
 
 \item{imputeN.max}{the max permutation times. Regardless of whether p has meet the requirement,, only valid when permutation set to TRUE}
 
-\item{permut.increase}{if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation’ to get more random/permutation values, only valid when permutation set to TRUE}
+\item{permut.increase}{if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation??? to get more random/permutation values, only valid when permutation set to TRUE}
 
 \item{boot.rep}{whether :"sampling with return" or not, only valid when permutation set to TRUE}
 
@@ -32,7 +35,7 @@ Lasso.bag(mat, out.mat, bootN = 1000, imputeN = 1000,
 
 \item{fit.pareto}{the method of fitting Generalized Pareto Distribution, alternative choice is "gd", for gradient descend}
 
-\item{permutation}{to decide whether to do permutation test, if set TRUE, no p value returns}
+\item{permutation}{to decide whether to do permutation test, if set FALSE, no p value returns}
 
 \item{n.cores}{how many cores/process to be assigned for this function, in Windows, you have to set this to 1}
 
@@ -41,6 +44,8 @@ Lasso.bag(mat, out.mat, bootN = 1000, imputeN = 1000,
 \item{plot.freq}{whether to show all the non-zero frequency in the final barplot or not. If "full", all the features(including zero frequency) will be plotted. If "part", all the non-zero features will be plotted. If "not", will not print the plot.}
 
 \item{plot.out}{the path or file's name to save the plot. If set to FALSE, no plot will be output. If you run this function in Linux command line, you don't have to set this param for the plot.freq will output your plot to your current working directory with name "Rplot.pdf".Default to FALSE.}
+
+\item{do.plot}{whether to print a barplot to show the frequency of the output. This package will show you a barplot when it is TRUE. If it is FALSE, the two plot.* params above will be invalid then.}
 }
 \value{
 a dataframe that contains the frequency, the p value and the adjusted p value of each feature(if you set permutation=T)
