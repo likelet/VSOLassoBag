@@ -32,8 +32,7 @@ Imports:
     glmnet,
     limma,
     POT,
-    survival,
-    ggplot2
+    survival
 Suggests: 
     parallel
 RoxygenNote: 6.1.1
