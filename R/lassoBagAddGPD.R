@@ -3,11 +3,12 @@
 
 #' @param mat sample matrix that each column represent a variable and rows represent sample data points, all the entries in it should be numeric.
 #' @param out.mat vector or dataframe with two columns with the same length as the sample size from `mat`
+#' @param base.exist indicates whether we have an existed frequency data frame. We set it to be FALSE under most condition. If you don't know what it means, leave it to be FALSE(default)
 #' @param a.family a string vector to determine the data type of out.mat
 #' @param bootN the size of resampled sample, only valid when permutation set to TRUE
 #' @param imputeN the initial permutation times, only valid when permutation set to TRUE
 #' @param imputeN.max the max permutation times. Regardless of whether p has meet the requirement,, only valid when permutation set to TRUE
-#' @param permut.increase if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation�? to get more random/permutation values, only valid when permutation set to TRUE
+#' @param permut.increase if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation??? to get more random/permutation values, only valid when permutation set to TRUE
 #' @param boot.rep whether :"sampling with return" or not, only valid when permutation set to TRUE
 #' @param parallel whether the script run in parallel, you need to set n.cores in case this package conquers all your cpu resource
 #' @param fit.pareto the method of fitting Generalized Pareto Distribution, alternative choice is "gd", for gradient descend
@@ -16,6 +17,7 @@
 #' @param rd.seed it is the random seed of this function, in case some of the experiments need to be reappeared
 #' @param plot.freq whether to show all the non-zero frequency in the final barplot or not. If "full", all the features(including zero frequency) will be plotted. If "part", all the non-zero features will be plotted. If "not", will not print the plot.
 #' @param plot.out the path or file's name to save the plot. If set to FALSE, no plot will be output. If you run this function in Linux command line, you don't have to set this param for the plot.freq will output your plot to your current working directory with name "Rplot.pdf".Default to FALSE.
+#' @param do.plot whether to print a barplot to show the frequency of the output. This package will show you a barplot when it is TRUE. If it is FALSE, the two plot.* params above will be invalid then.
 #' @return  a dataframe that contains the frequency, the p value and the adjusted p value of each feature(if you set permutation=T)
 #' @examples
 #' require(glmnet)
@@ -66,8 +68,9 @@
 # library(glmnet)
 # library(parallel)
 # library(POT)
+# library(simctest)
 # source("LessPermutation.R")
-Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE,n.cores=1,rd.seed=89757,plot.freq="full",plot.out=F) {
+Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),parallel=F,fit.pareto="mle",permutation=TRUE,n.cores=1,rd.seed=89757,plot.freq="full",plot.out=F, use.gpd=F, do.plot=F) {
   # bootN is the size of resample sample
   # mat is independent variable
   # out.mat is dependent variable
@@ -77,9 +80,9 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
   # imputeN.max is the max permutation times. Regardless of whether p has meet the requirement
   # permut.increase is: if the initial imputeN times of permutation doesn't meet the requirement, then we add permut.increase times of permutation to get more random values
   # if a.family == "multinomial", then the number of each class of dependent vars should be more than 1
-
   set.seed(rd.seed)
   rownames(mat) <- c(1:length(rownames(mat)))
+  all.num <- bootN * imputeN
   # rownames(out.mat) <- c(1:length(rownames(out.mat)))
   # a simple input judgement and transformation
   out.mat <- as.matrix(out.mat)
@@ -115,13 +118,11 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
     if(nrow(mat)!=length(out.mat)){  # TODO: i think that it should be dataframe for that will be more adjustable
       # and it allows us to store different types of data in one mat/df
       warning("incoporate length of matrix and outVarianbles, plz check your input ")
-      break
     }
   } else {
     if(nrow(mat)!=length(out.mat[,"time"])){  # TODO: i think that it should be dataframe for that will be more adjustable
       # and it allows us to store different types of data in one mat/df
       warning("incoporate length of matrix and outVarianbles, plz check your input ")
-      break
     }
   }
 
@@ -129,11 +130,13 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
   # lasso bag function in individual iteration
   # boot for one time.
   boot.once<-function(index=NULL){  # TODO: change here to check the input type and take actions to exact types
+    print(paste(Sys.time(), "I'm boostraping", sep = "--"))
     if(!is.null(index)){
       new.out.mat<-out.mat[index,]  # re-order the dependent variable
     }else{
       new.out.mat<-out.mat
     }
+
     if (a.family!="cox") {
       runData <- cbind(mat,out=new.out.mat)
     } else {
@@ -150,6 +153,7 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
       sampleindex2 <- sample(1:nrow(runData),1*nrow(runData),rep=boot.rep)  # re-sampling, same size
       index.list.bootonce[[i]]<-sampleindex2
     }
+
 
     # apply function
     boot.indiv<-function(sampleIdex){
@@ -174,20 +178,25 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
 
     tablecount1 <- table(unlist(selecVlist1))
     out.vec[intersect(names(tablecount1), names(out.vec))] <- tablecount1[intersect(names(tablecount1), names(out.vec))]
+    print(paste(Sys.time(), "One boostrap finished ...", sep = "--"))
     return(out.vec)  # the output is "what features have been chosen."
   }
   # get observed value
-  cat(paste(date(), "", sep=" -- start calculating observed frequency "), '\n')
-  observed.fre<-boot.once()  # observed frequency. The true freq
-
-  #construct datalist with permutation
-  cat(paste(date(), "", sep=" -- permutate index "), '\n')
-  index.list<-list()
+  if (!base.exist) {
+    cat(paste(date(), "", sep=" -- start calculating observed frequency "), '\n')
+    observed.fre<-boot.once()  # observed frequency. The true freq
+  } else {
+    observed.fre <- "Base.exists"
+  }
 
   if (permutation==TRUE) {
+    #construct datalist with permutation
+    cat(paste(date(), "", sep=" -- permutate index "), '\n')
+
     get.permutation <- function(N) {
       # N is how many times to do permutations at this function
       # returns out.df
+      index.list<-list()
       for (i in 1:N) {
         temp.index <- sample(1:nrow(mat),nrow(mat),rep=F)
         index.list[[i]]<-temp.index
@@ -195,6 +204,8 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
 
       cat(paste(date(), "", sep=" -- permutating "), '\n')
       # do permutation
+
+      # the origin
       if(!parallel){  # multiprocessing
         permut.list<-lapply(index.list,boot.once)
       }else{
@@ -211,7 +222,6 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
 
       out.df<-do.call(cbind.data.frame, permut.list)  # output as a data frame
       # features saved in df will be shown else the entities will be 0
-      colnames(out.df)<-c(1:N)
       cat(paste(date(), "", sep=" -- getting pvalue "), '\n')
 
       #get permutation pvalue
@@ -224,12 +234,22 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
         observed.value <- observed.fre[i]
         # to use GPD to fit right tail of distribution, but sometimes it will throw error because there is no
         # data that meets the requirement for fitting GPD
-        tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value,fitting.method = fit.pareto)},
-                 error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
-                 print("no data is bigger than threshold, we will use traditional p-value")})
+        if (use.gpd) {
+          # show if the GPD
+          tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value,fitting.method = fit.pareto)
+          good.fit <- adtest.gpd(temp.list,observed.fre[i],fitting.method = fit.pareto)},
+                   error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
+                   print(p.value)
+                   print("no data is bigger than threshold, we will use traditional p-value")})
+
+        } else {
+          good.fit <- "fit_good_enough"
+        }
+        
         if (!exists("p.value")) {
           p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N
         }
+        
         if (p.value==0) {
           p.value <- (length(temp.list[temp.list>observed.fre[i]])+1)/N
         }
@@ -241,75 +261,86 @@ Lasso.bag <- function(mat,out.mat,bootN=1000,imputeN=1000,imputeN.max=2000,permu
         # if (!length(temp.list[temp.list>observed.fre[i]])>=10) {
         #   add.more <- T
         # }
-        good.fit <- adtest.gpd(temp.list,observed.fre[i],fitting.method = fit.pareto)
         if (good.fit!="fit_good_enough") {
           add.more <- T
         }
       }
-      return(list(add.more,pvalue.list))
+
+      return(list(add.more, out.df, pvalue.list))
     }
+
 
 
     # TODO: to add GPD here to reduce permutation times.
     # we must first do imputeN times permutation
     permut.list <- get.permutation(imputeN)
-    judgement <- get.plist(permut.list,imputeN)
-    add.more <- judgement[[1]]
+    if (!base.exist) {
+      judgement <- get.plist(permut.list,imputeN)
+      add.more <- judgement[[1]]
+      out.table <- judgement[[2]]
+      total.imputeN <- imputeN
+      # TODO: to add more permutation here
+      if (add.more) {
 
-    # TODO: to add more permutation here
-    total.imputeN <- imputeN
-    if (add.more) {
-
-      new.permut.list <-c(permut.list)
-      while (add.more & total.imputeN<imputeN.max) {
-        new.perm <- get.permutation(permut.increase)
-        new.permut.list <- c(new.permut.list,new.perm)  # up to then all the permut.list
-        new.judgement <- get.plist(new.permut.list,total.imputeN)
-        add.more <- new.judgement[[1]]
+        new.permut.list <-c(permut.list)
+        while (add.more & total.imputeN<imputeN.max) {
+          new.perm <- get.permutation(permut.increase)
+          new.permut.list <- c(new.permut.list,new.perm)  # up to then all the permut.list
+          new.judgement <- get.plist(new.permut.list,total.imputeN)
+          add.more <- new.judgement[[1]]
+          total.imputeN <- total.imputeN + permut.increase
+          pvalue.list <- new.judgement[[3]]
+        }
         total.imputeN <- total.imputeN + permut.increase
-        pvalue.list <- new.judgement[[2]]
+      } else {
+        pvalue.list <- judgement[[3]]
       }
-      total.imputeN <- total.imputeN + permut.increase
+      #FDR calculation
+      cat(paste(date(), "", sep=" -- Pvalue adjusting "), '\n')
+      # FDR.list<-p.adjust(pvalue.list,method = "bonferroni")
+      FDR.list <- p.adjust(pvalue.list,method = "fdr")
+      res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre,P.value=pvalue.list,P.adjust=FDR.list)
+      cat(paste(date(), "", sep=" -- Done"), '\n')
     } else {
-      pvalue.list <- judgement[[2]]
+      out.table<-do.call(cbind.data.frame, permut.list)
+      cat(paste(date(), "", sep=" -- Clean up out.df "), '\n')
+      res.df <- "Don't care"
+      cat(paste(date(), "", sep=" -- Done"), '\n')
     }
 
-    #FDR calculation
-    cat(paste(date(), "", sep=" -- Pvalue adjusting "), '\n')
-    # FDR.list<-p.adjust(pvalue.list,method = "bonferroni")
-    FDR.list <- p.adjust(pvalue.list,method = "fdr")
-    res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre,P.value=pvalue.list,P.adjust=FDR.list)
-    cat(paste(date(), "", sep=" -- Done"), '\n')
   } else {  # do not permutate and output frequency
     res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre)
+    out.table <- "You said no permutation"
     cat(paste(date(), "", sep=" -- Done"), '\n')
   }
 
-  res.df.need <- res.df[res.df$Frequency!=0,]
-  if (plot.freq=="part") {
-    plot.df <- res.df.need
-  } else if (plot.freq=="full") {
-    plot.df <- res.df
-  } else if (plot.freq!=FALSE & plot.freq!="part" & plot.freq!="full"){
-    plot.df <- res.df
-    print("Actually you need to set plot.freq correctly, here we will plot all features.")
-  }
-  if (plot.freq!=FALSE) {
-    if (plot.out!=F) {  # for saving files
-      pdf(plot.out)
+  if (do.plot) {
+    if (plot.freq=="part") {
+      res.df.need <- res.df[res.df$Frequency!=0,]
+      plot.df <- res.df.need
+    } else if (plot.freq=="full") {
+      plot.df <- res.df
+    } else if (plot.freq!=FALSE & plot.freq!="part" & plot.freq!="full"){
+      plot.df <- res.df
+      print("Actually you need to set plot.freq correctly, here we will plot all features.")
+    }
+    if (plot.freq!=FALSE) {
+      if (plot.out!=F) {  # for saving files
+        pdf(plot.out)
+        print(ggplot(plot.df, aes(reorder(variate, -Frequency), Frequency)) +
+                geom_bar(stat = "identity") +
+                theme_bw() +
+                theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
+                xlab(label = NULL))
+        dev.off()
+      }
+      # for plot on the screen
       print(ggplot(plot.df, aes(reorder(variate, -Frequency), Frequency)) +
               geom_bar(stat = "identity") +
               theme_bw() +
               theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
               xlab(label = NULL))
-      dev.off()
     }
-    # for plot on the screen
-    print(ggplot(plot.df, aes(reorder(variate, -Frequency), Frequency)) +
-            geom_bar(stat = "identity") +
-            theme_bw() +
-            theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
-            xlab(label = NULL))
   }
-  return(res.df)
+  return(list(results=res.df, permutations=out.table))
 }

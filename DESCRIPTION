@@ -1,6 +1,6 @@
 Package: lassoBag
 Title: A cart frame work for screen variable or markers
-Version: 0.1.0
+Version: 1.0.1
 Authors@R: 
     c(person(given = "Qi",
              family = "Zhao",
