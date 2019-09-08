@@ -2,8 +2,11 @@
 # #' LASSO-bagging: a lasso based variable selecting CART framework
 
 # #' @param mat sample matrix that each column represent a variable and rows represent sample data points
-# #' @param out.mat vector with the same length as the sample size from `mat`
-# #' @param a.family a string vector
+# #' @param out.mat vector with the same length as the sample size from `mat`,representing the output vector for regression or variable selection analysis 
+# #' @param bootN bootstrap number for getting the consensus output of lasso model, 1000 by default .
+# #' @param imputeN The number of the imputation times for calculating the P-value of each variable. This parameter should be set when `run.perm`=true. 1000 by defaul. 
+# #' @param boot.rep Set `TRUE` if sampling your dataset with replacement 
+# #' @param a.family a string vector that specify the regression type, shuold be one of the c("gaussian","binomial","poisson","multinomial","cox","mgaussian")
 # #' @param universe total number of all strings that vec1 and vec2 comes from
 # #' @return  a P value
 # #   Test Package:              'Cmd + Shift + T'
