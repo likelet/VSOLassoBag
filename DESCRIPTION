@@ -3,7 +3,7 @@ Title: A cart frame work for screen variable or markers
 Version: 0.99.0
 Authors@R: c(
   person('Yu', 'Sun',   email = "suny226@mail2.sysu.edu.cn", role = c('aut', 'cre'), comment = c(ORCID = '0000-0003-4269-7187')),
-  person('Qi', 'Zhao',  email = 'zhaoqi@sysucc.org.cn', role = c('aut', 'cre'), comment = c(ORCID = '0000-0002-8683-6145'))
+  person('Qi', 'Zhao',  email = 'zhaoqi@sysucc.org.cn', role = c('aut'), comment = c(ORCID = '0000-0002-8683-6145'))
   )
 Maintainer: Qi Zhao <zhaoqi@sysucc.org.cn>
 Description: LassoBag provided a implementation of a CART frame for
@@ -19,4 +19,4 @@ Imports:
     ggplot2
 Suggests: 
     parallel
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
