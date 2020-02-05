@@ -4,8 +4,14 @@
 \alias{LessPermutation}
 \title{LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data}
 \usage{
-LessPermutation(X, x0, fitting.method = "mle", search.step = 0.01,
-  fit.cutoff = 0.05, when.to.fit = 0.05)
+LessPermutation(
+  X,
+  x0,
+  fitting.method = "mle",
+  search.step = 0.01,
+  fit.cutoff = 0.05,
+  when.to.fit = 0.05
+)
 }
 \arguments{
 \item{X}{a vector of data recording the permutation values}

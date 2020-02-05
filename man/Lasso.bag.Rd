@@ -5,12 +5,26 @@
 \title{LASSO-bagging
 a lasso based variable selecting CART framework}
 \usage{
-Lasso.bag(mat, out.mat, base.exist = F, bootN = 1000, imputeN = 1000,
-  imputeN.max = 2000, permut.increase = 100, boot.rep = TRUE,
-  a.family = c("gaussian", "binomial", "poisson", "multinomial", "cox",
-  "mgaussian"), parallel = F, fit.pareto = "mle", permutation = TRUE,
-  n.cores = 1, rd.seed = 89757, plot.freq = "full", plot.out = F,
-  use.gpd = F, do.plot = F)
+Lasso.bag(
+  mat,
+  out.mat,
+  base.exist = F,
+  bootN = 1000,
+  imputeN = 1000,
+  imputeN.max = 2000,
+  permut.increase = 100,
+  boot.rep = TRUE,
+  a.family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
+  parallel = F,
+  fit.pareto = "mle",
+  permutation = TRUE,
+  n.cores = 1,
+  rd.seed = 89757,
+  plot.freq = "full",
+  plot.out = F,
+  use.gpd = F,
+  do.plot = F
+)
 }
 \arguments{
 \item{mat}{sample matrix that each column represent a variable and rows represent sample data points, all the entries in it should be numeric.}
