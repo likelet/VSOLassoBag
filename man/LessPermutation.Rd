@@ -33,6 +33,5 @@ p value of the observed value in the permutation test
 LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data
 }
 \examples{
-x <- rgpd(200, 1, 2, 0.25)
-LessPermutation(x,1,fitting.method='gd')
+NULL
 }

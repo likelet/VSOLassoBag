@@ -1,6 +1,6 @@
 Package: LassoBag
 Title: A cart frame work for screen variable or markers
-Version: 0.99.0
+Version: 0.99.4
 Authors@R: c(
   person('Yu', 'Sun',   email = "suny226@mail2.sysu.edu.cn", role = c('aut', 'cre'), comment = c(ORCID = '0000-0003-4269-7187')),
   person('Qi', 'Zhao',  email = 'zhaoqi@sysucc.org.cn', role = c('aut'), comment = c(ORCID = '0000-0002-8683-6145'))
@@ -13,10 +13,12 @@ License: GPL-3
 Encoding: UTF-8
 Imports: 
     glmnet,
-    limma,
     POT,
     survival,
-    ggplot2
+    ggplot2,
+    reshape2,
+    limma
 Suggests: 
-    parallel
-RoxygenNote: 7.0.2
+    parallel,
+    testthat
+RoxygenNote: 7.1.1

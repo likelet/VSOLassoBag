@@ -1,6 +1,6 @@
 # for calculating p value with less permutation.
-# source('gradient_descent.R')
-# source('pareto_simple_opt_func.R')
+ # source('gradient_descent.R')
+ # source('pareto_simple_opt_func.R')
 #' LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data
 
 #' @param X a vector of data recording the permutation values
@@ -11,8 +11,9 @@
 #' @param when.to.fit a cutoff to tell how many sample values are bigger than the target value then we don't need to fit GPD. it is a portion.Default 0.05
 #' @return  p value of the observed value in the permutation test
 #' @examples
-#' x <- rgpd(200, 1, 2, 0.25)
-#' LessPermutation(x,1,fitting.method='gd')
+#' NULL
+# x <- rgpd(200, 1, 2, 0.25)
+# LessPermutation(x,1,fitting.method='gd')
 #' @export
 
 LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cutoff=0.05, when.to.fit=0.05) {
