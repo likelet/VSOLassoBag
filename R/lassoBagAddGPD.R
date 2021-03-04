@@ -89,10 +89,10 @@
  # source("forwardSelection.R")
 
 Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),additional.info=NULL,
-                      bagFreq.sigMethod="simple estimation",local.min.BIC=TRUE,use.gpd=F, fit.pareto="gd",parallel=F,n.cores=1,rd.seed=89757,nfolds=4,lambda.type="lambda.1se",
-                      plot.freq="full",plot.out=F, do.plot=F,output_dir=NA,
-                      filter_method="auto",filter_inbag=FALSE,filter_thres_method="traditional fdr",filter_thres_fdr=0.05,filter_rank_cutoff=0.05,FilterInitPermutT=100,FilterIncPermutSt=100,FilterMAXPermutT=2000,filter_result_report=T,report_all=T,
-                      post.regression=TRUE,post.LASSO=TRUE,pvalue.cutoff=0.05) {
+                      bagFreq.sigMethod="simple estimation",local.min.BIC=FALSE,use.gpd=F, fit.pareto="gd",parallel=FALSE,n.cores=1,rd.seed=89757,nfolds=4,lambda.type="lambda.1se",
+                      plot.freq="part",plot.out=FALSE, do.plot=FALSE,output_dir=NA,
+                      filter_method="auto",inbag.filter=TRUE,filter_thres_method="traditional fdr",filter_thres_fdr=0.05,filter_rank_cutoff=0.05,FilterInitPermutT=100,FilterIncPermutSt=100,FilterMAXPermutT=2000,filter_result_report=TRUE,report_all=TRUE,
+                      post.regression=FALSE,post.LASSO=FALSE,pvalue.cutoff=0.05) {
                       
   # bootN is the size of resample sample
   # mat is independent variable
@@ -106,56 +106,10 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
   # additional.info is only for providing additional info to build a cox model, and thus is only for Cox method (a.family == "cox"); a data.frame with same rows as mat/out.mat
   
   if (!is.na(output_dir)){
+    if (!dir.exists(output_dir)){
+      dir.create(output_dir)
+    }
     setwd(output_dir)
-  }
-  
-  filters<-function(fmat,fout.mat,silent=F,additional.info=NULL){
-    #A Correlation Filter here to reduce the feature size required to analysis, and thus boost the algorithm; Details check PreFilter2.R; parallel boosting computation allowed
-    timef<-0
-    sel<-integer(0)
-    if (is.vector(fout.mat)){  ## Force to be matrix
-      fout.mat<-as.matrix(fout.mat,ncol=1)
-      colnames(fout.mat)<-"out"
-      rownames(fout.mat)<-rownames(fmat)
-    }
-    
-    if (filter_method=="auto"){
-      ## not all done, need to be updated
-      if (a.family!="cox"){
-        filter_method<-"spearman"
-      }else{
-        filter_method<-"cox"
-      }
-    }
-    if (a.family=="multinomial" & ncol(fout.mat)==1){
-      ## transform one-column multinomial dependent variable to multiple dummy variables with 0/1 and apply the filter seperately
-      cl<-unique(fout.mat)
-      temp_out<-as.vector(fout.mat)  # fout.mat is a one-column matrix, and now transformed to a vector
-      temp.fout.mat<-matrix(0,nrow=length(temp_out),ncol=length(cl))
-      for (i in 1:length(cl)){
-        cur_var<-integer(nrow(fout.mat))
-        cur_var[which(temp_out==cl[i])]<-1
-        temp.fout.mat[,i]<-cur_var
-      }
-      fout.mat<-temp.fout.mat
-    }
-    
-    if (filter_method!="cox"){
-      for (i in 1:ncol(fout.mat)){
-        filterre<-PreFilter2(mat=fmat,out.mat=fout.mat[,i],filter_method=filter_method,filter_thres_method=filter_thres_method,filter_thres_fdr=filter_thres_fdr,filter_rank_cutoff=filter_rank_cutoff,
-                             parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,additional.info=additional.info,
-                             filter_result_report=filter_result_report,report_all=report_all,silent=silent,rd.seed=rd.seed)
-        sel<-union(sel,filterre$sel)
-        timef<-timef+filterre$time
-      }
-    }else{
-        filterre<-PreFilter2(mat=fmat,out.mat=fout.mat,filter_method=filter_method,filter_thres_method=filter_thres_method,filter_thres_fdr=filter_thres_fdr,filter_rank_cutoff=filter_rank_cutoff,
-                             parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,additional.info=additional.info,
-                             filter_result_report=filter_result_report,report_all=report_all,silent=silent,rd.seed=rd.seed)
-        sel<-union(sel,filterre$sel)
-        timef<-timef+filterre$time
-    }
-    return(list(sel=sel,time=timef))
   }
   
   ## INIT process
@@ -239,8 +193,11 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
   ## INIT end
   
   ## out-bag filter
-  if (filter_method!="none" & !filter_inbag){
-    o<-filters(mat,out.mat,silent=F, additional.info=additional.info)
+  if (filter_method!="none" & !inbag.filter){
+    o<-filters(mat,out.mat,silent=FALSE, additional.info=additional.info,filter_method=filter_method,a.family=a.family,
+               filter_thres_method=filter_thres_method,filter_thres_fdr=filter_thres_fdr,filter_rank_cutoff=filter_rank_cutoff,
+               parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,
+               filter_result_report=filter_result_report,report_all=report_all,rd.seed=rd.seed)
     mat<-mat[,o$sel]
     time1<-time1+o$time
   }
@@ -259,11 +216,14 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
     }
     
     ## Apply in-bag filter
-    if (filter_method!="none" & filter_inbag){
+    if (filter_method!="none" & inbag.filter){
       if (filter_thres_method=="permutation fdr"){
         filter_thres_method<-"rank"
       }
-      o<-filters(effectdata.x,effectdata.y,silent=T, additional.info=additional.info.boot)
+      o<-filters(effectdata.x,effectdata.y,silent=TRUE, additional.info=additional.info.boot,filter_method=filter_method,a.family=a.family,
+                 filter_thres_method=filter_thres_method,filter_thres_fdr=filter_thres_fdr,filter_rank_cutoff=filter_rank_cutoff,
+                 parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,
+                 filter_result_report=filter_result_report,report_all=report_all,rd.seed=rd.seed)
       effectdata.x<-effectdata.x[,o$sel]
       time1<-time1+o$time
     }
@@ -491,14 +451,18 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
     if (bagFreq.sigMethod=="simple estimation" | bagFreq.sigMethod=="SE"){
       cat("Using Simple Estimation Method...", '\n')
       # By fitting the observed freq to a binomial distribution model to estimate the significant p-value and therefore decide the cutoff
-      pvalue.list<-simpleEstimation(res.df=res.df,bootN=bootN)
+      se<-simpleEstimation(res.df=res.df,bootN=bootN)
+      pvalue.list<-se$pvalue
+      pin<-se$pi
       FDR.list <- p.adjust(pvalue.list,method = "fdr")
       res.df$P.value<-pvalue.list
       res.df$P.adjust<-FDR.list
       if (do.plot){
+        #theoretical<-data.frame(x=rbinom(n=nrow(res.df),size=bootN,prob=pin))
         pdf("ObservedFreqDistribution.pdf")
-        print(ggplot(res.df, aes(x=Frequency)) +
-          geom_histogram() +
+        print(ggplot(res.df) +
+          #geom_histogram(aes(x=x),data=theoretical,inherit.aes=F,fill="#b3b3b3",color="#666666")+ 
+          geom_histogram(aes(x=Frequency),fill="#ff9999",color="#cc0000")  + geom_text(aes(x=max(Frequency)*0.8,y=nrow(res.df)*0.1,label=paste0("estimated probability=\n",round(pin,digits=6)))) +
           theme_bw() +
           theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
           xlab("baggingFreq")+ylab("Count"))
@@ -509,7 +473,6 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
     if (bagFreq.sigMethod=="step-wise forward selection" | bagFreq.sigMethod=="forward selection" | bagFreq.sigMethod=="FS"){
       cat("Using Step-wise Forward Selection Method...", '\n')
       res.df<-forwardSelection(mat=mat, out.mat=out.mat, res.df=res.df, a.family=a.family, additional.info=additional.info,local.min.BIC=local.min.BIC)
-      print(res.df)
       if (do.plot){
         x<-round(c(1:nrow(res.df))/nrow(res.df)*100,digits=2)
         y<-res.df$BIC
@@ -530,8 +493,8 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
   
   model<-NULL
   if (post.regression){
-    # Optional, build a linear regression model based on the features selected by LASSOBag with custom-defined (or default) cutoff p-value (or minimum BIC, depend on the bagFreq.sigMethod)
-    # the features and their coefficient are reported, including the intercept or the additional info
+    # Optional, build a regression model based on the features selected by LASSOBag with custom-defined (or default) cutoff p-value (or minimum BIC, depend on the bagFreq.sigMethod)
+    # the features and their coefficient are reported, including the intercept or the coef of additional info
     res.df$coef<-NA
     if (bagFreq.sigMethod=="step-wise forward selection" | bagFreq.sigMethod=="forward selection" | bagFreq.sigMethod=="FS"){
       post.selected<-c(1:which(res.df$BIC==min(res.df$BIC,na.rm=T)))
@@ -593,11 +556,15 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
     if (plot.freq!=FALSE) {
       if (plot.out!=F) {  # for saving files
         pdf(plot.out)
-        print(ggplot(plot.df, aes(reorder(variate, -Frequency), Frequency)) +
-                geom_bar(stat = "identity") +
-                theme_bw() +
-                theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
-                xlab(label = NULL))
+        g<-ggplot(plot.df, aes(reorder(variate, -Frequency), Frequency)) +
+           geom_bar(stat = "identity") +
+           theme_bw() +
+           theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
+           xlab(label = "Features")
+        if (nrow(plot.df)>=30){
+          g<-g+theme(axis.text.x=element_blank())
+        }
+        print(g)
         dev.off()
       }
       # for plot on the screen

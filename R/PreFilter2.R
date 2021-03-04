@@ -1,7 +1,5 @@
 
-
-
-PreFilter2<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",filter_thres_method="permutation fdr",filter_thres_fdr=0.05,filter_rank_cutoff=0.05,rd.seed=10867,
+singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",filter_thres_method="permutation fdr",filter_thres_fdr=0.05,filter_rank_cutoff=0.05,rd.seed=10867,
                      parallel=F,n.cores=1,FilterInitPermutT=100,FilterIncPermutSt=100,FilterMAXPermutT=2000,permut_result_report=F,
                      silent=F,filter_result_report=T,report_all=T,subdir=""){
 
@@ -124,9 +122,11 @@ PreFilter2<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",f
   n<-nrow(mat)
   sel<-integer(0)
   
+  
   if (filter_method!="cox"){
     out.mat<-as.vector(out.mat)
-    if (filter_method!="pearson"){
+    Ay<-out.mat
+    if (filter_method=="spearman"){
       out.mat<-rank(out.mat)
       for (i in 1:ncol(mat)){
         mat[,i]<-rank(mat[,i])
@@ -136,7 +136,8 @@ PreFilter2<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",f
     estimate_set<-report$estimate
     ro<-order(x=abs(estimate_set),decreasing=T)
   }else{
-    # For cox filter, univariate cox regression is applied
+    # For cox filter, univariable cox regression is applied
+    Ay<-out.mat[,1]
     report<-COX_test(c(1:n))
     ro<-order(report$P.adjust)
   }
@@ -147,9 +148,11 @@ PreFilter2<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",f
   
   if (filter_thres_method=="traditional fdr"){
     ## Null hypothesis is estimate==0 and alternative hypothesis!=0
+	## when using adjusted P value method, it is assumed that original P values are uniformly distributed, e.g. the feature with p==0.05 is also ranked ~5%
     sel<-fdr_sel
     if (filter_result_report){
       g4<-ggplot(report)+geom_point(aes(x=(rank/nrow(report)),y=P.adjust),size=0.3,colour="blue")+
+	    geom_point(aes(x=(rank/nrow(report)),y=P),size=0.15,colour="red")+
         ylim(0,filter_thres_fdr)+xlim(0,min(1,max(report$rank[sel]/nrow(report))))+
         theme(axis.title = element_text(size=15),axis.text = element_text(size=13))+
         xlab("Variable Rank")+ylab("Adjusted P Value")
@@ -164,7 +167,7 @@ PreFilter2<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",f
     sel<-which(report$rank<=filter_rank_cutoff*p)
     if (filter_result_report){
       g4<-ggplot(report)+geom_point(aes(x=(rank/nrow(report)),y=P.adjust),size=0.3,colour="blue")+
-        xlim(0,min(1,max(report$rank/nrow(report))))+
+        xlim(0,min(1,filter_rank_cutoff))+ylim(0,max(report$P.adjust[sel]))+
         theme(axis.title = element_text(size=15),axis.text = element_text(size=13))+
         xlab("Variable Rank")+ylab("Adjusted P Value")
       pdf(paste0("Filter Result",subdir,".pdf"))
@@ -174,7 +177,8 @@ PreFilter2<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",f
 
   }
   
-  if (filter_thres_method=="permutation fdr"){
+  # filter_thres_method=="permutation fdr" is Dreprecated
+  if (filter_thres_method=="permutation fdr" & FALSE){
     
     report$P<-NULL
     report$P.adjust<-NULL
@@ -390,22 +394,26 @@ PreFilter2<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",f
   
   if (filter_result_report){
     
-    ## heatmap
-    #column order
-    feature_ord<-report[sel,]
-    feature_ord<-feature_ord$feature[order(feature_ord$estimate)]
-    #row order
-    heatmap_matrix<-mat[,feature_ord]
-    row_ord<-hclust(dist(heatmap_matrix))$order
-    heatmap_matrix<-heatmap_matrix[row_ord,]
-    heatmap_matrix<-scale(heatmap_matrix)
-    heatmap_matrix_melt<-melt(heatmap_matrix,varnames=c("samples","features"))
-    g6<-ggplot(heatmap_matrix_melt)+geom_tile(aes(x=features,y=samples,fill=value))+
-    scale_fill_gradient2(low="#001966", high="#660000", mid="#ffffcc")+
-    theme(axis.title = element_text(size=15),axis.text = element_blank(),axis.ticks=element_blank())
-    pdf(paste0("Heatmap",subdir,".pdf"))
-    print(g6)
-    dev.off()
+    # ## heatmap
+	# Dreprecated
+    # #column order
+    # feature_ord<-report[sel,]
+    # feature_ord<-feature_ord$feature[order(feature_ord$estimate)]
+    # heatmap_matrix<-mat[,feature_ord]
+    # #row order
+    
+    # row_ord<-hclust(dist(heatmap_matrix))$order
+    # Ay<-Ay[row_ord]
+    # sample_label<-data.frame(text=rep("·",length(Ay)),x=rep(-2,length(Ay)),y=c(1:length(Ay)))
+    # heatmap_matrix<-heatmap_matrix[row_ord,]
+    # heatmap_matrix<-scale(heatmap_matrix)
+    # heatmap_matrix_melt<-reshape2::melt(heatmap_matrix,varnames=c("samples","features"))
+    # g6<-ggplot(heatmap_matrix_melt)+geom_tile(aes(x=features,y=samples,fill=value))+geom_text(aes(x=x,y=y,color=Ay,label=text),data=sample_label,size=1)+
+    # scale_fill_gradient2(low="#001966", high="#660000", mid="#ffffcc")+scale_color_gradient(low="blue",high="red",name="dependent variable")+
+    # theme(axis.title = element_text(size=15),axis.text = element_blank(),axis.ticks=element_blank())
+    # pdf(paste0("Heatmap",subdir,".pdf"))
+    # print(g6)
+    # dev.off()
     
     report_selected<-report[sel,]
     report_selected<-report_selected[order(report_selected$P.adjust,report_selected$rank),]
@@ -423,4 +431,62 @@ PreFilter2<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",f
   }
   re<-list(sel=sel,rank=report$rank[sel],time=time)
   return(re)
+}
+
+
+
+filters<-function(fmat,fout.mat,silent=FALSE,additional.info=NULL,filter_method="auto",a.family,
+                  filter_thres_method="traditional fdr",filter_thres_fdr=0.05,filter_rank_cutoff=0.05,FilterInitPermutT=100,FilterIncPermutSt=100,FilterMAXPermutT=2000,
+                  parallel=FALSE,n.cores=1,filter_result_report=TRUE,report_all=TRUE,rd.seed=89757){
+  # A Correlation Filter here to reduce the feature size required to analysis, and thus boost the algorithm; parallel boosting computation allowed
+  timef<-0
+  sel<-integer(0)
+  if (is.vector(fout.mat)){  ## Force to be matrix
+    fout.mat<-as.matrix(fout.mat,ncol=1)
+    colnames(fout.mat)<-"out"
+    rownames(fout.mat)<-rownames(fmat)
+  }
+  
+  if (filter_method=="auto"){
+    if (a.family=="cox"){
+      filter_method<-"cox"
+    }else{
+      filter_method<-"spearman"
+    }
+  }
+  if (a.family=="multinomial" & ncol(fout.mat)==1){
+    ## transform one-column multinomial dependent variable to multiple dummy variables with 0/1 and apply the filter seperately
+    cl<-unique(fout.mat)
+    temp_out<-as.vector(fout.mat)  # fout.mat is a one-column matrix, and now transformed to a vector
+    temp.fout.mat<-matrix(0,nrow=length(temp_out),ncol=length(cl))
+    for (i in 1:length(cl)){
+      cur_var<-integer(nrow(fout.mat))
+      cur_var[which(temp_out==cl[i])]<-1
+      temp.fout.mat[,i]<-cur_var
+    }
+    fout.mat<-temp.fout.mat
+  }
+  
+  if (a.family=="cox" & filter_method!="cox"){
+    sav<-which(fout.mat[,2]==1) # only retain patients with event happened
+    fmat<-fmat[sav,]
+    fout.mat<-as.matrix(fout.mat[sav,1])
+  }
+  
+  if (filter_method!="cox"){
+    for (i in 1:ncol(fout.mat)){
+      filterre<-singleFilter(mat=fmat,out.mat=fout.mat[,i],filter_method=filter_method,filter_thres_method=filter_thres_method,filter_thres_fdr=filter_thres_fdr,filter_rank_cutoff=filter_rank_cutoff,
+                           parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,additional.info=additional.info,
+                           filter_result_report=filter_result_report,report_all=report_all,silent=silent,rd.seed=rd.seed)
+      sel<-union(sel,filterre$sel)
+      timef<-timef+filterre$time
+    }
+  }else{
+      filterre<-singleFilter(mat=fmat,out.mat=fout.mat,filter_method=filter_method,filter_thres_method=filter_thres_method,filter_thres_fdr=filter_thres_fdr,filter_rank_cutoff=filter_rank_cutoff,
+                           parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,additional.info=additional.info,
+                           filter_result_report=filter_result_report,report_all=report_all,silent=silent,rd.seed=rd.seed)
+      sel<-union(sel,filterre$sel)
+      timef<-timef+filterre$time
+  }
+  return(list(sel=sel,time=timef))
 }

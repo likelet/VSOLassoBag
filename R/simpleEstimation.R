@@ -4,11 +4,11 @@
 # Input bootN as bagging times
 # feature size is automatically determined as nrow(res.df), i.e. the features included in the res.df
 
-# Return a p-value list
+# Return a p-value list and the estimated probability pi
 
 simpleEstimation<-function(res.df,bootN){
   pin<-sum(res.df$Frequency)/(bootN*nrow(res.df))
   pvalue.list<-pbinom(q=res.df$Frequency,size=bootN,prob=pin,lower.tail=F)
-  return(pvalue.list)
+  return(list(pvalue=pvalue.list,pi=pin))
 }
 

@@ -1,7 +1,7 @@
 
 
 
-forwardSelection<-function(mat, out.mat, res.df, a.family, additional.info=NULL,local.min.BIC=TRUE){
+forwardSelection<-function(mat, out.mat, res.df, a.family, additional.info=NULL,local.min.BIC=FALSE){
   ## A step-wise forward selection method
   ## Rank all features (with baggingSelectedFreq>0) according to baggingSelectedFreq, then apply the forward selection method
   ## select the model with optimal (lowest) BIC
@@ -26,6 +26,9 @@ forwardSelection<-function(mat, out.mat, res.df, a.family, additional.info=NULL,
     }
     if (is.null(additional.info)){
       x<-mat
+      if (ncol(x)<=1){
+        return(NA)
+      }
       fit<-glmnet(x,out.mat,family="cox",lambda=0)
     }else{
       x<-cbind(additional.info,mat)
@@ -50,11 +53,10 @@ forwardSelection<-function(mat, out.mat, res.df, a.family, additional.info=NULL,
   features<-res.df$variate
   n<-nrow(mat)
   
-  k<-1
   local.min<-Inf
   early.break<-ncol(mat)
   
-  while (k<=ncol(mat)){
+  for (k in 1:ncol(mat)){
     print(k)
     x<-as.matrix(mat[,c(1:k)])
     if (a.family!="cox"){
@@ -75,10 +77,10 @@ forwardSelection<-function(mat, out.mat, res.df, a.family, additional.info=NULL,
       local.min<-res.df$BIC[k]
       early.break<-k*2
     }
-    if (k>=early.break){
+    if (local.min.BIC & (k>=early.break)){
       break
     }
-    k<-k+1
   }
+  res.df$BIC[which(duplicated(res.df$BIC))]<-NA  # ensure using the model with less features when BIC are equal
   return(res.df)
 }
