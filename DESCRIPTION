@@ -1,14 +1,16 @@
 Package: LassoBag
 Title: A cart frame work for screen variable or markers
-Version: 0.99.4
+Version: 0.99.6
 Authors@R: c(
   person('Yu', 'Sun',   email = "suny226@mail2.sysu.edu.cn", role = c('aut', 'cre'), comment = c(ORCID = '0000-0003-4269-7187')),
-  person('Qi', 'Zhao',  email = 'zhaoqi@sysucc.org.cn', role = c('aut'), comment = c(ORCID = '0000-0002-8683-6145'))
+  person('Qi', 'Zhao',  email = 'zhaoqi@sysucc.org.cn', role = c('aut'), comment = c(ORCID = '0000-0002-8683-6145')),
+  person('Jiaqi', 'Liang',  email = 'liangjq27@mail2.sysu.edu.cn', role = c('aut'))
   )
 Maintainer: Qi Zhao <zhaoqi@sysucc.org.cn>
-Description: LassoBag provided a implementation of a CART frame for
-    selecting markers from multiple models. An imputation strategy was provided to get
-    P-value of each variables. For each P-value, multiple testing correction was performed.
+Description: LassoBag provides an implementation of a CART frame for
+    selecting markers from multiple models. Several methods (Parametrical Statistical Test, Curve Elbow Point Detection and Permutation Test) 
+    are provided to aid the cutoff point decision for the importance measure (i.e. observed selected frequency) of each variable, while each method is 
+    based on different theoratical ground and may be optimal to be applied in different conditions.
 License: GPL-3
 Encoding: UTF-8
 Imports: 

@@ -89,9 +89,9 @@
  # source("forwardSelection.R")
 
 Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.max=2000,permut.increase=100,boot.rep=TRUE,a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),additional.info=NULL,
-                      bagFreq.sigMethod="simple estimation",local.min.BIC=FALSE,use.gpd=F, fit.pareto="gd",parallel=FALSE,n.cores=1,rd.seed=89757,nfolds=4,lambda.type="lambda.1se",
+                      bagFreq.sigMethod="simple estimation",local.min.BIC=FALSE,kneedle.S=1,use.gpd=F, fit.pareto="gd",parallel=FALSE,n.cores=1,rd.seed=89757,nfolds=4,lambda.type="lambda.1se",
                       plot.freq="part",plot.out=FALSE, do.plot=FALSE,output_dir=NA,
-                      filter_method="auto",inbag.filter=TRUE,filter_thres_method="traditional fdr",filter_thres_fdr=0.05,filter_rank_cutoff=0.05,FilterInitPermutT=100,FilterIncPermutSt=100,FilterMAXPermutT=2000,filter_result_report=TRUE,report_all=TRUE,
+                      filter_method="auto",inbag.filter=TRUE,filter_thres_method="traditional fdr",filter_thres_P=0.05,filter_rank_cutoff=0.05,FilterInitPermutT=100,FilterIncPermutSt=100,FilterMAXPermutT=2000,filter_result_report=TRUE,report_all=TRUE,
                       post.regression=FALSE,post.LASSO=FALSE,pvalue.cutoff=0.05) {
                       
   # bootN is the size of resample sample
@@ -104,7 +104,7 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
   # permut.increase is: if the initial imputeN times of permutation doesn't meet the requirement, then we add permut.increase times of permutation to get more random values
   # if a.family == "multinomial", then the number of each class of dependent vars should be more than 1
   # additional.info is only for providing additional info to build a cox model, and thus is only for Cox method (a.family == "cox"); a data.frame with same rows as mat/out.mat
-  
+  sts<-Sys.time()
   if (!is.na(output_dir)){
     if (!dir.exists(output_dir)){
       dir.create(output_dir)
@@ -118,9 +118,8 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
   ## correct input format
   
   set.seed(rd.seed)
-  time1<-0
-  time2<-0
-  time3<-0
+  time<-0
+  parallel_time<-0
   features<-colnames(mat)
   if (!parallel){
     n.cores<-1
@@ -195,11 +194,10 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
   ## out-bag filter
   if (filter_method!="none" & !inbag.filter){
     o<-filters(mat,out.mat,silent=FALSE, additional.info=additional.info,filter_method=filter_method,a.family=a.family,
-               filter_thres_method=filter_thres_method,filter_thres_fdr=filter_thres_fdr,filter_rank_cutoff=filter_rank_cutoff,
+               filter_thres_method=filter_thres_method,filter_thres_P=filter_thres_P,filter_rank_cutoff=filter_rank_cutoff,
                parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,
                filter_result_report=filter_result_report,report_all=report_all,rd.seed=rd.seed)
     mat<-mat[,o$sel]
-    time1<-time1+o$time
   }
   
   # lasso bag function in individual iteration
@@ -221,11 +219,10 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
         filter_thres_method<-"rank"
       }
       o<-filters(effectdata.x,effectdata.y,silent=TRUE, additional.info=additional.info.boot,filter_method=filter_method,a.family=a.family,
-                 filter_thres_method=filter_thres_method,filter_thres_fdr=filter_thres_fdr,filter_rank_cutoff=filter_rank_cutoff,
+                 filter_thres_method=filter_thres_method,filter_thres_P=filter_thres_P,filter_rank_cutoff=filter_rank_cutoff,
                  parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,
                  filter_result_report=filter_result_report,report_all=report_all,rd.seed=rd.seed)
       effectdata.x<-effectdata.x[,o$sel]
-      time1<-time1+o$time
     }
     
     if (!is.null(additional.info)){
@@ -249,7 +246,9 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
     }
     
     if (parallel & length(permutate.index.list)>1){
-      selecVlist1 <- mclapply(permutate.index.list, boot.indiv,mc.cores = n.cores,mc.preschedule=FALSE,mc.cleanup=TRUE)  # Slower, but can save some memory?
+      parallel_sts<-Sys.time()
+      selecVlist1 <- mclapply(permutate.index.list, boot.indiv,mc.cores = n.cores,mc.preschedule=FALSE,mc.cleanup=TRUE)  # Slower, but can save some memory
+      parallel_time<<-parallel_time+difftime(Sys.time(),parallel_sts,units="min")
     } else {
       selecVlist1 <- lapply(permutate.index.list, boot.indiv)
     }
@@ -271,7 +270,9 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
     }
     
     if (parallel & is.null(permutate.index.list)){
+      parallel_sts<-Sys.time()
       selecVlist1 <- mclapply(index.list.bootonce, boot.once, permutate.index.list=permutate.index.list,mc.cores = n.cores,mc.preschedule=TRUE,mc.cleanup=TRUE)
+      parallel_time<<-parallel_time+difftime(Sys.time(),parallel_sts,units="min")
     }else{
       selecVlist1 <- lapply(index.list.bootonce, boot.once, permutate.index.list=permutate.index.list)
     }
@@ -310,9 +311,7 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
   # get observed value
   if (!base.exist) {
     cat(paste(date(), "", sep=" -- start calculating observed frequency "), '\n')
-    sts<-Sys.time()
     observed.fre<-bagging()  # observed frequency. The true freq
-    time2<-difftime(Sys.time(),sts,units="min")*n.cores
   } else {
     observed.fre <- "Base.exists"
   }
@@ -347,9 +346,7 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
       # do permutation
 
       # the origin
-      sts<-Sys.time()
       permut.list<-bagging(permutate.index.list=index.list)  ## possible multiprocessing operation is set inside the function boot.once
-      time3<-difftime(Sys.time(),sts,units="min")*n.cores+time3
 
       return(permut.list)
     }
@@ -448,6 +445,30 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
   } else {  # do not permutate and output frequency; get P-value w/o permutation tests; use SE or FS to decide cutoff point
     cat(paste(date(), "", sep=" -- Using Non-permutation method to help determine a cutoff point "), '\n')
     
+    if (bagFreq.sigMethod=="curve elbow point detection" | bagFreq.sigMethod=="EP"){
+      cat("Detecting Elbow Points on the Observed Frequency Curve...", '\n')
+      # Detect elbow points on the observed frequency curve and consider them as cutoff point
+      res.df<-kneedle(res=res.df,S=kneedle.S)
+      if (length(which(res.df$elbow_point=="*"))==0){
+        cat("WARNING: No elbow point detected on the curve, use simple estimation method instead...",'\n')
+        bagFreq.sigMethod<-"SE"
+      }else{
+        
+        if (do.plot){
+          pdf("ObservedFreqCurve.pdf")
+          x<-c(1:nrow(res.df))
+          markPoints<-which(res.df$elbow_point=="*")
+          print(ggplot(res.df) +
+            geom_step(aes(x=x,y=Frequency),color="black",size=0.7)  + geom_line(aes(x=x,y=fitted_value),color="#cc0000",size=0.7) +
+            geom_vline(xintercept=markPoints,color="#0000cc",linetype="dashed",size=0.9) +
+            theme_bw() +
+            theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
+            xlab("FreqRank (Dashed line(s) indicate elbow point(s))")+ylab("Freq (Black:actual freq; Red: fitted value)"))
+          dev.off()
+        }
+      }
+    }
+    
     if (bagFreq.sigMethod=="simple estimation" | bagFreq.sigMethod=="SE"){
       cat("Using Simple Estimation Method...", '\n')
       # By fitting the observed freq to a binomial distribution model to estimate the significant p-value and therefore decide the cutoff
@@ -519,25 +540,25 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
     }
     names(result)<-NULL
     
-    if (a.family=="cox"){
-      if (is.null(additional.info)){
-        res.df.ps$coef<-result
-      }else{
-        empty<-as.data.frame(matrix(NA,ncol=ncol(res.df),nrow=ncol(additional.info)))
-        colnames(empty)<-colnames(res.df)
-        empty$variate<-colnames(additional.info)
-        res.df.ps<-rbind(res.df.ps,empty)
-        res.df.ps$coef<-result
-      }
-    }else{
-      empty<-as.data.frame(matrix(NA,ncol=ncol(res.df),nrow=1))
-      colnames(empty)<-colnames(res.df)
-      empty$variate[1]<-"Intercept"
-      res.df.ps<-rbind(empty,res.df.ps,stringsAsFactors=F)
-      res.df.ps$coef<-result
-    }
-    res.df<-rbind(res.df.ps,res.df.NOTps,stringsAsFactors=F)
-    res.df<-res.df[order(res.df$Frequency,decreasing=T,na.last=T),]
+    # if (a.family=="cox"){
+      # if (is.null(additional.info)){
+        # res.df.ps$coef<-result
+      # }else{
+        # empty<-as.data.frame(matrix(NA,ncol=ncol(res.df),nrow=ncol(additional.info)))
+        # colnames(empty)<-colnames(res.df)
+        # empty$variate<-colnames(additional.info)
+        # res.df.ps<-rbind(res.df.ps,empty)
+        # res.df.ps$coef<-result
+      # }
+    # }else{
+      # empty<-as.data.frame(matrix(NA,ncol=ncol(res.df),nrow=1))
+      # colnames(empty)<-colnames(res.df)
+      # empty$variate[1]<-"Intercept"
+      # res.df.ps<-rbind(empty,res.df.ps,stringsAsFactors=F)
+      # res.df.ps$coef<-result
+    # }
+    # res.df<-rbind(res.df.ps,res.df.NOTps,stringsAsFactors=F)
+    # res.df<-res.df[order(res.df$Frequency,decreasing=T,na.last=T),]
   }
   
   if (do.plot) {
@@ -575,6 +596,6 @@ Lasso.bag <- function(mat,out.mat, base.exist=F,bootN=1000,imputeN=1000,imputeN.
               # xlab(label = NULL))
     }
   }
-  time<-time1+time2+time3
-  return(list(results=res.df, permutations=out.table,time=time,model=model))
+  time<-difftime(Sys.time(),sts,units="min")
+  return(list(results=res.df, permutations=out.table,time=time,parallel_time=parallel_time,model=model))
 }

@@ -1,31 +1,31 @@
 
-singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",filter_thres_method="permutation fdr",filter_thres_fdr=0.05,filter_rank_cutoff=0.05,rd.seed=10867,
+singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman",filter_thres_method="traditional fdr",filter_thres_P=0.05,filter_rank_cutoff=0.05,filter_logFC=1,rd.seed=10867,
                      parallel=F,n.cores=1,FilterInitPermutT=100,FilterIncPermutSt=100,FilterMAXPermutT=2000,permut_result_report=F,
                      silent=F,filter_result_report=T,report_all=T,subdir=""){
 
   ## permutation_distance_cutoff / estimate_loss_cutoff is the rank threshold
   ## by default, filter_rank_cutoff=0.05, i.e. top 5%; To select more features, use larger filter_rank_cutoff
-  ## filter_thres_fdr determines the confidence level of the selected features are actually on the level of the filter_rank_cutoff
+  ## filter_thres_P determines the confidence level of the selected features are actually on the level of the filter_rank_cutoff
   
   time<-0
 
-  COX_simple<-function(index){
-    estimate_set<-numeric(p)
-    y<-out.mat[index,]  # Permutate or not
-    surv.y<-Surv(y[,1],y[,2])
-    for (i in 1:p){
+  # COX_simple<-function(index){
+    # estimate_set<-numeric(p)
+    # y<-out.mat[index,]  # Permutate or not
+    # surv.y<-Surv(y[,1],y[,2])
+    # for (i in 1:p){
         
-      # univariable cox regression
-      if (is.null(additional.info)){
-        cox<-coxph(surv.y~mat[,i])
-      }else{
-        cox<-coxph(surv.y~mat[,i]+additional.info)
-      }
-      estimate_set[i]<-cox$coefficients[1]
-    }
-    names(estimate_set)<-NULL
-    return(estimate_set)
-  }
+      # # univariable cox regression
+      # if (is.null(additional.info)){
+        # cox<-coxph(surv.y~mat[,i])
+      # }else{
+        # cox<-coxph(surv.y~mat[,i]+additional.info)
+      # }
+      # estimate_set[i]<-cox$coefficients[1]
+    # }
+    # names(estimate_set)<-NULL
+    # return(estimate_set)
+  # }
 
   COX_test<-function(index){
     p_set<-numeric(p)
@@ -41,7 +41,7 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
         cox<-coxph(surv.y~mat[,i]+additional.info)
       }
       estimate_set[i]<-cox$coefficients[1]
-      p_set[i]<-summary(cox)$sctest[3]  # Logrank Test P-value
+      p_set[i]<-summary(cox)$logtest[3]  # Likelihood ratio Test P-value
     }
     
     names(estimate_set)<-NULL
@@ -54,15 +54,15 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
     return(report)
   }
 
-  cor_simple<-function(index){  ## only return the estimates to compute faster
-    estimate_set<-numeric(p)
-    y<-out.mat[index]
-    for (i in 1:p){
-      x<-mat[,i]
-      estimate_set[i]<-cor(x,y,method=filter_method)
-    }
-    return(estimate_set)
-  }
+  # cor_simple<-function(index){  ## only return the estimates to compute faster
+    # estimate_set<-numeric(p)
+    # y<-out.mat[index]
+    # for (i in 1:p){
+      # x<-mat[,i]
+      # estimate_set[i]<-cor(x,y,method=filter_method)
+    # }
+    # return(estimate_set)
+  # }
 
   cor_test<-function(index){
     p_set<-numeric(p)
@@ -81,26 +81,26 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
     return(report)
   }
 
-  jaccard<-function(a,b){  ## Jaccard coefficient
-    if (length(a)==0 | length(b)==0){
-      return(0)
-    }
-    a<-unique(a)
-    b<-unique(b)
-    c<-intersect(a,b)
-    d<-union(a,b)
-    return((length(c)/length(d)))
-  }
+  # jaccard<-function(a,b){  ## Jaccard coefficient
+    # if (length(a)==0 | length(b)==0){
+      # return(0)
+    # }
+    # a<-unique(a)
+    # b<-unique(b)
+    # c<-intersect(a,b)
+    # d<-union(a,b)
+    # return((length(c)/length(d)))
+  # }
   
-  rank_similarity_cal<-function(new_rank_list,rank_list){  ## calculate the similarity between two rank lists
-    ## new_rank_list is shorter than / partial of the rank_list
-    if (length(rank_list)==0){
-      return(0)
-    }
-    d<-c(1:length(rank_list))
-    names(d)<-rank_list
-    return(cor(d[intersect(new_rank_list,rank_list)],sort(d[intersect(new_rank_list,rank_list)]),method="kendall"))  ## the returned estimate should be >0 otherwise it means getting reversed results between two cycles
-  }
+  # rank_similarity_cal<-function(new_rank_list,rank_list){  ## calculate the similarity between two rank lists
+    # ## new_rank_list is shorter than / partial of the rank_list
+    # if (length(rank_list)==0){
+      # return(0)
+    # }
+    # d<-c(1:length(rank_list))
+    # names(d)<-rank_list
+    # return(cor(d[intersect(new_rank_list,rank_list)],sort(d[intersect(new_rank_list,rank_list)]),method="kendall"))  ## the returned estimate should be >0 otherwise it means getting reversed results between two cycles
+  # }
 
   sts<-Sys.time()
 
@@ -122,38 +122,79 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
   n<-nrow(mat)
   sel<-integer(0)
   
+  if (filter_method=="limmaDiffExp" & FALSE){
+    # Assumed to be pre-processed and ready for linear modeling here; otherwise need to be pre-processed first
+    mat<-t(mat)  # transformed to meet the format requirement of limma input
+    out.mat<-as.matrix(out.mat)
+    if (ncol(out.mat)==1){
+      # make design-matrix first, if ncol>1 then it is assumed to be done
+      # in this case, out.mat must be integer to be transformed
+      design<-model.matrix(~0+factor(as.vector(out.mat)))
+      colnames(design)<-paste0("Group",c(1:ncol(design)))
+    }else{
+      design<-out.mat
+    }
+    fit<-lmFit(mat,design=design)
+    fit<-eBayes(fit)
+    res<-topTable(fit,p.value=1,lfc=0,number=p,sort.by="none")
+    report<-data.frame(rank=c(1:p)[order(res$adj.P.Val)],feature=row.names(res),estimate=res$F,P=res$P.Value,P.adjust=res$adj.P.Val)  # only for display
+    # By default, parameters filter_thres_P and filter_logFC are effective
+    # To use parameter filter_rank_cutoff, set both filter_thres_P and filter_logFC to NA
+    if (is.na(filter_thres_P) & is.na(filter_logFC)){
+      res<-topTable(fit,p.value=1,lfc=0,number=as.integer(filter_rank_cutoff*p))
+    }else{
+      res<-topTable(fit,p.value=filter_thres_P,lfc=filter_logFC,number=p)
+    }
+    selected<-integer(nrow(report))
+    names(selected)<-report$feature
+    selected[intersect(names(selected),row.names(res))]<-1
+    sel<-which(selected==1)
+    if (filter_result_report){
+      g4<-ggplot(report)+geom_point(aes(x=(rank/nrow(report)),y=P.adjust),size=0.3,colour="blue")+
+        ylim(0,filter_thres_P)+xlim(0,min(1,max(report$rank[sel]/nrow(report))))+
+        theme(axis.title = element_text(size=15),axis.text = element_text(size=13))+
+        xlab("Variable Rank")+ylab("Adjusted P Value")
+      pdf(paste0("Filter Result",subdir,".pdf"))
+      print(g4)
+      dev.off()
+    }
+  }
   
-  if (filter_method!="cox"){
+  if (filter_method=="spearman" | filter_method=="pearson" | filter_method=="kendall"){
     out.mat<-as.vector(out.mat)
-    Ay<-out.mat
     if (filter_method=="spearman"){
       out.mat<-rank(out.mat)
       for (i in 1:ncol(mat)){
         mat[,i]<-rank(mat[,i])
       }
     }
+    if (filter_method=="kendall"){
+      # must be discrete data
+      out.mat<-factor(out.mat)
+      for (i in 1:ncol(mat)){
+        mat[,i]<-factor(mat[,i])
+      }
+    }
     report<-cor_test(c(1:n))
     estimate_set<-report$estimate
     ro<-order(x=abs(estimate_set),decreasing=T)
-  }else{
+  }
+  if (filter_method=="cox"){
     # For cox filter, univariable cox regression is applied
-    Ay<-out.mat[,1]
     report<-COX_test(c(1:n))
-    ro<-order(report$P.adjust)
+    ro<-order(report$P.adjust,report$P)
   }
   
-  fdr_sel<-which(report$P.adjust<filter_thres_fdr)
-  
-  time<-time+difftime(Sys.time(),sts,units="min")
+
   
   if (filter_thres_method=="traditional fdr"){
     ## Null hypothesis is estimate==0 and alternative hypothesis!=0
-	## when using adjusted P value method, it is assumed that original P values are uniformly distributed, e.g. the feature with p==0.05 is also ranked ~5%
-    sel<-fdr_sel
+    ## when using adjusted P value method, it is assumed that original P values are uniformly distributed, e.g. the feature with p==0.05 is also ranked top ~5%
+    sel<-which(report$P.adjust<filter_thres_P)
     if (filter_result_report){
       g4<-ggplot(report)+geom_point(aes(x=(rank/nrow(report)),y=P.adjust),size=0.3,colour="blue")+
-	    geom_point(aes(x=(rank/nrow(report)),y=P),size=0.15,colour="red")+
-        ylim(0,filter_thres_fdr)+xlim(0,min(1,max(report$rank[sel]/nrow(report))))+
+        geom_point(aes(x=(rank/nrow(report)),y=P),size=0.15,colour="red")+
+        ylim(0,filter_thres_P)+xlim(0,min(1,max(report$rank[sel]/nrow(report))))+
         theme(axis.title = element_text(size=15),axis.text = element_text(size=13))+
         xlab("Variable Rank")+ylab("Adjusted P Value")
       pdf(paste0("Filter Result",subdir,".pdf"))
@@ -174,10 +215,9 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
       print(g4)
       dev.off()
     }
-
   }
   
-  # filter_thres_method=="permutation fdr" is Dreprecated
+  # filter_thres_method=="permutation fdr" is Deprecated
   if (filter_thres_method=="permutation fdr" & FALSE){
     
     report$P<-NULL
@@ -200,7 +240,6 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
     max_sel_rank<-0
     
     while ((permutation_time<FilterMAXPermutT) & !test_done){
-      sts<-Sys.time()
       Increase<-0
       if (permutation_time==0){
         Increase<-FilterInitPermutT
@@ -215,8 +254,6 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
         permutateindex <- sample(1:length(out.mat),length(out.mat),replace=F)
         index.list.permutate[[i]]<-permutateindex
       }
-      time<-time+difftime(Sys.time(),sts,units="min")
-      sts<-Sys.time()
       if (parallel & n.cores>1){    ## get estimates for permutation results
         if (filter_method!="cox"){
           res<-mclapply(index.list.permutate, cor_simple,mc.cores = n.cores,mc.preschedule=TRUE,mc.cleanup=TRUE)
@@ -230,8 +267,6 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
           res<-lapply(index.list.permutate, COX_simple)
         }
       }
-      time<-time+difftime(Sys.time(),sts,units="min")*n.cores
-      sts<-Sys.time()
       for (i in 1:Increase){
         temp_permut_estimate_matrix[,i]<-as.vector(res[[i]])
       }
@@ -265,7 +300,7 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
       temp_report<-report
       temp_report$order<-c(1:nrow(temp_report))  ## column order here is the same order as in the report dataframe, so that it is kept after further sort
       temp_report<-temp_report[order(temp_report$P.adjust,temp_report$rank),]  ## sort the temp_report according to P.adjust and rank of |estimate|
-      temp_report_selected<-temp_report[which(temp_report$P.adjust<filter_thres_fdr),]
+      temp_report_selected<-temp_report[which(temp_report$P.adjust<filter_thres_P),]
       sel<-temp_report_selected$order
       new_ranklist<-temp_report_selected$rank
       feature_selected<-length(sel)
@@ -274,7 +309,7 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
       max_rank_diff<-max_sel_rank/new_max_sel_rank
       if (max_rank_diff>1){
         max_rank_diff<-1/max_rank_diff
-      }  ##Jaccard Coefficient for selecting features whose rank not larger than the ones already selected according to P.adjust<filter_thres_fdr
+      }  ##Jaccard Coefficient for selecting features whose rank not larger than the ones already selected according to P.adjust<filter_thres_P
       max_rank_diff<-1-max_rank_diff
       max_rank_similarity<-rank_similarity_cal(temp_report$rank[which(temp_report$rank<=new_max_sel_rank)],full_ranklist)
       max_sel_rank<-max(temp_report_selected$rank)  ## must update AFTER the above operation
@@ -293,33 +328,6 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
         # Kendall Tau standard is more strict than Jaccard Coefficient
         # Jaccard Coefficient Difference <= 0.5% & Kendall Tau>=0.95 (95%) for 100 permutation increase step
         test_done<-T
-      }else{
-        # sav_length<-as.integer(round(length(new_ranklist)*(1-filter_thres_fdr),0))  ## cut off last filter_thres_fdr% of features to increase stability of the results, and try to pass the threshold again
-        # sav_length2<-as.integer(round(length(old_sel)*(1-filter_thres_fdr),0))
-        # temp_report_selected<-temp_report_selected[c(1:sav_length),]
-        # sel_cut<-temp_report_selected$order
-        # new_ranklist<-temp_report_selected$rank
-
-        # diff<-1-jaccard(sel_cut,old_sel[c(1:sav_length2)])
-        # rank_similarity<-rank_similarity_cal(new_ranklist,full_ranklist)  ## actually compare new rank list of this round and the full rank list of last round
-        # feature_selected<-length(sel_cut)
-        
-        # cat(paste0("Features selected by Filter with last ",round(filter_thres_fdr*100,2),"% cutoff: ",feature_selected),'\n')
-        # cat(paste0("Features selected Difference between Two Cycles (based on Jaccard Coefficient) with last ",round(filter_thres_fdr*100,2),"% cutoff: ",round(diff*100,2),"%"),'\n')
-        # cat(paste0("Features rank lists similarity (indicated by Kendall Rank Correlation Tau) with last ",round(filter_thres_fdr*100,2),"% cutoff: ",round(rank_similarity,5)),'\n\n')
-        
-        # if (max_rank_selection){
-          # if (max_rank_diff==0){   ## For max rank selection, difference between two rounds need to be 0 to be "stable"
-            # test_done<-T
-            # max_rank_stable<-T
-            # sel<-temp_report$order[which(temp_report$rank<=max_sel_rank)]
-          # }
-          # cat(paste0("Features selected by Filter with rank not larger than the ones filtered by P.adjust (i.e. max rank selection method): ",new_max_sel_rank),'\n')
-          # cat(paste0("Features selected by max rank selection method exceeded the original selected ones: ",round((new_max_sel_rank/feature_selected-1)*100,2),"%"),'\n')
-          # cat(paste0("Features selected Difference between Two Cycles (based on Jaccard Coefficient) by max rank selection method:",round(max_rank_diff*100,2),"%"),'\n')
-          # cat(paste0("Features rank lists similarity (indicated by Kendall Rank Correlation Tau) by max rank selection method: ",round(max_rank_similarity,5)),'\n\n')
-        # }
-        
       }
       
       ## update the selected feature set and the rank list; do not move the codes
@@ -344,7 +352,6 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
       rm(temp_permut_estimate_matrix,temp_distance_matrix,res,index.list.permutate,temp_report,temp_report_selected)
       gc()
       ## done
-      time<-time+difftime(Sys.time(),sts,units="min")
       if (FilterIncPermutSt<=0){  ##Increase<=0, run test with initial times and then exit
         if (!silent){
           cat("WARNING: Increasing step <= 0, test with initial times done and now exiting...",'\n')
@@ -366,15 +373,8 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
     
       max_sel<-max(report$rank[sel])/p+0.01
     
-      # g3<-ggplot()+geom_histogram(aes(x=report$permut_outstand_time),bins=50)+
-        # theme(axis.title = element_text(size=15),axis.text = element_text(size=13))+
-        # xlab("Estimate Sig Times for Each Variable")+ylab("Freq")
-      # pdf("Overall Estimate Sig Times.pdf")
-      # print(g3)
-      # dev.off()
-    
       g4<-ggplot(report)+geom_point(aes(x=(rank/nrow(report)),y=P.adjust),colour="blue",size=0.3)+
-        ylim(0,filter_thres_fdr+0.01)+xlim(max(max_sel-0.05,0),max_sel)+
+        ylim(0,filter_thres_P+0.01)+xlim(max(max_sel-0.05,0),max_sel)+
         theme(axis.title = element_text(size=15),axis.text = element_text(size=13))+
         xlab("Variable Rank")+ylab("Adjusted P Value")
       pdf(paste0("Filter Result ZoomIn",subdir,".pdf"))
@@ -395,7 +395,7 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
   if (filter_result_report){
     
     # ## heatmap
-	# Dreprecated
+    # Deprecated
     # #column order
     # feature_ord<-report[sel,]
     # feature_ord<-feature_ord$feature[order(feature_ord$estimate)]
@@ -429,6 +429,7 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
   if (!silent){
     cat(paste("In total",length(sel),"features were selected by the filter."),'\n')
   }
+  time<-time+difftime(Sys.time(),sts,units="min")
   re<-list(sel=sel,rank=report$rank[sel],time=time)
   return(re)
 }
@@ -436,7 +437,7 @@ singleFilter<-function(mat,out.mat,additional.info=NULL,filter_method="spearman"
 
 
 filters<-function(fmat,fout.mat,silent=FALSE,additional.info=NULL,filter_method="auto",a.family,
-                  filter_thres_method="traditional fdr",filter_thres_fdr=0.05,filter_rank_cutoff=0.05,FilterInitPermutT=100,FilterIncPermutSt=100,FilterMAXPermutT=2000,
+                  filter_thres_method="traditional fdr",filter_thres_P=0.05,filter_rank_cutoff=0.05,filter_logFC=1,FilterInitPermutT=100,FilterIncPermutSt=100,FilterMAXPermutT=2000,
                   parallel=FALSE,n.cores=1,filter_result_report=TRUE,report_all=TRUE,rd.seed=89757){
   # A Correlation Filter here to reduce the feature size required to analysis, and thus boost the algorithm; parallel boosting computation allowed
   timef<-0
@@ -473,20 +474,28 @@ filters<-function(fmat,fout.mat,silent=FALSE,additional.info=NULL,filter_method=
     fout.mat<-as.matrix(fout.mat[sav,1])
   }
   
-  if (filter_method!="cox"){
-    for (i in 1:ncol(fout.mat)){
-      filterre<-singleFilter(mat=fmat,out.mat=fout.mat[,i],filter_method=filter_method,filter_thres_method=filter_thres_method,filter_thres_fdr=filter_thres_fdr,filter_rank_cutoff=filter_rank_cutoff,
-                           parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,additional.info=additional.info,
-                           filter_result_report=filter_result_report,report_all=report_all,silent=silent,rd.seed=rd.seed)
-      sel<-union(sel,filterre$sel)
-      timef<-timef+filterre$time
-    }
+  if (filter_method=="limmaDiffExp"){
+    filterre<-singleFilter(mat=fmat,out.mat=fout.mat,filter_method=filter_method,filter_thres_method=filter_thres_method,filter_thres_P=filter_thres_P,filter_rank_cutoff=filter_rank_cutoff,filter_logFC=filter_logFC,
+                        parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,additional.info=additional.info,
+                       filter_result_report=filter_result_report,report_all=report_all,silent=silent,rd.seed=rd.seed)
+    sel<-union(sel,filterre$sel)
+    timef<-timef+filterre$time
   }else{
-      filterre<-singleFilter(mat=fmat,out.mat=fout.mat,filter_method=filter_method,filter_thres_method=filter_thres_method,filter_thres_fdr=filter_thres_fdr,filter_rank_cutoff=filter_rank_cutoff,
-                           parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,additional.info=additional.info,
-                           filter_result_report=filter_result_report,report_all=report_all,silent=silent,rd.seed=rd.seed)
-      sel<-union(sel,filterre$sel)
-      timef<-timef+filterre$time
+    if (filter_method!="cox"){
+      for (i in 1:ncol(fout.mat)){
+        filterre<-singleFilter(mat=fmat,out.mat=fout.mat[,i],filter_method=filter_method,filter_thres_method=filter_thres_method,filter_thres_P=filter_thres_P,filter_rank_cutoff=filter_rank_cutoff,
+                             parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,additional.info=additional.info,
+                             filter_result_report=filter_result_report,report_all=report_all,silent=silent,rd.seed=rd.seed)
+        sel<-union(sel,filterre$sel)
+        timef<-timef+filterre$time
+      }
+    }else{
+        filterre<-singleFilter(mat=fmat,out.mat=fout.mat,filter_method=filter_method,filter_thres_method=filter_thres_method,filter_thres_P=filter_thres_P,filter_rank_cutoff=filter_rank_cutoff,
+                             parallel=parallel,n.cores=n.cores,FilterInitPermutT=FilterInitPermutT,FilterIncPermutSt=FilterIncPermutSt,FilterMAXPermutT=FilterMAXPermutT,additional.info=additional.info,
+                             filter_result_report=filter_result_report,report_all=report_all,silent=silent,rd.seed=rd.seed)
+        sel<-union(sel,filterre$sel)
+        timef<-timef+filterre$time
+    }
   }
   return(list(sel=sel,time=timef))
 }
