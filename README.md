@@ -12,9 +12,9 @@ bootstrapped sample set. Variables with the highest frequency among the
 several selected result were considered as stable variables for differ
 sample set. However, it is usually hard to determine the cutoff in terms
 of frequency when applyed in a real dataset. In this package, we
-introduced a permutation test to obtain P-values of variables. In
-addition, it supports several multiple correction methods for P-value
-adjustment.
+introduced several methods, namely (1) curve elbow point
+detection, (2) parametrical statistical test and (3) permutation test to
+help determine the cut-off point for variables selection.
 
 ## Installation
 
