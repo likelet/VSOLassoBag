@@ -2,8 +2,10 @@
 
 export(Lasso.bag)
 export(LessPermutation)
+export(kneedle)
+export(simpleEstimation)
 import(POT)
 import(ggplot2)
 import(glmnet)
-import(limma)
 import(parallel)
+import(survival)

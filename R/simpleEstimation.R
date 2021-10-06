@@ -1,10 +1,16 @@
 # provide p-value using the statistical method described in RRLASSO (Park H., et al, 2015; doi:10.1371/journal.pone.0141869)
 
-# Input a dataframe res.df of p*2 (p feature rows with 2 columns, i.e. variate and frequency column; other columns if any, would be neglected)
-# Input bootN as bagging times
-# feature size is automatically determined as nrow(res.df), i.e. the features included in the res.df
-
 # Return a p-value list and the estimated probability pi
+
+#' Parametric Statistical Test
+#'
+#' This is an internal function utilized by Lasso.bag.
+#'
+#' @param res.df a dataframe with variates and observed frequency
+#' @param bootN an integer, bagging times
+#' @return a p-value list and the estimated probability pi
+#' @references \href{https://www.doi.org/10.1371/journal.pone.0141869}{RRLASSO, Park H., et al, 2015}, the algorithm utilized in LassoBag has been modified.
+#' @export
 
 simpleEstimation<-function(res.df,bootN){
   pin<-sum(res.df$Frequency)/(bootN*nrow(res.df))

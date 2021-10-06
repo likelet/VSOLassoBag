@@ -30,8 +30,5 @@ LessPermutation(
 p value of the observed value in the permutation test
 }
 \description{
-LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data
-}
-\examples{
-NULL
+This is an internal function utilized by Lasso.bag.
 }

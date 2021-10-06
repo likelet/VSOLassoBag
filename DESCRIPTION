@@ -1,26 +1,22 @@
 Package: LassoBag
-Title: A cart frame work for screen variable or markers
-Version: 0.99.6
+Title: A cart frame work for screen variates or markers
+Version: 1.0.0
 Authors@R: c(
   person('Yu', 'Sun',   email = "suny226@mail2.sysu.edu.cn", role = c('aut', 'cre'), comment = c(ORCID = '0000-0003-4269-7187')),
   person('Qi', 'Zhao',  email = 'zhaoqi@sysucc.org.cn', role = c('aut'), comment = c(ORCID = '0000-0002-8683-6145')),
   person('Jiaqi', 'Liang',  email = 'liangjq27@mail2.sysu.edu.cn', role = c('aut'))
   )
 Maintainer: Qi Zhao <zhaoqi@sysucc.org.cn>
-Description: LassoBag provides an implementation of a CART frame for
-    selecting markers from multiple models. Several methods (Parametrical Statistical Test, Curve Elbow Point Detection and Permutation Test) 
-    are provided to aid the cutoff point decision for the importance measure (i.e. observed selected frequency) of each variable, while each method is 
-    based on different theoratical ground and may be optimal to be applied in different conditions.
+Description: LassoBag provides an implementation of a CART frame for selecting important variates/markers from multiple models. Several methods (Parametrical Statistical Test, Curve Elbow Point Detection and Permutation Test) are provided for the cut-off point decision of the importance measure (i.e. observed selected frequency) of variates.
 License: GPL-3
 Encoding: UTF-8
+Depends:
+    R (>= 3.5.0)
 Imports: 
     glmnet,
-    POT,
     survival,
     ggplot2,
-    reshape2,
-    limma
-Suggests: 
-    parallel,
-    testthat
+    POT,
+    parallel
 RoxygenNote: 7.1.1
+LazyData: true
