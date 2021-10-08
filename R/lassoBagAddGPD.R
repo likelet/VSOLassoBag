@@ -16,7 +16,7 @@
 #' @param a.family a character determine the data type of out.mat, the same used in \code{\link[glmnet]{glmnet}}.
 #' @param additional.covariate provide additional covariate(s) to build the cox model, only valid in Cox method (`a.family` == "cox"); a data.frame with same rows as `mat`
 #' @param bagFreq.sigMethod a character to determine the cut-off point determination method for the importance measure (i.e. the observed selected frequency). Supported methods are "Parametrical Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP".
-#' @param kneedle.S numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points. Default `kneedle.S`=5 seems fine, but feel free to try other values. The selection of `kneedle.S` should be based on the shape of observed frequency curve.
+#' @param kneedle.S numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points. Default `kneedle.S`=5 seems fine, but feel free to try other values. The selection of `kneedle.S` should be based on the shape of observed frequency curve. It is suggested to use larger S first.
 #' @param auto.loose if TRUE, will reduce `kneedle.S` in case no elbow point is found with the set `kneedle.S`; only valid when `bagFreq.sigMethod` is "Curve Elbow Point Detection" ("CEP").
 #' @param loosing.factor a numeric value range in (0,1), which `kneedle.S` is multiplied by to reduce itself; only valid when `auto.loose` set to TRUE.
 #' @param min.S a numeric value determines the minimal value that `kneedle.S` will be loosed to; only valid when `auto.loose` set to TRUE.
@@ -339,7 +339,7 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
     # preserve only features selected at least 1 time in the bagging process
     sav<-which(observed.fre>0)
     observed.fre<-observed.fre[sav]
-    mat<-mat[,sav]
+    #mat<-mat[,sav]
   
     # get a res.df to show first, in case cutpoint-decision method is not set
     res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre,ori.region=sav)
@@ -485,7 +485,7 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
     }
 
   } else {  # do not permutate and output frequency; get P-value w/o permutation tests; use PST or CEP to decide cutoff point
-    cat(paste(date(), "", sep=" -- Using Non-permutation method to help determine a cutoff point "), '\n')
+    cat(paste(date(), "", sep=" -- Using Non-permutation method to determine a cutoff point "), '\n')
     
     if (bagFreq.sigMethod=="Curve Elbow Point Detection" | bagFreq.sigMethod=="CEP"){
       cat("Detecting Elbow Points on the Observed Frequency Curve...", '\n')
@@ -495,14 +495,18 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
         cat("WARNING: No elbow point detected on the curve, use simple estimation method instead...",'\n')
         bagFreq.sigMethod<-"PST"
       }else{
-        
+        if (length(which(res.df$elbow.point=="*"))>5){
+          cat("INFO: >5 elbow points detected on curve, may need to use larger kneedle.S to get a more conservative result; also refer to the 'ObservedFreqCurve' plot for kneedle.S adjustment.",'\n')
+        }
         if (do.plot){
           pdf("ObservedFreqCurve.pdf")
           x<-c(1:nrow(res.df))
           markPoints<-which(res.df$elbow.point=="*")
           print(ggplot(res.df) +
-            geom_step(aes(x=x,y=Frequency),color="black",size=0.5)  + 
-            geom_vline(xintercept=markPoints,color="#0000cc",linetype="dashed",size=0.6) +
+            geom_step(aes(x=x,y=Frequency),color="black",size=0.5)+
+            geom_line(aes(x=x,y=Diff),color="red",size=0.5)+
+            geom_step(aes(x=x,y=Thres),color="#6666ff",linetype="twodash",size=0.4)+
+            geom_vline(xintercept=markPoints,color="#0000cc",linetype="dashed",size=0.3) +
             theme_bw() +
             theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
             xlab("Frequency Rank (Dashed line(s) indicate elbow point(s))")+
@@ -542,12 +546,11 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
     # Optional, build a regression model based on the features selected by LASSOBag with custom-defined (or default) cutoff p-value
     # the features and their coefficient are reported, including the intercept or the coef of additional covariate
     cat("Building a regression model using features selected by LASSOBag...", '\n')
-    res.df$coef<-NA
     if (bagFreq.sigMethod=="Permutation Test" | bagFreq.sigMethod=="PERT" | bagFreq.sigMethod=="Parametrical Statistical Test" | bagFreq.sigMethod=="PST"){
-      post.selected<-res.df$ori.region[which(res.df$P.value<pvalue.cutoff)]
+      post.selected<-res.df$ori.region[which(res.df$P.adjust<pvalue.cutoff)]
     }else{
       if (bagFreq.sigMethod=="Curve Elbow Point Detection" | bagFreq.sigMethod=="CEP"){
-        candidates<-which(res.df$elbow_point=="*")
+        candidates<-which(res.df$elbow.point=="*")
         if (used.elbow.point=="first"){
           post.selected<-res.df$ori.region[c(1:(candidates[1]-1))]
         }else{
@@ -562,25 +565,27 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
         }
       }
     }
-
     effect.mat<-mat[,post.selected]
-    res.df.ps<-res.df[post.selected,]
-    res.df.NOTps<-res.df[setdiff(c(1:nrow(res.df)),post.selected),]
+    # res.df.ps<-res.df[post.selected,]
+    # res.df.NOTps<-res.df[setdiff(c(1:nrow(res.df)),post.selected),]
     if (!is.null(additional.covariate)){
       effect.mat<-cbind(effect.mat,additional.covariate)
     }
-    
+          # cv.glmmod<-try(cv.glmnet(x=effectdata.x, y=out, family = a.family,nfolds = nfolds),silent=TRUE)
+      # if ('try-error' %in% class(cv.glmmod)){
+        # return(character(0))
+      # }
     if (post.LASSO){
       cat("Using LASSO model...", '\n')
-      cv.glm<-cv.glmnet(x=effect.mat, y=out.mat, family = a.family,nfolds = nfolds)
-      result<-as.numeric(coef(cv.glm, s = lambda.type)) 
-      model<-cv.glm
+      glm<-try(cv.glmnet(x=effect.mat, y=out.mat, family = a.family,nfolds = nfolds),silent=TRUE)
     }else{
-      glm<-glmnet(x=effect.mat, y=out.mat, family = a.family,lambda=0)  ## a no-penalty regression
-      result<-as.numeric(coef(glm))
+      glm<-try(glmnet(x=effect.mat, y=out.mat, family = a.family,lambda=0),silent=TRUE)  ## a no-penalty regression
+    }
+    if ('try-error' %in% class(glm)){
+      warning("Failed to build a regression model, return NULL.")
+    }else{
       model<-glm
     }
-    names(result)<-NULL
     cat(paste(date(), "", sep=" -- Done"), '\n')
   }
   

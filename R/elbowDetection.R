@@ -10,7 +10,7 @@
 #' @param auto.loose if TRUE, will reduce `kneedle.S` in case no elbow point is found with the set `kneedle.S`
 #' @param min.S a numeric value determines the minimal value that `kneedle.S` will be loosed to.
 #' @param loosing.factor a numeric value range in (0,1), which `kneedle.S` is multiplied by to reduce itself.
-#' @return the original input dataframe along with the elbow point indicator with elbow point(s) marked with "*".
+#' @return the original input dataframe along with the elbow point indicator "elbow.point" with elbow point(s) marked with "*", "Diff" the difference curve, "Thres" the threshold.
 #' @references \href{http://www.icsi.berkeley.edu/pubs/networking/findingakneedle10.pdf}{Original Needle Algorithm}, the algorithm utilized in LassoBag has been modified.
 #' @export
 
@@ -22,21 +22,19 @@ kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
   MM_normalize<-function(x){
     return((x-min(x,na.rm = T))/(max(x,na.rm = T)-min(x,na.rm = T)))
   }
-  # reverse_MM_normalize<-function(x,mini,maxi){
-    # return(x*(maxi-mini)+mini)
-  # }
+  reverse_MM_normalize<-function(x,mini,maxi){
+    return(x*(maxi-mini)+mini)
+  }
   ord<-order(res$Frequency,decreasing=T)
   d<-data.frame(x=integer(nrow(res)),y=res$Frequency)
   d<-d[ord,]
   res<-res[ord,]
   d$x<-c(1:nrow(d))/nrow(d)
   d$y<-max(d$y)-d$y
-  
+  miny<-min(d$y,na.rm=TRUE)
+  maxy<-max(d$y,na.rm=TRUE)
   d$x<-MM_normalize(d$x)
   d$y<-MM_normalize(d$y)
-  # z<-smooth.spline(d$x,d$y)
-  # z$x<-MM_normalize(z$x)
-  # z$y<-MM_normalize(z$y)
   D<-data.frame(x=numeric(nrow(d)),y=numeric(nrow(d)))
   for (i in 2:nrow(D)){
     D$x[i]<-d$x[i]-d$x[i-1]
@@ -105,9 +103,18 @@ kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
       }
     }
   }
-  res$elbow_point<-""
+  res$elbow.point<-""
   if (length(knee_x)>0){
-    res$elbow_point[knee_x]<-"*"
+    res$elbow.point[knee_x]<-"*"
+  }
+  res$Diff<-reverse_MM_normalize(D$y,mini=miny,maxi=maxy)
+  res$Thres<-reverse_MM_normalize(D$y-S*avediffx,mini=miny,maxi=maxy)
+  Th<-0
+  for (i in 1:nrow(res)){
+    if (res$elbow.point[i]=="*"){
+      Th<-res$Thres[i]
+    }
+    res$Thres[i]<-Th
   }
   return(res)
 }

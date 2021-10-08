@@ -18,7 +18,7 @@ kneedle(res, S = 10, auto.loose = TRUE, min.S = 0.1, loosing.factor = 0.5)
 \item{loosing.factor}{a numeric value range in (0,1), which `kneedle.S` is multiplied by to reduce itself.}
 }
 \value{
-the original input dataframe along with the elbow point indicator with elbow point(s) marked with "*".
+the original input dataframe along with the elbow point indicator "elbow.point" with elbow point(s) marked with "*", "Diff" the difference curve, "Thres" the threshold.
 }
 \description{
 This is an internal function utilized by Lasso.bag.
