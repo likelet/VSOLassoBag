@@ -1,5 +1,4 @@
 ## Ref: http://www.icsi.berkeley.edu/pubs/networking/findingakneedle10.pdf
-# Adapted Needle Algorithm
 
 #' Kneedle Algorithm: to detect elbow point(s) on the curve
 #'
@@ -11,7 +10,7 @@
 #' @param min.S a numeric value determines the minimal value that `kneedle.S` will be loosed to.
 #' @param loosing.factor a numeric value range in (0,1), which `kneedle.S` is multiplied by to reduce itself.
 #' @return the original input dataframe along with the elbow point indicator "elbow.point" with elbow point(s) marked with "*", "Diff" the difference curve, "Thres" the threshold.
-#' @references \href{http://www.icsi.berkeley.edu/pubs/networking/findingakneedle10.pdf}{Original Needle Algorithm}, the algorithm utilized in LassoBag has been modified.
+#' @references \href{https://ieeexplore.ieee.org/document/5961514}{Original Kneedle Algorithm}, the algorithm utilized in LassoBag has been modified.
 #' @export
 
 kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
