@@ -3,8 +3,8 @@
 
 # LassoBag
 
-[LassoBag](https://github.com/likelet/LassoBag) provides an
-implementation of a CART frame for selecting markers from multiple
+[LassoBag](https://github.com/likelet/LassoBag) provides a bagging Lasso method
+for selecting important variables from multiple
 models. A main application of this package is to screen limitted number
 of variables that are less dependent to train dataset. Basically, this
 packages was initially deveploped for adjust LASSO selected results from

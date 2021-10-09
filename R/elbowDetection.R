@@ -4,7 +4,7 @@
 #'
 #' This is an internal function utilized by Lasso.bag.
 #'
-#' @param res a dataframe with variates and observed frequency
+#' @param res a dataframe with variables and observed frequency
 #' @param S numeric, determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and larger means more conservative
 #' @param auto.loose if TRUE, will reduce `kneedle.S` in case no elbow point is found with the set `kneedle.S`
 #' @param min.S a numeric value determines the minimal value that `kneedle.S` will be loosed to.

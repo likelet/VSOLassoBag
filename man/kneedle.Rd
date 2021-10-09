@@ -7,7 +7,7 @@
 kneedle(res, S = 10, auto.loose = TRUE, min.S = 0.1, loosing.factor = 0.5)
 }
 \arguments{
-\item{res}{a dataframe with variates and observed frequency}
+\item{res}{a dataframe with variables and observed frequency}
 
 \item{S}{numeric, determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and larger means more conservative}
 
@@ -24,5 +24,5 @@ the original input dataframe along with the elbow point indicator "elbow.point" 
 This is an internal function utilized by Lasso.bag.
 }
 \references{
-\href{http://www.icsi.berkeley.edu/pubs/networking/findingakneedle10.pdf}{Original Needle Algorithm}, the algorithm utilized in LassoBag has been modified.
+\href{https://ieeexplore.ieee.org/document/5961514}{Original Kneedle Algorithm}, the algorithm utilized in LassoBag has been modified.
 }

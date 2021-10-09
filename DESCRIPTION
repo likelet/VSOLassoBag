@@ -1,5 +1,5 @@
 Package: LassoBag
-Title: A cart frame work for screen variates or markers
+Title: A bagging Lasso method for screen variables
 Version: 1.0.0
 Authors@R: c(
   person('Yu', 'Sun',   email = "suny226@mail2.sysu.edu.cn", role = c('aut', 'cre'), comment = c(ORCID = '0000-0003-4269-7187')),
@@ -7,7 +7,7 @@ Authors@R: c(
   person('Jiaqi', 'Liang',  email = 'liangjq27@mail2.sysu.edu.cn', role = c('aut'))
   )
 Maintainer: Qi Zhao <zhaoqi@sysucc.org.cn>
-Description: LassoBag provides an implementation of a CART frame for selecting important variates/markers from multiple models. Several methods (Parametrical Statistical Test, Curve Elbow Point Detection and Permutation Test) are provided for the cut-off point decision of the importance measure (i.e. observed selected frequency) of variates.
+Description: LassoBag provides an implementation of a bootstrap aggregating (bagging) Lasso method for selecting important variables from multiple models. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test) are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
 License: GPL-3
 Encoding: UTF-8
 Depends:

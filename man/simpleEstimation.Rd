@@ -7,12 +7,12 @@
 simpleEstimation(res.df, bootN)
 }
 \arguments{
-\item{res.df}{a dataframe with variates and observed frequency}
+\item{res.df}{a dataframe with variables and observed frequency}
 
 \item{bootN}{an integer, bagging times}
 }
 \value{
-a p-value list and the estimated probability pi
+a list of p-value of each variable and the average selection ratio
 }
 \description{
 This is an internal function utilized by Lasso.bag.

@@ -11,7 +11,7 @@ Lasso.bag(
   bootN = 1000,
   boot.rep = TRUE,
   a.family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
-  additional.covariate = NULL,
+  additional.covariable = NULL,
   bagFreq.sigMethod = "PST",
   kneedle.S = 10,
   auto.loose = TRUE,
@@ -36,10 +36,10 @@ Lasso.bag(
   filter.thres.method = "fdr",
   filter.thres.P = 0.05,
   filter.rank.cutoff = 0.05,
-  filter.min.features = -Inf,
-  filter.max.features = Inf,
+  filter.min.variables = -Inf,
+  filter.max.variables = Inf,
   filter.result.report = TRUE,
-  filter.report.all.variates = TRUE,
+  filter.report.all.variables = TRUE,
   post.regression = FALSE,
   post.LASSO = FALSE,
   pvalue.cutoff = 0.05,
@@ -51,7 +51,7 @@ Lasso.bag(
 
 \item{out.mat}{vector or dataframe with the same rows as the sample size of `mat`.}
 
-\item{observed.fre}{dataframe with columns 'variate' and 'Frequency', which can be obtained from existed LASSOBag results for re-analysis. A warning will be issued if the variates in `observed.fre` not found in `mat`, and these variates will be excluded.}
+\item{observed.fre}{dataframe with columns 'variable' and 'Frequency', which can be obtained from existed LASSOBag results for re-analysis. A warning will be issued if the variables in `observed.fre` not found in `mat`, and these variables will be excluded.}
 
 \item{bootN}{the size of re-sampled samples for bagging, default 1000; smaller consumes less processing time but may not get robust results.}
 
@@ -59,9 +59,9 @@ Lasso.bag(
 
 \item{a.family}{a character determine the data type of out.mat, the same used in \code{\link[glmnet]{glmnet}}.}
 
-\item{additional.covariate}{provide additional covariate(s) to build the cox model, only valid in Cox method (`a.family` == "cox"); a data.frame with same rows as `mat`}
+\item{additional.covariable}{provide additional covariable(s) to build the cox model, only valid in Cox method (`a.family` == "cox"); a data.frame with same rows as `mat`}
 
-\item{bagFreq.sigMethod}{a character to determine the cut-off point determination method for the importance measure (i.e. the observed selected frequency). Supported methods are "Parametrical Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP".}
+\item{bagFreq.sigMethod}{a character to determine the cut-off point determination method for the importance measure (i.e. the observed selection frequency). Supported methods are "Parametric Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP".}
 
 \item{kneedle.S}{numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points. Default `kneedle.S`=5 seems fine, but feel free to try other values. The selection of `kneedle.S` should be based on the shape of observed frequency curve. It is suggested to use larger S first.}
 
@@ -89,9 +89,9 @@ Lasso.bag(
 
 \item{nfolds}{integer > 2, how many folds to be created for n-folds cross-validation LASSO in \code{\link[glmnet]{cv.glmnet}}.}
 
-\item{lambda.type}{character, which model should be used to obtain the variates selected in one bagging. Default is "lambda.1se" for less variates selected and lower probability being over-fitting. See the help of `cv.glmnet` for more details.}
+\item{lambda.type}{character, which model should be used to obtain the variables selected in one bagging. Default is "lambda.1se" for less variables selected and lower probability being over-fitting. See the help of `cv.glmnet` for more details.}
 
-\item{plot.freq}{whether to show all the non-zero frequency in the final barplot or not. If "full", all the features(including zero frequency) will be plotted. If "part", all the non-zero features will be plotted. If "not", will not print the plot.}
+\item{plot.freq}{whether to show all the non-zero frequency in the final barplot or not. If "full", all the variables(including zero frequency) will be plotted. If "part", all the non-zero variables will be plotted. If "not", will not print the plot.}
 
 \item{plot.out}{the file's name of the frequency plot. If set to FALSE, no plot will be output. If you run this function in Linux command line, you don't have to set this param for the plot.freq will output your plot to your current working directory with name "Rplot.pdf".Default to FALSE.}
 
@@ -109,27 +109,27 @@ Lasso.bag(
 
 \item{filter.rank.cutoff}{if `filter.thres.method` is "rank", use `filter.rank.cutoff` as the cut-off rank. Default is 0.05.}
 
-\item{filter.min.features}{minimum important features selected by filters. Useful when building a multi-variate cox model since cox model can only be built on limited variates. Default is -Inf (not applied).}
+\item{filter.min.variables}{minimum important variables selected by filters. Useful when building a multi-variable cox model since cox model can only be built on limited variables. Default is -Inf (not applied).}
 
-\item{filter.max.features}{maximum important features selected by filters. Useful when building a multi-variate cox model since cox model can only be built on limited variates. Default is Inf (not applied).}
+\item{filter.max.variables}{maximum important variables selected by filters. Useful when building a multi-variable cox model since cox model can only be built on limited variables. Default is Inf (not applied).}
 
 \item{filter.result.report}{if TRUE generate filter reports for filter results, only vaild when `inbag.filter` set to FALSE (i.e. only valid in out-bag filters mode).}
 
-\item{filter.report.all.variates}{if TRUE report all variates in the filter report, only valid when `filter.result.report` set to TRUE.}
+\item{filter.report.all.variables}{if TRUE report all variables in the filter report, only valid when `filter.result.report` set to TRUE.}
 
-\item{post.regression}{build a regression model based on the variates selected by LASSOBag process. Default is FALSE.}
+\item{post.regression}{build a regression model based on the variables selected by LASSOBag process. Default is FALSE.}
 
-\item{post.LASSO}{build a LASSO regression model based on the variates selected by LASSOBag process, only vaild when `post.regression` set to TRUE.}
+\item{post.LASSO}{build a LASSO regression model based on the variables selected by LASSOBag process, only vaild when `post.regression` set to TRUE.}
 
-\item{pvalue.cutoff}{determine the cut-off p-value for what variates were selected by LASSOBag, only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Parametrical Statistical Test" or "Permutation Test".}
+\item{pvalue.cutoff}{determine the cut-off p-value for what variables were selected by LASSOBag, only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Parametric Statistical Test" or "Permutation Test".}
 
-\item{used.elbow.point}{determine which elbow point to use if multiple elbow points were detectedfor what variates were selected by LASSOBag. Supported methods are "first", "middle" and "last". Default is "middle", use the middle one among all detected elbow points. Only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Curve Elbow Point Detection".}
+\item{used.elbow.point}{determine which elbow point to use if multiple elbow points were detected for what variables were selected by LASSOBag. Supported methods are "first", "middle" and "last". Default is "middle", use the middle one among all detected elbow points. Only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Curve Elbow Point Detection".}
 }
 \value{
-A list with (1) the result dataframe contains "variate" with selected frequency >1 and their "Frequency", the "P.value" and the adjusted p value "P.adjust" of each variate (if set `bagFreq.sigMethod` = "PST" or "PERT"), or the elbow point indicators "elbow.point", while elbow point(s) will be marked with "*" (if set `bagFreq.sigMethod` = "CEP"); (2) other utility results, including permutation results, the regression model built on LASSOBag results.
+A list with (1) the result dataframe contains "variable" with selection frequency >=1 and their "Frequency", the "P.value" and the adjusted p value "P.adjust" of each variable (if set `bagFreq.sigMethod` = "PST" or "PERT"), or the elbow point indicators "elbow.point", while elbow point(s) will be marked with "*" (if set `bagFreq.sigMethod` = "CEP"); (2) other utility results, including permutation results, the regression model built on LASSOBag results.
 }
 \description{
-Lasso.bag is an one-step function that can be easily utilized for selecting important variates/markers from multiple models inherited from R package \emph{glmnet}. Several methods (Parametrical Statistical Test, Curve Elbow Point Detection and Permutation Test)  are provided for the cut-off point decision of the importance measure (i.e. observed selected frequency) of variates.
+Lasso.bag is an one-step function that can be easily utilized for selecting important variables from multiple models inherited from R package \emph{glmnet}. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test)  are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
 }
 \examples{
 \dontrun{

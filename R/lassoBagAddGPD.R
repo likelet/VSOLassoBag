@@ -1,6 +1,6 @@
 #' Lasso.bag: one-step main function of LassoBag framework
 #'
-#' Lasso.bag is an one-step function that can be easily utilized for selecting important variates/markers from multiple models inherited from R package \emph{glmnet}. Several methods (Parametrical Statistical Test, Curve Elbow Point Detection and Permutation Test)  are provided for the cut-off point decision of the importance measure (i.e. observed selected frequency) of variates.
+#' Lasso.bag is an one-step function that can be easily utilized for selecting important variables from multiple models inherited from R package \emph{glmnet}. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test)  are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
 #'
 #' @import glmnet
 #' @import survival
@@ -10,12 +10,12 @@
 #'
 #' @param mat sample matrix that each column represent a variable and rows represent sample data points, all the entries in it should be numeric.
 #' @param out.mat vector or dataframe with the same rows as the sample size of `mat`.
-#' @param observed.fre dataframe with columns 'variate' and 'Frequency', which can be obtained from existed LASSOBag results for re-analysis. A warning will be issued if the variates in `observed.fre` not found in `mat`, and these variates will be excluded.
+#' @param observed.fre dataframe with columns 'variable' and 'Frequency', which can be obtained from existed LASSOBag results for re-analysis. A warning will be issued if the variables in `observed.fre` not found in `mat`, and these variables will be excluded.
 #' @param bootN the size of re-sampled samples for bagging, default 1000; smaller consumes less processing time but may not get robust results.
 #' @param boot.rep whether sampling with return or not in the bagging procedure
 #' @param a.family a character determine the data type of out.mat, the same used in \code{\link[glmnet]{glmnet}}.
-#' @param additional.covariate provide additional covariate(s) to build the cox model, only valid in Cox method (`a.family` == "cox"); a data.frame with same rows as `mat`
-#' @param bagFreq.sigMethod a character to determine the cut-off point determination method for the importance measure (i.e. the observed selected frequency). Supported methods are "Parametrical Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP".
+#' @param additional.covariable provide additional covariable(s) to build the cox model, only valid in Cox method (`a.family` == "cox"); a data.frame with same rows as `mat`
+#' @param bagFreq.sigMethod a character to determine the cut-off point determination method for the importance measure (i.e. the observed selection frequency). Supported methods are "Parametric Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP".
 #' @param kneedle.S numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points. Default `kneedle.S`=5 seems fine, but feel free to try other values. The selection of `kneedle.S` should be based on the shape of observed frequency curve. It is suggested to use larger S first.
 #' @param auto.loose if TRUE, will reduce `kneedle.S` in case no elbow point is found with the set `kneedle.S`; only valid when `bagFreq.sigMethod` is "Curve Elbow Point Detection" ("CEP").
 #' @param loosing.factor a numeric value range in (0,1), which `kneedle.S` is multiplied by to reduce itself; only valid when `auto.loose` set to TRUE.
@@ -29,8 +29,8 @@
 #' @param n.cores how many cores/process to be assigned for this function; more cores used results in more resource of CPU and memory used.
 #' @param rd.seed the random seed of this function, in case some of the experiments need to be reproduced.
 #' @param nfolds integer > 2, how many folds to be created for n-folds cross-validation LASSO in \code{\link[glmnet]{cv.glmnet}}.
-#' @param lambda.type character, which model should be used to obtain the variates selected in one bagging. Default is "lambda.1se" for less variates selected and lower probability being over-fitting. See the help of `cv.glmnet` for more details.
-#' @param plot.freq whether to show all the non-zero frequency in the final barplot or not. If "full", all the features(including zero frequency) will be plotted. If "part", all the non-zero features will be plotted. If "not", will not print the plot.
+#' @param lambda.type character, which model should be used to obtain the variables selected in one bagging. Default is "lambda.1se" for less variables selected and lower probability being over-fitting. See the help of `cv.glmnet` for more details.
+#' @param plot.freq whether to show all the non-zero frequency in the final barplot or not. If "full", all the variables(including zero frequency) will be plotted. If "part", all the non-zero variables will be plotted. If "not", will not print the plot.
 #' @param plot.out the file's name of the frequency plot. If set to FALSE, no plot will be output. If you run this function in Linux command line, you don't have to set this param for the plot.freq will output your plot to your current working directory with name "Rplot.pdf".Default to FALSE.
 #' @param do.plot if TRUE generate result plots.
 #' @param output.dir the path to save result files generated by \code{\link[LassoBag]{Lasso.bag}} (if not existed, will be created). Default is NA, will save in the same space as the current working dir.
@@ -39,16 +39,16 @@
 #' @param filter.thres.method the method determines the threshold of importance in filters. Supported methods are "fdr" and "rank".
 #' @param filter.thres.P if `filter.thres.method` is "fdr", use `filter.thres.P` as the (adjusted) cut-off p-value. Default is 0.05.
 #' @param filter.rank.cutoff if `filter.thres.method` is "rank", use `filter.rank.cutoff` as the cut-off rank. Default is 0.05.
-#' @param filter.min.features minimum important features selected by filters. Useful when building a multi-variate cox model since cox model can only be built on limited variates. Default is -Inf (not applied).
-#' @param filter.max.features maximum important features selected by filters. Useful when building a multi-variate cox model since cox model can only be built on limited variates. Default is Inf (not applied).
+#' @param filter.min.variables minimum important variables selected by filters. Useful when building a multi-variable cox model since cox model can only be built on limited variables. Default is -Inf (not applied).
+#' @param filter.max.variables maximum important variables selected by filters. Useful when building a multi-variable cox model since cox model can only be built on limited variables. Default is Inf (not applied).
 #' @param filter.result.report if TRUE generate filter reports for filter results, only vaild when `inbag.filter` set to FALSE (i.e. only valid in out-bag filters mode).
-#' @param filter.report.all.variates if TRUE report all variates in the filter report, only valid when `filter.result.report` set to TRUE.
-#' @param post.regression build a regression model based on the variates selected by LASSOBag process. Default is FALSE.
-#' @param post.LASSO build a LASSO regression model based on the variates selected by LASSOBag process, only vaild when `post.regression` set to TRUE.
-#' @param pvalue.cutoff determine the cut-off p-value for what variates were selected by LASSOBag, only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Parametrical Statistical Test" or "Permutation Test".
-#' @param used.elbow.point determine which elbow point to use if multiple elbow points were detectedfor what variates were selected by LASSOBag. Supported methods are "first", "middle" and "last". Default is "middle", use the middle one among all detected elbow points. Only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Curve Elbow Point Detection".
+#' @param filter.report.all.variables if TRUE report all variables in the filter report, only valid when `filter.result.report` set to TRUE.
+#' @param post.regression build a regression model based on the variables selected by LASSOBag process. Default is FALSE.
+#' @param post.LASSO build a LASSO regression model based on the variables selected by LASSOBag process, only vaild when `post.regression` set to TRUE.
+#' @param pvalue.cutoff determine the cut-off p-value for what variables were selected by LASSOBag, only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Parametric Statistical Test" or "Permutation Test".
+#' @param used.elbow.point determine which elbow point to use if multiple elbow points were detected for what variables were selected by LASSOBag. Supported methods are "first", "middle" and "last". Default is "middle", use the middle one among all detected elbow points. Only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Curve Elbow Point Detection".
 #'
-#' @return  A list with (1) the result dataframe contains "variate" with selected frequency >1 and their "Frequency", the "P.value" and the adjusted p value "P.adjust" of each variate (if set `bagFreq.sigMethod` = "PST" or "PERT"), or the elbow point indicators "elbow.point", while elbow point(s) will be marked with "*" (if set `bagFreq.sigMethod` = "CEP"); (2) other utility results, including permutation results, the regression model built on LASSOBag results.
+#' @return  A list with (1) the result dataframe contains "variable" with selection frequency >=1 and their "Frequency", the "P.value" and the adjusted p value "P.adjust" of each variable (if set `bagFreq.sigMethod` = "PST" or "PERT"), or the elbow point indicators "elbow.point", while elbow point(s) will be marked with "*" (if set `bagFreq.sigMethod` = "CEP"); (2) other utility results, including permutation results, the regression model built on LASSOBag results.
 #'
 #' @seealso \code{\link[glmnet]{glmnet}} and \code{\link[glmnet]{cv.glmnet}} in R package \emph{glmnet}.
 #'
@@ -86,15 +86,15 @@
 
 Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
                       bootN=1000,boot.rep=TRUE,
-                      a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),additional.covariate=NULL,
+                      a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),additional.covariable=NULL,
                       bagFreq.sigMethod="PST",
                       kneedle.S=10,auto.loose=TRUE,loosing.factor=0.5,min.S=0.1,
                       use.gpd=FALSE, fit.pareto="gd",imputeN=1000,imputeN.max=2000,permut.increase=100,
                       parallel=FALSE,n.cores=1,rd.seed=10867,
                       nfolds=4,lambda.type="lambda.1se",
                       plot.freq="part",plot.out=FALSE, do.plot=TRUE,output.dir=NA,
-                      filter.method="auto",inbag.filter=TRUE,filter.thres.method="fdr",filter.thres.P=0.05,filter.rank.cutoff=0.05,filter.min.features=-Inf,filter.max.features=Inf,
-                      filter.result.report=TRUE,filter.report.all.variates=TRUE,
+                      filter.method="auto",inbag.filter=TRUE,filter.thres.method="fdr",filter.thres.P=0.05,filter.rank.cutoff=0.05,filter.min.variables=-Inf,filter.max.variables=Inf,
+                      filter.result.report=TRUE,filter.report.all.variables=TRUE,
                       post.regression=FALSE,post.LASSO=FALSE,pvalue.cutoff=0.05,used.elbow.point="middle"
                       ) {
                       
@@ -126,26 +126,26 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
     out.mat<-as.matrix(out.mat,ncol=1)
   }
   
-  if (!is.null(additional.covariate)){
-    if (is.vector(additional.covariate)){
-      additional.covariate<-as.data.frame(additional.covariate)
+  if (!is.null(additional.covariable)){
+    if (is.vector(additional.covariable)){
+      additional.covariable<-as.data.frame(additional.covariable)
     }
-    for (i in 1:ncol(additional.covariate)){
-      # For additional.covariate for building a cox model, all columns should be type of numeric, otherwise it will be forced to be factor first, then transformed to be numeric.
-      if (!is.numeric(additional.covariate[,i])){
-        if (!is.factor(additional.covariate[,i])){
-          additional.covariate[,i]<-as.factor(additional.covariate[,i])
+    for (i in 1:ncol(additional.covariable)){
+      # For additional.covariable for building a cox model, all columns should be type of numeric, otherwise it will be forced to be factor first, then transformed to be numeric.
+      if (!is.numeric(additional.covariable[,i])){
+        if (!is.factor(additional.covariable[,i])){
+          additional.covariable[,i]<-as.factor(additional.covariable[,i])
         }
-        additional.covariate[,i]<-as.numeric(additional.covariate[,i])
+        additional.covariable[,i]<-as.numeric(additional.covariable[,i])
       }
     }
-    additional.covariate<-as.matrix(additional.covariate)
+    additional.covariable<-as.matrix(additional.covariable)
   }
   
   # simply judge whether dependent vars has the same size of independent vars
   if(nrow(mat)!=nrow(out.mat)){  # TODO: i think that it should be dataframe for that will be more adjustable
     # and it allows us to store different types of data in one mat/df
-    warning("incoporate length of inVariables (X) and outVariables (Y), samples not match, plz check your input ")
+    warning("incoporate length of independent variables (X) and dependent variables (Y), samples not match, plz check your input ")
     stop("LASSOBag failed due to incorrect input dimension, samples of X and Y not match")
   }
   # check column No. of dependent vars
@@ -191,11 +191,11 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
   
   ## out-bag filter
   if (filter.method!="none" & !inbag.filter){
-    o<-filters(mat,out.mat, additional.covariate=additional.covariate,filter.method=filter.method,
+    o<-filters(mat,out.mat, additional.covariable=additional.covariable,filter.method=filter.method,
                filter.thres.method=filter.thres.method,a.family=a.family,filter.thres.P=filter.thres.P,filter.rank.cutoff=filter.rank.cutoff,
-               filter.min.features=filter.min.features,filter.max.features=filter.max.features,
+               filter.min.variables=filter.min.variables,filter.max.variables=filter.max.variables,
                rd.seed=rd.seed,parallel=parallel,n.cores=n.cores,
-               silent=FALSE,filter.result.report=filter.result.report,filter.report.all.variates=filter.report.all.variates)
+               silent=FALSE,filter.result.report=filter.result.report,filter.report.all.variables=filter.report.all.variables)
     mat<-mat[,o$sel]
     cat(paste(date(), "", sep=" -- out-bag filter completed "), '\n')
   }
@@ -207,10 +207,10 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
     effectdata.x<-mat[sampleIndex,]
     effectdata.y<-out.mat[sampleIndex,]
     effectdata.y<-as.matrix(effectdata.y,nrow=nrow(out.mat),ncol=ncol(out.mat))
-    if (!is.null(additional.covariate)){
-      additional.covariate.boot<-additional.covariate[sampleIndex,]
+    if (!is.null(additional.covariable)){
+      additional.covariable.boot<-additional.covariable[sampleIndex,]
     }else{
-      additional.covariate.boot<-NULL
+      additional.covariable.boot<-NULL
     }
     
     if (parallel){
@@ -228,17 +228,17 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
       if (filter.thres.method=="permutation fdr"){
         filter.thres.method<-"rank"
       }
-      o<-filters(effectdata.x,effectdata.y, additional.covariate=additional.covariate.boot,
+      o<-filters(effectdata.x,effectdata.y, additional.covariable=additional.covariable.boot,
                  filter.method=filter.method,a.family=a.family,filter.thres.method=filter.thres.method,filter.thres.P=filter.thres.P,filter.rank.cutoff=filter.rank.cutoff,
-                 filter.min.features=filter.min.features,filter.max.features=filter.max.features,
+                 filter.min.variables=filter.min.variables,filter.max.variables=filter.max.variables,
                  rd.seed=rd.seed,parallel=sub_parallel,n.cores=n.cores,
-                 silent=TRUE,filter.result.report=filter.result.report,filter.report.all.variates=filter.report.all.variates)
+                 silent=TRUE,filter.result.report=filter.result.report,filter.report.all.variables=filter.report.all.variables)
       effectdata.x<-effectdata.x[,o$sel]
     }
     ##
     
-    if (!is.null(additional.covariate)){
-      effectdata.x<-cbind(effectdata.x,additional.covariate.boot)
+    if (!is.null(additional.covariable)){
+      effectdata.x<-cbind(effectdata.x,additional.covariable.boot)
     }
     
     # apply function for not permutated or permutated lasso
@@ -342,28 +342,28 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
     #mat<-mat[,sav]
   
     # get a res.df to show first, in case cutpoint-decision method is not set
-    res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre,ori.region=sav)
+    res.df<-data.frame(variable=names(observed.fre),Frequency=observed.fre,ori.region=sav)
     names(res.df$Frequency)<-NULL
     rownames(res.df)<-NULL
   } else {
     cat(paste(date(), "", sep=" -- input existed observed frequency "), '\n')
-    if (class(observed.fre)!="data.frame"| length(which(!c("variate","Frequency") %in% colnames(observed.fre)))>0){
-      cat("data of observed frequency not correct, must be a data.frame with columns 'variate','Frequency', please check your input data", '\n')
+    if (class(observed.fre)!="data.frame"| length(which(!c("variable","Frequency") %in% colnames(observed.fre)))>0){
+      cat("data of observed frequency not correct, must be a data.frame with columns 'variable','Frequency', please check your input data", '\n')
       stop("Input observed frequency Error")
     }
     ## read in standard feature_freq.txt output
-    ## must be a data.frame with columns "variate","Frequency","ori.region"
-    res.df<-observed.fre[,c("variate","Frequency")]
-    ord<-as.integer(factor(res.df$variate,levels=features))
+    ## must be a data.frame with columns "variable","Frequency","ori.region"
+    res.df<-observed.fre[,c("variable","Frequency")]
+    ord<-as.integer(factor(res.df$variable,levels=features))
     res.df$ori.region<-ord
     if (anyNA(ord)){
-      warning("Some variates in observed.fre not found in mat, and these variates will be excluded from the analysis.")
+      warning("Some variables in observed.fre not found in mat, and these variables will be excluded from the analysis.")
       res.df<-res.df[which(!is.na(res.df$ori.region)),]
     }
   }
   gc()
   
-  if (!(bagFreq.sigMethod %in% c("Permutation Test","PERT","Parametrical Statistical Test","PST","Curve Elbow Point Detection","CEP"))){
+  if (!(bagFreq.sigMethod %in% c("Permutation Test","PERT","Parametric Statistical Test","PST","Curve Elbow Point Detection","CEP"))){
     if (bagFreq.sigMethod!="none"){
       cat("bagFreq.sigMethod not correctly set, got observed frequency and exit.",'\n')
     }
@@ -473,7 +473,7 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
       cat(paste(date(), "", sep=" -- Pvalue adjusting "), '\n')
       # FDR.list<-p.adjust(pvalue.list,method = "bonferroni")
       FDR.list <- p.adjust(pvalue.list,method = "fdr")
-      res.df<-data.frame(variate=names(observed.fre),Frequency=observed.fre,ori.region=sav,P.value=pvalue.list,P.adjust=FDR.list)
+      res.df<-data.frame(variable=names(observed.fre),Frequency=observed.fre,ori.region=sav,P.value=pvalue.list,P.adjust=FDR.list)
       names(res.df$Frequency)<-NULL
       rownames(res.df)<-NULL
       cat(paste(date(), "", sep=" -- Done"), '\n')
@@ -509,15 +509,15 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
             geom_vline(xintercept=markPoints,color="#0000cc",linetype="dashed",size=0.3) +
             theme_bw() +
             theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
-            xlab("Frequency Rank (Dashed line(s) indicate elbow point(s))")+
+            xlab("Variables Frequency Rank\n(black: frequency; dashed vertical: elbow point;\nred: difference; dashed blue: threshold)")+
             ylab("Frequency"))
           dev.off()
         }
       }
     }
     
-    if (bagFreq.sigMethod=="Parametrical Statistical Test" | bagFreq.sigMethod=="PST"){
-      cat("Using Parametrical Statistical Test...", '\n')
+    if (bagFreq.sigMethod=="Parametric Statistical Test" | bagFreq.sigMethod=="PST"){
+      cat("Using Parametric Statistical Test...", '\n')
       # By fitting the observed freq to a binomial distribution model to estimate the significant p-value for each feature being "important" and therefore decide the cutoff
       se<-simpleEstimation(res.df=res.df,bootN=bootN)
       pvalue.list<-se$pvalue
@@ -526,13 +526,12 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
       res.df$P.value<-pvalue.list
       res.df$P.adjust<-FDR.list
       if (do.plot){
-        #theoretical<-data.frame(x=rbinom(n=nrow(res.df),size=bootN,prob=pin))
         pdf("ObservedFreqDistribution.pdf")
         print(ggplot(res.df) +
-          geom_histogram(aes(x=Frequency),fill="#ff9999",color="#cc0000")  + geom_text(aes(x=max(Frequency)*0.8,y=nrow(res.df)*0.1,label=paste0("estimated probability=\n",round(pin,digits=6)))) +
+          geom_histogram(aes(x=Frequency),fill="#ff9999",color="#cc0000")  + geom_text(aes(x=max(Frequency)*0.8,y=nrow(res.df)*0.1,label=paste0("average selection ratio=\n",round(pin,digits=4)))) +
           theme_bw() +
           theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
-          xlab("Observed Bagging Frequency")+ylab("Features Count"))
+          xlab("Observed Selection Frequency")+ylab("Variables Count"))
         dev.off()
       }
     }
@@ -544,9 +543,9 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
   model<-NULL
   if (post.regression){
     # Optional, build a regression model based on the features selected by LASSOBag with custom-defined (or default) cutoff p-value
-    # the features and their coefficient are reported, including the intercept or the coef of additional covariate
+    # the features and their coefficient are reported, including the intercept or the coef of additional covariable
     cat("Building a regression model using features selected by LASSOBag...", '\n')
-    if (bagFreq.sigMethod=="Permutation Test" | bagFreq.sigMethod=="PERT" | bagFreq.sigMethod=="Parametrical Statistical Test" | bagFreq.sigMethod=="PST"){
+    if (bagFreq.sigMethod=="Permutation Test" | bagFreq.sigMethod=="PERT" | bagFreq.sigMethod=="Parametric Statistical Test" | bagFreq.sigMethod=="PST"){
       post.selected<-res.df$ori.region[which(res.df$P.adjust<pvalue.cutoff)]
     }else{
       if (bagFreq.sigMethod=="Curve Elbow Point Detection" | bagFreq.sigMethod=="CEP"){
@@ -566,15 +565,9 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
       }
     }
     effect.mat<-mat[,post.selected]
-    # res.df.ps<-res.df[post.selected,]
-    # res.df.NOTps<-res.df[setdiff(c(1:nrow(res.df)),post.selected),]
-    if (!is.null(additional.covariate)){
-      effect.mat<-cbind(effect.mat,additional.covariate)
+    if (!is.null(additional.covariable)){
+      effect.mat<-cbind(effect.mat,additional.covariable)
     }
-          # cv.glmmod<-try(cv.glmnet(x=effectdata.x, y=out, family = a.family,nfolds = nfolds),silent=TRUE)
-      # if ('try-error' %in% class(cv.glmmod)){
-        # return(character(0))
-      # }
     if (post.LASSO){
       cat("Using LASSO model...", '\n')
       glm<-try(cv.glmnet(x=effect.mat, y=out.mat, family = a.family,nfolds = nfolds),silent=TRUE)
@@ -592,24 +585,24 @@ Lasso.bag <- function(mat,out.mat, observed.fre=NULL,
   if (do.plot) {
     plot.df <- res.df[which(!is.na(res.df$Frequency)),]
     if (plot.freq=="full") {
-      other.variate<-setdiff(features,res.df$variate)
-      empty.df<-as.data.frame(matrix(NA,ncol=ncol(plot.df),nrow=length(other.variate)))
+      other.variable<-setdiff(features,res.df$variable)
+      empty.df<-as.data.frame(matrix(NA,ncol=ncol(plot.df),nrow=length(other.variable)))
       colnames(empty.df)<-colnames(plot.df)
-      empty.df$variate<-other.variate
+      empty.df$variable<-other.variable
       empty.df$Frequency<-0
       plot.df<-rbind(plot.df,empty.df)
     } else if (plot.freq!=FALSE & plot.freq!="part" & plot.freq!="full"){
       plot.df <- res.df
-      print("Actually you need to set plot.freq correctly, here we will plot all features.")
+      print("Actually you need to set plot.freq correctly, here we will plot all variables.")
     }
     if (plot.freq!=FALSE) {
       if (plot.out!=F) {  # for saving files
         pdf(plot.out)
-        gg<-ggplot(plot.df, aes(reorder(variate, -Frequency), Frequency)) +
+        gg<-ggplot(plot.df, aes(reorder(variable, -Frequency), Frequency)) +
            geom_bar(stat = "identity") +
            theme_bw() +
            theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
-           xlab(label = "Features")
+           xlab(label = "Variables")
         if (nrow(plot.df)>=30){
           gg<-gg+theme(axis.text.x=element_blank())
         }
