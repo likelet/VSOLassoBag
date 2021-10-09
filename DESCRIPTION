@@ -1,5 +1,5 @@
 Package: LassoBag
-Title: A bagging Lasso method for screen variables
+Title: A bagging Lasso method for screening variables
 Version: 1.0.0
 Authors@R: c(
   person('Yu', 'Sun',   email = "suny226@mail2.sysu.edu.cn", role = c('aut', 'cre'), comment = c(ORCID = '0000-0003-4269-7187')),
