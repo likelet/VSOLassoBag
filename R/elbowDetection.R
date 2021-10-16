@@ -53,7 +53,7 @@ kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
   localmin<-which(localmin==1)
   Dlmx<-D[candidate,]
   Dlmx$i<-candidate
-  avediffx<-(d$x[nrow(d)]-d$x[1])/(nrow(d)-1)
+  avediffx<-1/(nrow(d)-1)
   reached<-FALSE
   while (!reached){
     Dlmx$T<-Dlmx$y-S*avediffx

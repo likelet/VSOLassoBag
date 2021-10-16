@@ -12,7 +12,7 @@ Lasso.bag(
   boot.rep = TRUE,
   a.family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
   additional.covariable = NULL,
-  bagFreq.sigMethod = "PST",
+  bagFreq.sigMethod = "CEP",
   kneedle.S = 10,
   auto.loose = TRUE,
   loosing.factor = 0.5,
@@ -61,7 +61,7 @@ Lasso.bag(
 
 \item{additional.covariable}{provide additional covariable(s) to build the cox model, only valid in Cox method (`a.family` == "cox"); a data.frame with same rows as `mat`}
 
-\item{bagFreq.sigMethod}{a character to determine the cut-off point determination method for the importance measure (i.e. the observed selection frequency). Supported methods are "Parametric Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP".}
+\item{bagFreq.sigMethod}{a character to determine the cut-off point decision method for the importance measure (i.e. the observed selection frequency). Supported methods are "Parametric Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP". The method "PERT" is not recommended due to consuming time and memmory requirement.}
 
 \item{kneedle.S}{numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points. Default `kneedle.S`=5 seems fine, but feel free to try other values. The selection of `kneedle.S` should be based on the shape of observed frequency curve. It is suggested to use larger S first.}
 
