@@ -1,9 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# LassoBag
+# VSOLassoBag
 
-[LassoBag](https://github.com/likelet/LassoBag) provides a bagging Lasso method
+[VSOLassoBag](https://github.com/likelet/LassoBag)  provides a bagging Lasso framework
 for selecting important variables from multiple
 models. A main application of this package is to screen limitted number
 of variables that are less dependent to train dataset. Basically, this
