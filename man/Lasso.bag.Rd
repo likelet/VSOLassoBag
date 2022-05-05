@@ -2,7 +2,7 @@
 % Please edit documentation in R/lassoBagAddGPD.R
 \name{Lasso.bag}
 \alias{Lasso.bag}
-\title{Lasso.bag: one-step main function of LassoBag framework}
+\title{Lasso.bag: one-step main function of VSOLassoBag framework}
 \usage{
 Lasso.bag(
   mat,
@@ -63,7 +63,7 @@ Lasso.bag(
 
 \item{bagFreq.sigMethod}{a character to determine the cut-off point decision method for the importance measure (i.e. the observed selection frequency). Supported methods are "Parametric Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP". The method "PERT" is not recommended due to consuming time and memmory requirement.}
 
-\item{kneedle.S}{numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points. Default `kneedle.S`=5 seems fine, but feel free to try other values. The selection of `kneedle.S` should be based on the shape of observed frequency curve. It is suggested to use larger S first.}
+\item{kneedle.S}{numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points. Default `kneedle.S`=10 seems fine, but feel free to try other values. The selection of `kneedle.S` should be based on the shape of observed frequency curve. It is suggested to use larger S first.}
 
 \item{auto.loose}{if TRUE, will reduce `kneedle.S` in case no elbow point is found with the set `kneedle.S`; only valid when `bagFreq.sigMethod` is "Curve Elbow Point Detection" ("CEP").}
 
@@ -73,7 +73,7 @@ Lasso.bag(
 
 \item{use.gpd}{whether to fit Generalized Pareto Distribution to the permutation results to accelerate the process. Only valid when `bagFreq.sigMethod` is "Permutation Test" ("PERT").}
 
-\item{fit.pareto}{the method of fitting Generalized Pareto Distribution, alternative choice is "gd", for gradient descend (only valid in "PERT" mode).}
+\item{fit.pareto}{the method of fitting Generalized Pareto Distribution, default choice is "gd", for gradient descend, and alternative as "mle", for Maximum Likelihood Estimation (only valid in "PERT" mode).}
 
 \item{imputeN}{the initial permutation times (only valid in "PERT" mode).}
 
@@ -83,7 +83,7 @@ Lasso.bag(
 
 \item{parallel}{whether the script run in parallel mode; you also need to set n.cores to determine how much CPU resource to use.}
 
-\item{n.cores}{how many cores/process to be assigned for this function; more cores used results in more resource of CPU and memory used.}
+\item{n.cores}{how many threads/process to be assigned for this function; more threads used results in more resource of CPU and memory used.}
 
 \item{rd.seed}{the random seed of this function, in case some of the experiments need to be reproduced.}
 

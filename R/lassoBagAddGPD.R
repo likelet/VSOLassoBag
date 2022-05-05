@@ -1,4 +1,4 @@
-#' Lasso.bag: one-step main function of LassoBag framework
+#' Lasso.bag: one-step main function of VSOLassoBag framework
 #'
 #' Lasso.bag is an one-step function that can be easily utilized for selecting important variables from multiple models inherited from R package \emph{glmnet}. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test)  are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
 #'
@@ -16,17 +16,17 @@
 #' @param a.family a character determine the data type of out.mat, the same used in \code{\link[glmnet]{glmnet}}.
 #' @param additional.covariable provide additional covariable(s) to build the cox model, only valid in Cox method (`a.family` == "cox"); a data.frame with same rows as `mat`
 #' @param bagFreq.sigMethod a character to determine the cut-off point decision method for the importance measure (i.e. the observed selection frequency). Supported methods are "Parametric Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP". The method "PERT" is not recommended due to consuming time and memmory requirement.
-#' @param kneedle.S numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points. Default `kneedle.S`=5 seems fine, but feel free to try other values. The selection of `kneedle.S` should be based on the shape of observed frequency curve. It is suggested to use larger S first.
+#' @param kneedle.S numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points. Default `kneedle.S`=10 seems fine, but feel free to try other values. The selection of `kneedle.S` should be based on the shape of observed frequency curve. It is suggested to use larger S first.
 #' @param auto.loose if TRUE, will reduce `kneedle.S` in case no elbow point is found with the set `kneedle.S`; only valid when `bagFreq.sigMethod` is "Curve Elbow Point Detection" ("CEP").
 #' @param loosing.factor a numeric value range in (0,1), which `kneedle.S` is multiplied by to reduce itself; only valid when `auto.loose` set to TRUE.
 #' @param min.S a numeric value determines the minimal value that `kneedle.S` will be loosed to; only valid when `auto.loose` set to TRUE.
 #' @param use.gpd whether to fit Generalized Pareto Distribution to the permutation results to accelerate the process. Only valid when `bagFreq.sigMethod` is "Permutation Test" ("PERT").
-#' @param fit.pareto the method of fitting Generalized Pareto Distribution, alternative choice is "gd", for gradient descend (only valid in "PERT" mode).
+#' @param fit.pareto the method of fitting Generalized Pareto Distribution, default choice is "gd", for gradient descend, and alternative as "mle", for Maximum Likelihood Estimation (only valid in "PERT" mode).
 #' @param imputeN the initial permutation times (only valid in "PERT" mode).
 #' @param imputeN.max the max permutation times. Regardless of whether p-value has meet the requirement (only valid in "PERT" mode).
 #' @param permut.increase if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation to get more random/permutation values (only valid in "PERT" mode).
 #' @param parallel whether the script run in parallel mode; you also need to set n.cores to determine how much CPU resource to use.
-#' @param n.cores how many cores/process to be assigned for this function; more cores used results in more resource of CPU and memory used.
+#' @param n.cores how many threads/process to be assigned for this function; more threads used results in more resource of CPU and memory used.
 #' @param rd.seed the random seed of this function, in case some of the experiments need to be reproduced.
 #' @param nfolds integer > 2, how many folds to be created for n-folds cross-validation LASSO in \code{\link[glmnet]{cv.glmnet}}.
 #' @param lambda.type character, which model should be used to obtain the variables selected in one bagging. Default is "lambda.1se" for less variables selected and lower probability being over-fitting. See the help of `cv.glmnet` for more details.

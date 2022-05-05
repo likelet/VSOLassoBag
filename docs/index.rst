@@ -6,7 +6,7 @@
 Welcome to lassoBag's documentation!
 ======================================
 
-`lassoBag <https://github.com/likelet/lassoBag/>`_ (LASSO and Bagging) aims at figuring out those features in independent variables that are significantly contributed to the dependent variables. It combines LASSO, Bagging and Permutation tests to get the estimated p value, which measures the significant level of each feature in independent variables.
+`lassoBag <https://github.com/likelet/lassoBag/>`_ (LASSO and Bagging) aims at figuring out those features in independent variables that are significantly contributed to the dependent variables. It combines LASSO, Bagging and several cut-off point decision methods to measure the importance level of each feature in independent variables.
 
 More information can be found in the project GitHub wiki.
 Please be sure that you have all dependencies software or tools preinstalled in your system. 
