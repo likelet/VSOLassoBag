@@ -59,7 +59,7 @@ Lasso.bag
     
     :type: numeric
     :default: ``10``
-    numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points; Default **kneedle\.S**=10 seems fine, but feel free to try other values; The selection of **kneedle\.S** should be based on the shape of observed frequency curve; It is suggested to use larger S first
+    numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points; Default **kneedle\.S** =10 seems fine, but feel free to try other values; The selection of **kneedle\.S** should be based on the shape of observed frequency curve; It is suggested to use larger S first
 
 .. confval:: auto.loose
     
@@ -226,7 +226,7 @@ Lasso.bag
     
     :type: boolean
     :default: ``FALSE``
-    *build a regression model based on the variables selected by LASSOBag process*
+    build a regression model based on the variables selected by LASSOBag process
 
 .. confval:: post.LASSO
     
