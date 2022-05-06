@@ -87,33 +87,33 @@ There may be more than one elbow point detected on the curve when using loose th
 
 The returned result, **res$results**, is a data.frame\:
 
-.. table:: Truth table for "not"
+.. csv-table::
    :widths: auto
-
-   =====  =====  =====  =====  =====
-   variable Frequency elbow\.point Diff Thres
-   =====  =====  =====  =====  =====
-   X_2 100  0 0
-   X_7 100  0 0
-   X_10 100  0 0
-   X_3 99  1 0
-   X_6 97  2 0
-   X_5 89 \* 8 3.9426
-   X_9 87  2 3.9426
-   X_8 81  6 3.9426
-   X_1 60 \* 21 16.9426
-   X_4 44  16 16.9426
-   X_468 27 \* 17 12.9426
-   X_169 25  2 12.9426
-   X_55 19 \* 6 1.9426
-   X_404 19  0 1.9426
-   X_108 18  1 1.9426
-   X_265 17  1 1.9426
-   X_114 15  2 1.9426
-   X_286 15  0 1.9426
-   X_236 14  1 1.9426
-   X_142 13  1 1.9426
-   =====  =====  =====  =====  =====
+   :header-rows: 1
+   :align: center
+   :delim: tab
+   
+variable	Frequency	elbow.point	Diff	Thres
+X_2	100		0	0
+X_7	100		0	0
+X_10	100		0	0
+X_3	99		1	0
+X_6	97		2	0
+X_5	89	*	8	3.9426
+X_9	87		2	3.9426
+X_8	81		6	3.9426
+X_1	60	*	21	16.9426
+X_4	44		16	16.9426
+X_468	27	*	17	12.9426
+X_169	25		2	12.9426
+X_55	19	*	6	1.9426
+X_404	19		0	1.9426
+X_108	18		1	1.9426
+X_265	17		1	1.9426
+X_114	15		2	1.9426
+X_286	15		0	1.9426
+X_236	14		1	1.9426
+X_142	13		1	1.9426
 
 (only showing the header and the first 20 rows)
 
