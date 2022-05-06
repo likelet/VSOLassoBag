@@ -48,7 +48,7 @@
 #' @param pvalue.cutoff determine the cut-off p-value for what variables were selected by LASSOBag, only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Parametric Statistical Test" or "Permutation Test".
 #' @param used.elbow.point determine which elbow point to use if multiple elbow points were detected for what variables were selected by LASSOBag. Supported methods are "first", "middle" and "last". Default is "middle", use the middle one among all detected elbow points. Only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Curve Elbow Point Detection".
 #'
-#' @return  A list with (1) the result dataframe contains "variable" with selection frequency >=1 and their "Frequency", the "P.value" and the adjusted p value "P.adjust" of each variable (if set `bagFreq.sigMethod` = "PST" or "PERT"), or the elbow point indicators "elbow.point", while elbow point(s) will be marked with "*" (if set `bagFreq.sigMethod` = "CEP"); (2) other utility results, including permutation results, the regression model built on LASSOBag results.
+#' @return  A list with (1) the result dataframe, "results", contains "variable" with selection frequency >=1 and their "Frequency", the "P.value" and the adjusted p value "P.adjust" of each variable (if set `bagFreq.sigMethod` = "PST" or "PERT"), or the elbow point indicators "elbow.point", while elbow point(s) will be marked with "*" (if set `bagFreq.sigMethod` = "CEP"). This is the main result VSOLassoBag obtained. (2) other utility results, including permutation results, "permutations", the regression model built on LASSOBag results, "model".
 #'
 #' @seealso \code{\link[glmnet]{glmnet}} and \code{\link[glmnet]{cv.glmnet}} in R package \emph{glmnet}.
 #'
@@ -81,6 +81,11 @@
 #' # poisson
 #' res<-Lasso.bag(mat=test.df$x,out.mat=test.df$pois,bootN=100,a.family="poisson",bagFreq.sigMethod="PST")
 #' res<-Lasso.bag(mat=test.df$x,out.mat=test.df$pois,bootN=100,a.family="poisson",bagFreq.sigMethod="CEP")
+#'
+#' # multi-thread processing is supported if run on a multi-thread, forking-supported platform (detailed see R package 'parallel'), which can significantly accelerate the process
+#' # you can achieve this by flag 'parallel' to TRUE and set 'n.cores' to an integer larger than 1, depending on the available threads
+#' # multi-thread processing using 2 threads
+#' res<-Lasso.bag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
 #' }
 
 

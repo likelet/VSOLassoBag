@@ -14,7 +14,7 @@ test.df
 Simulated Example Data for LassoBag Application for all models LassoBag supports.
 The independent variables matrix (X) contains 200 samples (rows) x 500 variates (columns).
 The dependent variable(s) matrix (Y) contains same rows as X and 1 variate (column) for gaussian, binomial, possion model application, or 2 variates (columns) for mgaussian, multinomial and cox model application.
-The first 1~10 independent variables (X_1~X_10) are simulated to be related to the dependent variable (D_1), and the first 6~15 independent variables (X_6~X_15) are simulated to be related to the second dependent variable (D_2) for mgaussian and multinomial model application.
+The first 1~10 independent variables (X_1~X_10) are simulated to be related to the dependent variable (D_1, first column), and the first 6~15 independent variables (X_6~X_15) are simulated to be related to the second dependent variable (D_2, second column) for mgaussian and multinomial model application.
 Survival data for cox model application were simulated with right-censored rate = 0.5 using \code{\link[coxed]{sim.survdata}} of R package \emph{coxed}.
 }
 \examples{

@@ -69,8 +69,75 @@ You can also tune other parameters to better balance the performance and require
 ^^^^^^^^^^^^^^^
 
 A list with:
-1. the result dataframe contains *variable* with selection frequency >=1 and their *Frequency*, the \"P.value\" and the adjusted p value *P.adjust* of each variable (if set *bagFreq.sigMethod* = \"PST\" or \"PERT\"), or the elbow point indicators \"elbow.point\", while elbow point(s) will be marked with \"\*\" (if set *bagFreq.sigMethod* = \"CEP\");
-2. other utility results, including permutation results, the regression model built on LASSOBag results.
+1. the result dataframe, "results", contains *variable* with selection frequency >=1 and their *Frequency*, the \"P.value\" and the adjusted p value *P.adjust* of each variable (if set *bagFreq.sigMethod* = \"PST\" or \"PERT\"), or the elbow point indicators \"elbow.point\", while elbow point(s) will be marked with \"\*\" (if set *bagFreq.sigMethod* = \"CEP\"). This is the main result VSOLassoBag obtained.
+2. other utility results, including permutation results, "permutations", the regression model built on LASSOBag results, "model".
+
+For tutorial purpose, here we used two examples utilizing different cut-off point decision methods to demonstrate how to interpret the returned results.
+
+We used simulated example data for gaussian model from the **simulated_example** from the package for the demonstration.
+
+
+
+2.3 Example 1: using "CEP" cut-off point decision method
+^^^^^^^^^^^^^^^^
+
+"CEP" (i.e. "Curve Elbow Point Detection") is the default and recommended method for cut-off point decision. Assuming a sharp decreasing of the observed frequency may seperate important features from those unimportant ones, the "CEP" method detects the elbow point(s) on the observed frequency curve, and features with observed frequency higher than the elbow point are inferred important.
+
+There may be more than one elbow point detected on the curve when using loose threshold, so it is recommended to use a stricter threshold first (use a larger *kneedle\.S* ) and auto loose the S parameter in case no elbow point can be found.
+
+The returned result, **res$results**, is a data.frame\:
+
+==== ==== ==== ==== ====
+variable Frequency elbow.point Diff Thres
+==== ==== ==== ==== ====
+X_2 100  0 0
+X_7 100  0 0
+X_10 100  0 0
+X_3 99  1 0
+X_6 97  2 0
+X_5 89 \* 8 3.9426
+X_9 87  2 3.9426
+X_8 81  6 3.9426
+X_1 60 \* 21 16.9426
+X_4 44  16 16.9426
+X_468 27 \* 17 12.9426
+X_169 25  2 12.9426
+X_55 19 \* 6 1.9426
+X_404 19  0 1.9426
+X_108 18  1 1.9426
+X_265 17  1 1.9426
+X_114 15  2 1.9426
+X_286 15  0 1.9426
+X_236 14  1 1.9426
+X_142 13  1 1.9426
+==== ==== ==== ==== ====
+
+(only showing the header and the first 20 rows)
+
+**variable**
+The name of the variable.
+
+**Frequency**
+The observed frequency of the variable.
+
+**elbow.point**
+Indicator, if detected as an elbow point, it is marked with "\*", otherwise left blank.
+
+**Diff**
+The calculated difference.
+
+**Thres**
+Threshold, only when the difference is larger than the threshold, it will be detected as an elbow point.
+
+In this example, when using default *kneedle\.S* , 4 elbow points were detected. Generally, one can choose the middle ("median") one as the cut-off point. Here we used the middle one as the cut-off point and obtained 10 important variables (X_2 ~ X_4).
+
+Since X_1 ~ X_10 were set to be important features, the obtained result successfully disrecovered all important features and excluded unimportant ones. 
+
+However, it must be pointed out that in practise, such performance is very **unlikely** to be achieved.
+
+
+
+
 
 
 
