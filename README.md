@@ -3,9 +3,9 @@
 
 # VSOLassoBag
 
-[VSOLassoBag](https://github.com/likelet/LassoBag) is a variable-selection
-oriented lasso bagging algorithm for biomarker development in omic-based
-translational research, providing a bagging Lasso framework
+[VSOLassoBag](https://github.com/likelet/LassoBag) is a variable-selection oriented
+lasso bagging algorithm for biomarker development in omic-based translational
+research, providing a bagging Lasso framework
 for selecting important variables from multiple
 models. A main application of this package is to screen limitted number
 of variables that are less dependent to train dataset. Basically, this
@@ -33,3 +33,18 @@ And the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("likelet/LassoBag")
 ```
+
+## Documentation
+
+A detailed documentation of VSOLassoBag could be found at [Readthedoc](https://lassobag.readthedocs.io/en/latest/contents/installation.html#install-vsolassobag). 
+
+## Authors
+
+Jiaqi Liang 
+
+## Supervisor
+
+Qi Zhao 
+
+## License 
+GNU General Public License V3
