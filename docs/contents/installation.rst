@@ -149,6 +149,16 @@ Since X_1 ~ X_10 were set to be important features, the obtained result successf
 However, it must be pointed out that in practise, such performance is very **unlikely** to be achieved.
 
 
+The image below shows the observed frequency curve (black) of variables with observed frequency >=1, and the change of difference (red) and threshold (dash blue), and the elbow points (dash vertical blue).
+
+
+
+.. image:: ObservedFreqCurve.png
+   :height: 200 px
+   :width: 200 px
+   :alt: Observed Frequency Curve
+   :align: left
+
 
 
 2.4 Example 2: using "PST" cut-off point decision method
