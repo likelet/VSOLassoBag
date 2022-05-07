@@ -34,7 +34,7 @@ devtools::install_github("likelet/LassoBag")
 
 ## Documentation
 
-The Documentation of VSOLassoBag could be found at (https://lassobag.readthedocs.io/en/latest/contents/installation.html#install-vsolassobag)[https://lassobag.readthedocs.io/en/latest/contents/installation.html#install-vsolassobag]
+A detailed documentation of VSOLassoBag could be found at [Readthedoc](https://lassobag.readthedocs.io/en/latest/contents/installation.html#install-vsolassobag). 
 
 ## Authors
 
