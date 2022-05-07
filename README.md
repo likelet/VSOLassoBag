@@ -31,3 +31,18 @@ And the development version from [GitHub](https://github.com/) with:
 # install.packages("devtools")
 devtools::install_github("likelet/LassoBag")
 ```
+
+## Documentation
+
+The Documentation of VSOLassoBag could be found at (https://lassobag.readthedocs.io/en/latest/contents/installation.html#install-vsolassobag)[https://lassobag.readthedocs.io/en/latest/contents/installation.html#install-vsolassobag]
+
+## Authors
+
+Jiaqi Liang 
+
+## Supervisor
+
+Qi Zhao 
+
+## License 
+GNU General Public License V3
