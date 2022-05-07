@@ -149,15 +149,18 @@ Since X_1 ~ X_10 were set to be important features, the obtained result successf
 However, it must be pointed out that in practise, such performance is very **unlikely** to be achieved.
 
 
-The image below shows the observed frequency curve (black) of variables with observed frequency >=1, and the change of difference (red) and threshold (dash blue), and the elbow points (dash vertical blue).
+The line plot below shows the observed frequency curve (black) of variables with observed frequency >=1, and the change of difference (red) and threshold (dash blue), and the elbow points (dash vertical blue).
 
 
 
 .. image:: ObservedFreqCurve.png
-   :height: 200 px
-   :width: 200 px
+   :height: 600 px
+   :width: 600 px
    :alt: Observed Frequency Curve
    :align: left
+
+
+      
 
 
 
@@ -214,6 +217,17 @@ In this example, when using default adjusted p-value cut-off, 0.05, we obtained 
 
 Since X_1 ~ X_10 were set to be important features, the obtained result disrecovered all important features, but also included some unimportant ones (from X_468 to X_286). 
 
+The histogram below shows the distribution of observed frequency of variables with observed frequency >=1, and the average selection ratio calculated based on the observed frequency.
+
+
+
+.. image:: ObservedFreqDistribution.png
+   :height: 600 px
+   :width: 600 px
+   :alt: Observed Frequency Distribution
+   :align: left
+
+      
 
 
 3 References
