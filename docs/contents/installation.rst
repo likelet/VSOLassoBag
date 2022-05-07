@@ -102,11 +102,10 @@ The returned result, **res$results**, is a data.frame\:
 
 
 .. csv-table::  Example Table
-   :widths: 15, 15, 15, 15
+   :widths: 15, 15, 15, 15, 15
    :header-rows: 1
-   :align: "center"
    
-   "variable","Frequency","elbow\.point","Diff","Thres"
+   "variable","Frequency","elbow.point","Diff","Thres"
    "X_2",100,"",0,0
    "X_7",100,"",0,0
    "X_10",100,"",0,0
