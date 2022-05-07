@@ -3,7 +3,9 @@
 
 # VSOLassoBag
 
-[VSOLassoBag](https://github.com/likelet/LassoBag)  provides a bagging Lasso framework
+[VSOLassoBag](https://github.com/likelet/LassoBag) is a variable-selection
+oriented lasso bagging algorithm for biomarker development in omic-based
+translational research, providing a bagging Lasso framework
 for selecting important variables from multiple
 models. A main application of this package is to screen limitted number
 of variables that are less dependent to train dataset. Basically, this

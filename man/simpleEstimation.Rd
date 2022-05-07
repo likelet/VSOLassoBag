@@ -15,7 +15,7 @@ simpleEstimation(res.df, bootN)
 a list of p-value of each variable and the average selection ratio
 }
 \description{
-This is an internal function utilized by Lasso.bag.
+This is an internal function utilized by VSOLassoBag.
 }
 \references{
 \href{https://www.doi.org/10.1371/journal.pone.0141869}{RRLASSO, Park H., et al, 2015}, the algorithm utilized in LassoBag has been modified.

@@ -2,7 +2,7 @@
 
 #' Kneedle Algorithm: to detect elbow point(s) on the curve
 #'
-#' This is an internal function utilized by Lasso.bag.
+#' This is an internal function utilized by VSOLassoBag.
 #'
 #' @param res a dataframe with variables and observed frequency
 #' @param S numeric, determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and larger means more conservative

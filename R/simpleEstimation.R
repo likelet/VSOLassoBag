@@ -4,7 +4,7 @@
 
 #' Parametric Statistical Test
 #'
-#' This is an internal function utilized by Lasso.bag.
+#' This is an internal function utilized by VSOLassoBag.
 #'
 #' @param res.df a dataframe with variables and observed frequency
 #' @param bootN an integer, bagging times

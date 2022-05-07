@@ -3,7 +3,7 @@
  # source('pareto_simple_opt_func.R')
 #' LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data
 #'
-#' This is an internal function utilized by Lasso.bag.
+#' This is an internal function utilized by VSOLassoBag.
 #'
 #' @param X a vector of data recording the permutation values
 #' @param x0 observed value

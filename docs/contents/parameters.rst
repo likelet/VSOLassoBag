@@ -2,7 +2,7 @@ Parameters and Configuration
 ====
 
 
-Lasso.bag
+VSOLassoBag
 ----
 
 .. confval:: mat

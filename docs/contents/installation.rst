@@ -17,10 +17,10 @@ VSOLassoBag can be run in both Windows system and most POSIX systems. The follow
 2 Usage Example
 --------------------
 
-2.1 Lasso.bag
+2.1 VSOLassoBag
 ^^^^^^^^^^^^^^^  
 
-Lasso.bag is an one-step function that can be easily utilized for selecting important variables from multiple models inherited from R package glmnet. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test) are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
+VSOLassoBag is an one-step function that can be easily utilized for selecting important variables from multiple models inherited from R package glmnet. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test) are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
 
 For a start, you need to input dependent variable(s) as a matrix **out.mat**, independent variables also as a matrix **mat**, and **a.family** for the model used by Lasso as determined by the type of dependent variables. The function will return a data frame which contains the important measure for each features in the dependent variables. The details of its parameters are shown in the parameters section.
 
@@ -35,33 +35,33 @@ You can also tune other parameters to better balance the performance and require
     # as shown below, 'a.family' is totally determined by the type of 'out.mat', the dependent variable(s)
     
     # binomial
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="PST")
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="CEP")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="PST")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="CEP")
     
     # gaussian
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$y,bootN=100,a.family="gaussian",bagFreq.sigMethod="PST")
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$y,bootN=100,a.family="gaussian",bagFreq.sigMethod="CEP")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$y,bootN=100,a.family="gaussian",bagFreq.sigMethod="PST")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$y,bootN=100,a.family="gaussian",bagFreq.sigMethod="CEP")
     
     # cox
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$surv,bootN=100,a.family="cox",bagFreq.sigMethod="PST")
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$surv,bootN=100,a.family="cox",bagFreq.sigMethod="CEP")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$surv,bootN=100,a.family="cox",bagFreq.sigMethod="PST")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$surv,bootN=100,a.family="cox",bagFreq.sigMethod="CEP")
     
     # multinomial
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,a.family="multinomial",bagFreq.sigMethod="PST")
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,a.family="multinomial",bagFreq.sigMethod="CEP")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,a.family="multinomial",bagFreq.sigMethod="PST")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,a.family="multinomial",bagFreq.sigMethod="CEP")
     
     # mgaussian
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,a.family="mgaussian",bagFreq.sigMethod="PST")
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,a.family="mgaussian",bagFreq.sigMethod="CEP")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,a.family="mgaussian",bagFreq.sigMethod="PST")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,a.family="mgaussian",bagFreq.sigMethod="CEP")
     
     # poisson
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$pois,bootN=100,a.family="poisson",bagFreq.sigMethod="PST")
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$pois,bootN=100,a.family="poisson",bagFreq.sigMethod="CEP")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$pois,bootN=100,a.family="poisson",bagFreq.sigMethod="PST")
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$pois,bootN=100,a.family="poisson",bagFreq.sigMethod="CEP")
     
     # multi-thread processing is supported if run on a multi-thread, forking-supported platform (detailed see R package 'parallel'), which can significantly accelerate the process
     # you can achieve this by flag 'parallel' to TRUE and set 'n.cores' to an integer larger than 1, depending on the available threads
     # multi-thread processing using 2 threads
-    res<-Lasso.bag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
+    res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
 
 
 
@@ -148,6 +148,7 @@ Since X_1 ~ X_10 were set to be important features, the obtained result successf
 
 However, it must be pointed out that in practise, such performance is very **unlikely** to be achieved.
 
+If set **do.plot** == TRUE, a PDF file named "ObservedFreqCurve" will be generated for result visualisation.
 
 The line plot below shows the observed frequency curve (black) of variables with observed frequency >=1, and the change of difference (red) and threshold (dash blue), and the elbow points (dash vertical blue).
 
@@ -157,6 +158,7 @@ The line plot below shows the observed frequency curve (black) of variables with
    :height: 600 px
    :width: 600 px
    :alt: Observed Frequency Curve
+
 
 
       
@@ -199,8 +201,7 @@ The returned result, **res$results**, is also a data.frame\:
    "X_236",14,0.0047,0.0609
    "X_142",13,0.0113,0.1202
 
-(only showing the header and the first 20 rows; results rounded to 4 decimal digits; 
-has been sorted according to the **Frequency** in a decreasing order)
+(only showing the header and the first 20 rows; results rounded to 4 decimal digits)
 
 **variable** , **Frequency** have the same meaning as indicated above.
 
@@ -216,6 +217,8 @@ In this example, when using default adjusted p-value cut-off, 0.05, we obtained 
 
 Since X_1 ~ X_10 were set to be important features, the obtained result disrecovered all important features, but also included some unimportant ones (from X_468 to X_286). 
 
+If set **do.plot** == TRUE, a PDF file named "ObservedFreqDistribution" will be generated for result visualisation.
+
 The histogram below shows the distribution of observed frequency of variables with observed frequency >=1, and the average selection ratio calculated based on the observed frequency.
 
 
@@ -224,6 +227,8 @@ The histogram below shows the distribution of observed frequency of variables wi
    :height: 600 px
    :width: 600 px
    :alt: Observed Frequency Distribution
+
+
 
       
 

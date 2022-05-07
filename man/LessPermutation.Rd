@@ -30,5 +30,5 @@ LessPermutation(
 p value of the observed value in the permutation test
 }
 \description{
-This is an internal function utilized by Lasso.bag.
+This is an internal function utilized by VSOLassoBag.
 }
