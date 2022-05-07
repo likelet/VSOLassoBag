@@ -97,11 +97,12 @@ The returned result, **res$results**, is a data.frame\:
    "Crunchy Frog", 1.49, "If we took the bones out, it wouldn't be
    crunchy, now would it?"
    "Gannet Ripple", 1.99, "On a stick!"
+   "X_2",100,"\*"
 
 
 
-.. csv-table::  
-   :widths: "auto"
+.. csv-table::  Example Table
+   :widths: 15, 15, 15, 15
    :header-rows: 1
    :align: "center"
    
