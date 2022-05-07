@@ -20,9 +20,25 @@ VSOLassoBag can be run in both Windows system and most POSIX systems. The follow
 2.1 VSOLassoBag
 ^^^^^^^^^^^^^^^  
 
-VSOLassoBag is an one-step function that can be easily utilized for selecting important variables from multiple models inherited from R package glmnet. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test) are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
+VSOLassoBag is an one-step function that can be easily utilized for selecting important variables from multiple models inherited from R package glmnet. 
+Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test) are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
 
-For a start, you need to input dependent variable(s) as a matrix **out.mat**, independent variables also as a matrix **mat**, and **a.family** for the model used by Lasso as determined by the type of dependent variables. The function will return a data frame which contains the important measure for each features in the dependent variables. The details of its parameters are shown in the parameters section.
+The algorithm workflow is shown in the follow image:
+
+
+
+.. image:: workflow.png
+   :height: 600 px
+   :width: 500 px
+   :alt: Algorithm Workflow
+
+
+
+      
+
+For a start, you need to input dependent variable(s) as a matrix **out.mat**, independent variables also as a matrix **mat**, 
+and **a.family** for the model used by Lasso as determined by the type of dependent variables. The function will return a data frame which contains the important measure for each features in the dependent variables. 
+The details of its parameters are shown in the parameters section.
 
 You can also tune other parameters to better balance the performance and required resource for analysis. Key parameters include *bootN* for bagging times, and *bagFreq.sigMethod* for the cut-off point decision method.
 
@@ -230,16 +246,3 @@ The histogram below shows the distribution of observed frequency of variables wi
 
 
 
-      
-
-
-3 References
---------------------
-
- - Park H, Imoto S, Miyano S, 2015. \"Recursive Random Lasso (RRLasso) for Identifying Anti-Cancer Drug Targets\", PLoS ONE 10(11): e0141869. https://doi.org/10.1371/journal.pone.0141869 .
- 
- - V\. Satopaa, J. Albrecht, D. Irwin and B. Raghavan, 2011. \"Finding a 'Kneedle' in a Haystack: Detecting Knee Points in System Behavior\", 2011 31st International Conference on Distributed Computing Systems Workshops, pp. 166-171. https://doi.org/10.1109/ICDCSW.2011.20 .
-
- - Simon, Noah, Jerome Friedman, Trevor Hastie, and Robert Tibshirani. 2011. \"Regularization Paths for Cox’s Proportional Hazards Model via Coordinate Descent.\" Journal of Statistical Software, Articles 39 (5): 1–13. https://doi.org/10.18637/jss.v039.i05 .
-
- - Friedman, Jerome, Trevor Hastie, and Robert Tibshirani. 2010. \"Regularization Paths for Generalized Linear Models via Coordinate Descent.\" Journal of Statistical Software, Articles 33 (1): 1–22. https://doi.org/10.18637/jss.v033.i01 .
