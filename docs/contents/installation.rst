@@ -157,7 +157,6 @@ The line plot below shows the observed frequency curve (black) of variables with
    :height: 600 px
    :width: 600 px
    :alt: Observed Frequency Curve
-   :align: left
 
 
       
@@ -225,7 +224,6 @@ The histogram below shows the distribution of observed frequency of variables wi
    :height: 600 px
    :width: 600 px
    :alt: Observed Frequency Distribution
-   :align: left
 
       
 
