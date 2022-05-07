@@ -42,6 +42,7 @@ The details of its parameters are shown in the parameters section.
 
 You can also tune other parameters to better balance the performance and required resource for analysis. Key parameters include *bootN* for bagging times, and *bagFreq.sigMethod* for the cut-off point decision method.
 
+Here are some example codes that can be used to analysis simulated example data:
 
  .. code-block:: R
     
