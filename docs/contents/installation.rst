@@ -69,7 +69,9 @@ You can also tune other parameters to better balance the performance and require
 ^^^^^^^^^^^^^^^
 
 A list with:
+
 1. the result dataframe, "results", contains *variable* with selection frequency >=1 and their *Frequency*, the \"P.value\" and the adjusted p value *P.adjust* of each variable (if set *bagFreq.sigMethod* = \"PST\" or \"PERT\"), or the elbow point indicators \"elbow.point\", while elbow point(s) will be marked with \"\*\" (if set *bagFreq.sigMethod* = \"CEP\"). This is the main result VSOLassoBag obtained.
+
 2. other utility results, including permutation results, "permutations", the regression model built on LASSOBag results, "model".
 
 For tutorial purpose, here we used two examples utilizing different cut-off point decision methods to demonstrate how to interpret the returned results.
@@ -89,19 +91,7 @@ The returned result, **res$results**, is a data.frame\:
 
 
 
-.. csv-table:: Frozen Delights!
-   :header: "Treat", "Quantity", "Description"
-   :widths: 15, 10, 30
-
-   "Albatross", 2.99, "On a stick!"
-   "Crunchy Frog", 1.49, "If we took the bones out, it wouldn't be
-   crunchy, now would it?"
-   "Gannet Ripple", 1.99, "On a stick!"
-   "X_2",100,"\*"
-
-
-
-.. csv-table::  Example Table
+.. csv-table::  
    :widths: 15, 15, 15, 15, 15
    :header-rows: 1
    
@@ -129,7 +119,8 @@ The returned result, **res$results**, is a data.frame\:
 
 
 
-(only showing the header and the first 20 rows)
+(only showing the header and the first 20 rows; 
+results rounded to 4 decimal digits)
 
 **variable**
 
@@ -151,7 +142,7 @@ The calculated difference.
 
 Threshold, only when the difference is larger than the threshold, it will be detected as an elbow point.
 
-In this example, when using default *kneedle\.S* , 4 elbow points were detected. Generally, one can choose the middle ("median") one as the cut-off point. Here we used the middle one as the cut-off point and obtained 10 important variables (X_2 ~ X_4).
+In this example, when using default *kneedle\.S* , 4 elbow points were detected. Generally, one can choose the middle ("median") one as the cut-off point. Here we used the middle one as the cut-off point and obtained 10 important variables (from X_2 to X_4).
 
 Since X_1 ~ X_10 were set to be important features, the obtained result successfully disrecovered all important features and excluded unimportant ones. 
 
@@ -160,6 +151,58 @@ However, it must be pointed out that in practise, such performance is very **unl
 
 
 
+2.4 Example 2: using "PST" cut-off point decision method
+^^^^^^^^^^^^^^^^
+
+"PST" (i.e. "Parametric Statistical Test") is one of the alternative methods for cut-off point decision, which is computed as fast and memory-effecient as "CEP". 
+It assumes the expected selection frequency of all variables follows a binomial distribution, so we can first model such a theoritical background distribution, and then get the statistical significance (p-value) of all variables.
+
+The returned result, **res$results**, is also a data.frame\:
+
+
+
+.. csv-table::  
+   :widths: 15, 15, 15, 15
+   :header-rows: 1
+   
+   "variable","Frequency","P.value","P.adjust"
+   "X_2",100,0,0
+   "X_7",100,0,0
+   "X_10",100,0,0
+   "X_3",99,0,0
+   "X_6",97,0,0
+   "X_5",89,0,0
+   "X_9",87,0,0
+   "X_8",81,0,0
+   "X_1",60,0,0
+   "X_4",44,0,0
+   "X_468",27,0,0
+   "X_169",25,0,0
+   "X_55",19,0,4e-04
+   "X_404",19,0,4e-04
+   "X_108",18,1e-04,0.0012
+   "X_265",17,2e-04,0.0035
+   "X_114",15,0.0018,0.0251
+   "X_286",15,0.0018,0.0251
+   "X_236",14,0.0047,0.0609
+   "X_142",13,0.0113,0.1202
+
+(only showing the header and the first 20 rows; results rounded to 4 decimal digits; 
+has been sorted according to the **Frequency** in a decreasing order)
+
+**variable** , **Frequency** have the same meaning as indicated above.
+
+**P.value**
+
+The p-value of variables with observed frequency >=1.
+
+**P.adjust**
+
+The adjusted p-value, which is corrected for multiple test by *Benjamini-Hochberg* method.
+
+In this example, when using default adjusted p-value cut-off, 0.05, we obtained 18 important variables (from X_2 to X_286).
+
+Since X_1 ~ X_10 were set to be important features, the obtained result disrecovered all important features, but also included some unimportant ones (from X_468 to X_286). 
 
 
 
