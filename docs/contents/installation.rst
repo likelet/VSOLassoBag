@@ -30,7 +30,7 @@ The algorithm workflow is shown in the follow image:
 .. image:: workflow.png
    :height: 600 px
    :width: 500 px
-   :alt: Algorithm Workflow
+   :alt: Algorithm Workflow (Purposely removed, will be updated until manuscript acception)
 
 
 
