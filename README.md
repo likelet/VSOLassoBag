@@ -40,11 +40,11 @@ A detailed documentation of VSOLassoBag could be found at [here](https://seqworl
 
 ## Authors
 
-Jiaqi Liang and Chaoye Wang
+Jiaqi Liang and Chaoye Wang from SYSU
 
 ## Supervisor
 
-Qi Zhao 
+Qi Zhao from SYSUCC, zhaoqi@sysucc.org.cn
 
 ## License 
 GNU General Public License V3
