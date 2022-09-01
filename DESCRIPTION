@@ -1,5 +1,5 @@
 Package: VSOLassoBag
-Title: A variable-selection oriented lasso bagging algorithm for biomarker discovery in omic-based translational research
+Title: A variable-selection oriented LASSO bagging algorithm for biomarker discovery in omic-based translational research
 Version: 1.0.0
 Authors@R: c(
   person('Qi', 'Zhao',  email = 'zhaoqi@sysucc.org.cn', role = c('aut','cre'), comment = c(ORCID = '0000-0002-8683-6145')),
