@@ -1,8 +1,8 @@
 ---
 title: "VSOLassoBag"
 subtitle: "Variable-Selection Oriented Lasso Bagging Algorithm"
-date: "2022-5-18"
-author: "wangcy1@sysucc.org.cn"
+date: "2022-9-1"
+author: "liangjq27@mail2.sysu.edu.cn"
 output:
   rmdformats::readthedown:
     self_contained: true
@@ -50,14 +50,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## 1. Introduction
 
-<a href="https://github.com/likelet/LassoBag">VSOLassoBag</a> is a variable-selection oriented Lasso bagging algorithm for biomarker development in omics-based translational research, providing a bagging Lasso framework for **selecting significant variables from multiple models**. A main application of this package is to screen a limited number of variables that are less dependent to the training data sets. Basically, this package was initially developed to adjust Lasso selected results from bootstrapped sample sets. The variables with the highest frequency among several selected results were considered as the stable variables to discriminate different sample sets. However, it is usually difficult to determine the cut-off point in terms of frequency when applied in real data sets. In this package, we introduced several methods, namely (1) **curve elbow point detection**, (2) **parametric statistical test** and (3) **permutation test** to help determine the cut-off point for variable selection.
+**VSOLassoBag** is a variable-selection oriented Lasso bagging algorithm for biomarker development in omics-based translational research, providing a bagging Lasso framework for **selecting significant variables from multiple models**. A main application of this package is to screen a limited number of variables that are less dependent to the training data sets. Basically, this package was initially developed to adjust Lasso selected results from bootstrapped sample sets. The variables with the highest frequency among several selected results were considered as the stable variables to discriminate different sample sets. However, it is usually difficult to determine the cut-off point in terms of frequency when applied in real data sets. In this package, we introduced several methods, namely (1) **curve elbow point detection**, (2) **parametric statistical test** to help determine the cut-off point for variable selection. The source code and documents are freely available through Github (https://github.com/likelet/LassoBag).
 
 ### 1.1 Citation
 If you find this tool useful, please cite:
 
-> **Yu Sun, Qi Zhao and Jiaqi Liang (2022). VSOLassoBag: A
-  variable-selection oriented Lasso bagging algorithm for biomarker
-  development in omic-based translational research. R package version
+> **Jiaqi Liang, Chaoye Wang and Qi Zhao(2022). VSOLassoBag: a
+  variable-selection oriented LASSO bagging algorithm for biomarker
+  discovery in omic-based translational research. R package version
   1.0.0.**
   
 
@@ -119,7 +119,7 @@ To perform analysis with `VSOLassoBag` function, you need to provide:
 ## 4. Results
 A list with:
 
-1. `results`: a dataframe containing **variables** with selection frequency >= 1. If setting `bagFreq.sigMethod == "PST" or "PERT"`, the **P.value** and the **P.adjust** of each variable will be provided. If setting `bagFreq.sigMethod = "CEP"` or using the elbow point indicators, elbow point(s) will be marked with <strong>*</strong> and <strong>thresholds</strong> for each variable will be assigned.
+1. `results`: a dataframe containing **variables** with selection frequency >= 1. If setting `bagFreq.sigMethod == "PST"`, the **P.value** and the **P.adjust** of each variable will be provided. If setting `bagFreq.sigMethod = "CEP"` or using the elbow point indicators, elbow point(s) will be marked with <strong>*</strong> and <strong>thresholds</strong> for each variable will be assigned.
 
 2. `permutations`: the permutation test results. 
 
