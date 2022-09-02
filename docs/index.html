@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="generator" content="pandoc" />
 
-        <meta name="author" content="wangcy1@sysucc.org.cn" />
+        <meta name="author" content="liangjq27@mail2.sysu.edu.cn" />
     
     
     <title>VSOLassoBag</title>
@@ -1625,8 +1625,8 @@ Algorithm</h1>
       </ul>
     </div>
     <div id="postamble" data-toggle="wy-nav-shift" class="status">
-                  <p class="author"><span class="glyphicon glyphicon-user"></span> <a href="mailto:wangcy1@sysucc.org.cn" class="email">wangcy1@sysucc.org.cn</a></p>
-                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2022-5-18</p>
+                  <p class="author"><span class="glyphicon glyphicon-user"></span> <a href="mailto:liangjq27@mail2.sysu.edu.cn" class="email">liangjq27@mail2.sysu.edu.cn</a></p>
+                        <p class="date"><span class="glyphicon glyphicon-calendar"></span> 2022-9-1</p>
           </div>
    </div>
      
@@ -1664,29 +1664,29 @@ a:visited {
 </style>
 <div id="introduction" class="section level2">
 <h2>1. Introduction</h2>
-<p><a href="https://github.com/likelet/LassoBag">VSOLassoBag</a> is a
-variable-selection oriented Lasso bagging algorithm for biomarker
-development in omics-based translational research, providing a bagging
-Lasso framework for <strong>selecting significant variables from
-multiple models</strong>. A main application of this package is to
-screen a limited number of variables that are less dependent to the
-training data sets. Basically, this package was initially developed to
-adjust Lasso selected results from bootstrapped sample sets. The
-variables with the highest frequency among several selected results were
-considered as the stable variables to discriminate different sample
-sets. However, it is usually difficult to determine the cut-off point in
-terms of frequency when applied in real data sets. In this package, we
-introduced several methods, namely (1) <strong>curve elbow point
-detection</strong>, (2) <strong>parametric statistical test</strong> and
-(3) <strong>permutation test</strong> to help determine the cut-off
-point for variable selection.</p>
+<p><strong>VSOLassoBag</strong> is a variable-selection oriented Lasso
+bagging algorithm for biomarker development in omics-based translational
+research, providing a bagging Lasso framework for <strong>selecting
+significant variables from multiple models</strong>. A main application
+of this package is to screen a limited number of variables that are less
+dependent to the training data sets. Basically, this package was
+initially developed to adjust Lasso selected results from bootstrapped
+sample sets. The variables with the highest frequency among several
+selected results were considered as the stable variables to discriminate
+different sample sets. However, it is usually difficult to determine the
+cut-off point in terms of frequency when applied in real data sets. In
+this package, we introduced several methods, namely (1) <strong>curve
+elbow point detection</strong>, (2) <strong>parametric statistical
+test</strong> to help determine the cut-off point for variable
+selection. The source code and documents are freely available through
+Github (<a href="https://github.com/likelet/LassoBag" class="uri">https://github.com/likelet/LassoBag</a>).</p>
 <div id="citation" class="section level3">
 <h3>1.1 Citation</h3>
 <p>If you find this tool useful, please cite:</p>
 <blockquote>
-<p><strong>Jiaqi Liang, Chaoye Wang and Qi Zhao(2022). VSOLassoBag: A
-variable-selection oriented Lasso bagging algorithm for biomarker
-development in omic-based translational research. R package version
+<p><strong>Jiaqi Liang, Chaoye Wang and Qi Zhao(2022). VSOLassoBag: a
+variable-selection oriented LASSO bagging algorithm for biomarker
+discovery in omic-based translational research. R package version
 1.0.0.</strong></p>
 </blockquote>
 </div>
@@ -1757,10 +1757,9 @@ the <code>mat.</code>.</p>
 <ol style="list-style-type: decimal">
 <li><p><code>results</code>: a dataframe containing
 <strong>variables</strong> with selection frequency &gt;= 1. If setting
-<code>bagFreq.sigMethod == &quot;PST&quot; or &quot;PERT&quot;</code>, the
-<strong>P.value</strong> and the <strong>P.adjust</strong> of each
-variable will be provided. If setting
-<code>bagFreq.sigMethod = &quot;CEP&quot;</code> or using the elbow point
+<code>bagFreq.sigMethod == &quot;PST&quot;</code>, the <strong>P.value</strong>
+and the <strong>P.adjust</strong> of each variable will be provided. If
+setting <code>bagFreq.sigMethod = &quot;CEP&quot;</code> or using the elbow point
 indicators, elbow point(s) will be marked with <strong>*</strong> and
 <strong>thresholds</strong> for each variable will be assigned.</p></li>
 <li><p><code>permutations</code>: the permutation test results.</p></li>
