@@ -1,13 +1,13 @@
 Package: VSOLassoBag
-Title: A variable-selection oriented lasso bagging algorithm for biomarker development in omic-based translational research
+Title: A variable-selection oriented LASSO bagging algorithm for biomarker discovery in omic-based translational research
 Version: 1.0.0
 Authors@R: c(
-  person('Yu', 'Sun',   email = "suny226@mail2.sysu.edu.cn", role = c('aut', 'cre'), comment = c(ORCID = '0000-0003-4269-7187')),
-  person('Qi', 'Zhao',  email = 'zhaoqi@sysucc.org.cn', role = c('aut'), comment = c(ORCID = '0000-0002-8683-6145')),
-  person('Jiaqi', 'Liang',  email = 'liangjq27@mail2.sysu.edu.cn', role = c('aut'))
+  person('Qi', 'Zhao',  email = 'zhaoqi@sysucc.org.cn', role = c('aut','cre'), comment = c(ORCID = '0000-0002-8683-6145')),
+  person('Jiaqi', 'Liang',  email = 'liangjq27@mail2.sysu.edu.cn', role = c('aut')),
+  person('Chaoye', 'Wang',  email = 'wangcy1@sysucc.org.cn', role = c('aut'))
   )
 Maintainer: Qi Zhao <zhaoqi@sysucc.org.cn>
-Description: VSOLassoBag provides an implementation of a bootstrap aggregating (bagging) Lasso method for selecting important variables for multiple models. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test) are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
+Description: VSOLassoBag is a wrapped LASSO approach by integrating an ensemble learning strategy to help select efficient, stable, and high confidential variables from omics-based data. Using a bagging strategy in combination of a parametric method or inflection point search method for cut-off threshold determination, VSOLassoBag can integrate and vote variables generated from multiple LASSO models to determine the optimal candidates.
 License: GPL-3
 Encoding: UTF-8
 Depends:
@@ -18,5 +18,5 @@ Imports:
     ggplot2,
     POT,
     parallel
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 LazyData: true
