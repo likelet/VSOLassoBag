@@ -24,7 +24,6 @@ VSOLassoBag(
   permut.increase = 100,
   parallel = FALSE,
   n.cores = 1,
-  rd.seed = 10867,
   nfolds = 4,
   lambda.type = "lambda.1se",
   plot.freq = "part",
@@ -47,124 +46,216 @@ VSOLassoBag(
 )
 }
 \arguments{
-\item{mat}{sample matrix that each column represent a variable and rows represent sample data points, all the entries in it should be numeric.}
+\item{mat}{sample matrix that each column represent a variable and rows
+represent sample data points, all the entries in it should be numeric.}
 
-\item{out.mat}{vector or dataframe with the same rows as the sample size of `mat`.}
+\item{out.mat}{vector or dataframe with the same rows as the sample size of
+`mat`.}
 
-\item{observed.fre}{dataframe with columns 'variable' and 'Frequency', which can be obtained from existed VSOLassoBag results for re-analysis. A warning will be issued if the variables in `observed.fre` not found in `mat`, and these variables will be excluded.}
+\item{observed.fre}{dataframe with columns 'variable' and 'Frequency',
+which can be obtained from existed VSOLassoBag results for re-analysis. A
+warning will be issued if the variables in `observed.fre` not found in `mat`,
+and these variables will be excluded.}
 
-\item{bootN}{the size of re-sampled samples for bagging, default 1000; smaller consumes less processing time but may not get robust results.}
+\item{bootN}{the size of re-sampled samples for bagging, default 1000; smaller
+consumes less processing time but may not get robust results.}
 
 \item{boot.rep}{whether sampling with return or not in the bagging procedure}
 
-\item{a.family}{a character determine the data type of out.mat, the same used in \code{\link[glmnet]{glmnet}}.}
+\item{a.family}{a character determine the data type of out.mat, the same used
+in \code{\link[glmnet]{glmnet}}.}
 
-\item{additional.covariable}{provide additional covariable(s) to build the cox model, only valid in Cox method (`a.family` == "cox"); a data.frame with same rows as `mat`}
+\item{additional.covariable}{provide additional covariable(s) to build the cox
+model, only valid in Cox method (`a.family` == "cox"); a data.frame with same
+rows as `mat`}
 
-\item{bagFreq.sigMethod}{a character to determine the cut-off point decision method for the importance measure (i.e. the observed selection frequency). Supported methods are "Parametric Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP". The method "PERT" is not recommended due to consuming time and memmory requirement.}
+\item{bagFreq.sigMethod}{a character to determine the cut-off point decision
+method for the importance measure (i.e. the observed selection frequency).
+Supported methods are "Parametric Statistical Test" (abbr. "PST"),
+"Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT").
+The default and preferable method is "CEP". The method "PERT" is not
+recommended due to consuming time and memmory requirement.}
 
-\item{kneedle.S}{numeric, an important parameter that determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and may find more elbow points. Default `kneedle.S`=10 seems fine, but feel free to try other values. The selection of `kneedle.S` should be based on the shape of observed frequency curve. It is suggested to use larger S first.}
+\item{kneedle.S}{numeric, an important parameter that determines how aggressive
+the elbow points on the curve to be called, smaller means more aggressive and
+may find more elbow points. Default `kneedle.S`=10 seems fine, but feel free to
+try other values. The selection of `kneedle.S` should be based on the shape of
+observed frequency curve. It is suggested to use larger S first.}
 
-\item{auto.loose}{if TRUE, will reduce `kneedle.S` in case no elbow point is found with the set `kneedle.S`; only valid when `bagFreq.sigMethod` is "Curve Elbow Point Detection" ("CEP").}
+\item{auto.loose}{if TRUE, will reduce `kneedle.S` in case no elbow point is
+found with the set `kneedle.S`; only valid when `bagFreq.sigMethod` is "Curve
+Elbow Point Detection" ("CEP").}
 
-\item{loosing.factor}{a numeric value range in (0,1), which `kneedle.S` is multiplied by to reduce itself; only valid when `auto.loose` set to TRUE.}
+\item{loosing.factor}{a numeric value range in (0,1), which `kneedle.S` is
+multiplied by to reduce itself; only valid when `auto.loose` set to TRUE.}
 
-\item{min.S}{a numeric value determines the minimal value that `kneedle.S` will be loosed to; only valid when `auto.loose` set to TRUE.}
+\item{min.S}{a numeric value determines the minimal value that `kneedle.S` will
+be loosed to; only valid when `auto.loose` set to TRUE.}
 
-\item{use.gpd}{whether to fit Generalized Pareto Distribution to the permutation results to accelerate the process. Only valid when `bagFreq.sigMethod` is "Permutation Test" ("PERT").}
+\item{use.gpd}{whether to fit Generalized Pareto Distribution to the
+permutation results to accelerate the process. Only valid when
+`bagFreq.sigMethod` is "Permutation Test" ("PERT").}
 
-\item{fit.pareto}{the method of fitting Generalized Pareto Distribution, default choice is "gd", for gradient descend, and alternative as "mle", for Maximum Likelihood Estimation (only valid in "PERT" mode).}
+\item{fit.pareto}{the method of fitting Generalized Pareto Distribution,
+default choice is "gd", for gradient descend, and alternative as "mle", for
+Maximum Likelihood Estimation (only valid in "PERT" mode).}
 
 \item{imputeN}{the initial permutation times (only valid in "PERT" mode).}
 
-\item{imputeN.max}{the max permutation times. Regardless of whether p-value has meet the requirement (only valid in "PERT" mode).}
+\item{imputeN.max}{the max permutation times. Regardless of whether p-value has
+meet the requirement (only valid in "PERT" mode).}
 
-\item{permut.increase}{if the initial imputeN times of permutation doesn't meet the requirement, then we add ‘permut.increase times of permutation to get more random/permutation values (only valid in "PERT" mode).}
+\item{permut.increase}{if the initial imputeN times of permutation doesn't meet
+the requirement, then we add ‘permut.increase times of permutation to get more
+random/permutation values (only valid in "PERT" mode).}
 
-\item{parallel}{whether the script run in parallel mode; you also need to set n.cores to determine how much CPU resource to use.}
+\item{parallel}{whether the script run in parallel mode; you also need to set
+n.cores to determine how much CPU resource to use.}
 
-\item{n.cores}{how many threads/process to be assigned for this function; more threads used results in more resource of CPU and memory used.}
+\item{n.cores}{how many threads/process to be assigned for this function; more
+threads used results in more resource of CPU and memory used.}
 
-\item{rd.seed}{the random seed of this function, in case some of the experiments need to be reproduced.}
+\item{nfolds}{integer > 2, how many folds to be created for n-folds
+cross-validation LASSO in \code{\link[glmnet]{cv.glmnet}}.}
 
-\item{nfolds}{integer > 2, how many folds to be created for n-folds cross-validation LASSO in \code{\link[glmnet]{cv.glmnet}}.}
+\item{lambda.type}{character, which model should be used to obtain the
+variables selected in one bagging. Default is "lambda.1se" for less variables
+selected and lower probability being over-fitting. See the help of `cv.glmnet`
+for more details.}
 
-\item{lambda.type}{character, which model should be used to obtain the variables selected in one bagging. Default is "lambda.1se" for less variables selected and lower probability being over-fitting. See the help of `cv.glmnet` for more details.}
+\item{plot.freq}{whether to show all the non-zero frequency in the final
+barplot or not. If "full", all the variables(including zero frequency) will be
+plotted. If "part", all the non-zero variables will be plotted. If "not", will
+not print the plot.}
 
-\item{plot.freq}{whether to show all the non-zero frequency in the final barplot or not. If "full", all the variables(including zero frequency) will be plotted. If "part", all the non-zero variables will be plotted. If "not", will not print the plot.}
-
-\item{plot.out}{the file's name of the frequency plot. If set to FALSE, no plot will be output. If you run this function in Linux command line, you don't have to set this param for the plot.freq will output your plot to your current working directory with name "Rplot.pdf".Default to FALSE.}
+\item{plot.out}{the file's name of the frequency plot. If set to FALSE, no plot
+will be output. If you run this function in Linux command line, you don't have
+to set this param for the plot.freq will output your plot to your current
+working directory with name "Rplot.pdf".Default to FALSE.}
 
 \item{do.plot}{if TRUE generate result plots.}
 
-\item{output.dir}{the path to save result files generated by \code{\link[VSOLassoBag]{VSOLassoBag}} (if not existed, will be created). Default is NA, will save in the same space as the current working dir.}
+\item{output.dir}{the path to save result files generated by
+\code{\link[VSOLassoBag]{VSOLassoBag}} (if not existed, will be created).
+Default is NA, will save in the same space as the current working dir.}
 
-\item{filter.method}{the filter method applied to input matrix; default is `auto`, automatically select the filter method according to the data type of `out.mat`. Specific supported methods are "pearson", "spearman", "kendall" from \code{\link{cor.test}} method, and "cox" from \code{\link{coxph}} method, and "none" (no filter applied).}
+\item{filter.method}{the filter method applied to input matrix; default is
+`auto`, automatically select the filter method according to the data type of
+`out.mat`. Specific supported methods are "pearson", "spearman", "kendall"
+from \code{\link{cor.test}} method, and "cox" from \code{\link{coxph}} method,
+and "none" (no filter applied).}
 
-\item{inbag.filter}{if TRUE, apply filters to the re-sampled bagging samples rather than the original samples; default is TRUE.}
+\item{inbag.filter}{if TRUE, apply filters to the re-sampled bagging samples
+rather than the original samples; default is TRUE.}
 
-\item{filter.thres.method}{the method determines the threshold of importance in filters. Supported methods are "fdr" and "rank".}
+\item{filter.thres.method}{the method determines the threshold of importance
+in filters. Supported methods are "fdr" and "rank".}
 
-\item{filter.thres.P}{if `filter.thres.method` is "fdr", use `filter.thres.P` as the (adjusted) cut-off p-value. Default is 0.05.}
+\item{filter.thres.P}{if `filter.thres.method` is "fdr", use `filter.thres.P`
+as the (adjusted) cut-off p-value. Default is 0.05.}
 
-\item{filter.rank.cutoff}{if `filter.thres.method` is "rank", use `filter.rank.cutoff` as the cut-off rank. Default is 0.05.}
+\item{filter.rank.cutoff}{if `filter.thres.method` is "rank", use
+`filter.rank.cutoff` as the cut-off rank. Default is 0.05.}
 
-\item{filter.min.variables}{minimum important variables selected by filters. Useful when building a multi-variable cox model since cox model can only be built on limited variables. Default is -Inf (not applied).}
+\item{filter.min.variables}{minimum important variables selected by filters.
+Useful when building a multi-variable cox model since cox model can only be
+built on limited variables. Default is -Inf (not applied).}
 
-\item{filter.max.variables}{maximum important variables selected by filters. Useful when building a multi-variable cox model since cox model can only be built on limited variables. Default is Inf (not applied).}
+\item{filter.max.variables}{maximum important variables selected by filters.
+Useful when building a multi-variable cox model since cox model can only be
+built on limited variables. Default is Inf (not applied).}
 
-\item{filter.result.report}{if TRUE generate filter reports for filter results, only vaild when `inbag.filter` set to FALSE (i.e. only valid in out-bag filters mode).}
+\item{filter.result.report}{if TRUE generate filter reports for filter results,
+only vaild when `inbag.filter` set to FALSE (i.e. only valid in out-bag filters
+mode).}
 
-\item{filter.report.all.variables}{if TRUE report all variables in the filter report, only valid when `filter.result.report` set to TRUE.}
+\item{filter.report.all.variables}{if TRUE report all variables in the filter
+report, only valid when `filter.result.report` set to TRUE.}
 
-\item{post.regression}{build a regression model based on the variables selected by VSOLassoBag process. Default is FALSE.}
+\item{post.regression}{build a regression model based on the variables selected
+by VSOLassoBag process. Default is FALSE.}
 
-\item{post.LASSO}{build a LASSO regression model based on the variables selected by VSOLassoBag process, only vaild when `post.regression` set to TRUE.}
+\item{post.LASSO}{build a LASSO regression model based on the variables
+selected by VSOLassoBag process, only vaild when `post.regression` set to TRUE.}
 
-\item{pvalue.cutoff}{determine the cut-off p-value for what variables were selected by VSOLassoBag, only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Parametric Statistical Test" or "Permutation Test".}
+\item{pvalue.cutoff}{determine the cut-off p-value for what variables were
+selected by VSOLassoBag, only vaild when `post.regression` is TRUE and
+`bagFreq.sigMethod` set to "Parametric Statistical Test" or "Permutation Test".}
 
-\item{used.elbow.point}{determine which elbow point to use if multiple elbow points were detected for what variables were selected by VSOLassoBag. Supported methods are "first", "middle" and "last". Default is "middle", use the middle one among all detected elbow points. Only vaild when `post.regression` is TRUE and `bagFreq.sigMethod` set to "Curve Elbow Point Detection".}
+\item{used.elbow.point}{determine which elbow point to use if multiple elbow
+points were detected for what variables were selected by VSOLassoBag. Supported
+methods are "first", "middle" and "last". Default is "middle", use the middle
+one among all detected elbow points. Only vaild when `post.regression` is TRUE
+and `bagFreq.sigMethod` set to "Curve Elbow Point Detection".}
 }
 \value{
-A list with (1) the result dataframe, "results", contains "variable" with selection frequency >=1 and their "Frequency", the "P.value" and the adjusted p value "P.adjust" of each variable (if set `bagFreq.sigMethod` = "PST" or "PERT"), or the elbow point indicators "elbow.point", while elbow point(s) will be marked with "*" (if set `bagFreq.sigMethod` = "CEP"). This is the main result VSOLassoBag obtained. (2) other utility results, including permutation results, "permutations", the regression model built on VSOLassoBag results, "model".
+A list with (1) the result dataframe, "results", contains "variable" with
+selection frequency >=1 and their "Frequency", the "P.value" and the adjusted
+p value "P.adjust" of each variable (if set `bagFreq.sigMethod` = "PST" or
+"PERT"), or the elbow point indicators "elbow.point", while elbow point(s)
+will be marked with "*" (if set `bagFreq.sigMethod` = "CEP"). This is the main
+result VSOLassoBag obtained. (2) other utility results, including permutation
+results, "permutations", the regression model built on VSOLassoBag results,
+"model".
 }
 \description{
-VSOLassoBag is an one-step function that can be easily utilized for selecting important variables from multiple models inherited from R package \emph{glmnet}. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test)  are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
+VSOLassoBag is an one-step function that can be easily utilized for selecting
+important variables from multiple models inherited from R package \emph{glmnet}.
+Several methods (Parametric Statistical Test, Curve Elbow Point Detection and
+Permutation Test)  are provided for the cut-off point decision of the importance
+measure (i.e. observed selection frequency) of variables.
 }
 \examples{
-\dontrun{
 data(simulated_example)
 
 # binomial
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="CEP")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,
+a.family="binomial",bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,
+a.family="binomial",bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 
+\dontrun{
 # gaussian
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$y,bootN=100,a.family="gaussian",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$y,bootN=100,a.family="gaussian",bagFreq.sigMethod="CEP")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$y,bootN=100,
+a.family="gaussian",bagFreq.sigMethod="PST")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$y,bootN=100,
+a.family="gaussian",bagFreq.sigMethod="CEP")
 
 # cox
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$surv,bootN=100,a.family="cox",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$surv,bootN=100,a.family="cox",bagFreq.sigMethod="CEP")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$surv,bootN=100,
+a.family="cox",bagFreq.sigMethod="PST")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$surv,bootN=100,
+a.family="cox",bagFreq.sigMethod="CEP")
 
 # multinomial
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,a.family="multinomial",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,a.family="multinomial",bagFreq.sigMethod="CEP")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,
+a.family="multinomial",bagFreq.sigMethod="PST")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,
+a.family="multinomial",bagFreq.sigMethod="CEP")
 
 # mgaussian
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,a.family="mgaussian",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,a.family="mgaussian",bagFreq.sigMethod="CEP")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,
+a.family="mgaussian",bagFreq.sigMethod="PST")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,
+a.family="mgaussian",bagFreq.sigMethod="CEP")
 
 # poisson
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$pois,bootN=100,a.family="poisson",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$pois,bootN=100,a.family="poisson",bagFreq.sigMethod="CEP")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$pois,bootN=100,
+a.family="poisson",bagFreq.sigMethod="PST")
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$pois,bootN=100,
+a.family="poisson",bagFreq.sigMethod="CEP")
 
-# multi-thread processing is supported if run on a multi-thread, forking-supported platform (detailed see R package 'parallel'), which can significantly accelerate the process
-# you can achieve this by flag 'parallel' to TRUE and set 'n.cores' to an integer larger than 1, depending on the available threads
+# multi-thread processing is supported if run on a multi-thread,
+forking-supported platform (detailed see R package 'parallel'),
+which can significantly accelerate the process
+# you can achieve this by flag 'parallel' to TRUE and set 'n.cores' to an
+integer larger than 1, depending on the available threads
 # multi-thread processing using 2 threads
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
+res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,
+a.family="binomial",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
 }
 }
 \seealso{
-\code{\link[glmnet]{glmnet}} and \code{\link[glmnet]{cv.glmnet}} in R package \emph{glmnet}.
+\code{\link[glmnet]{glmnet}} and \code{\link[glmnet]{cv.glmnet}}
+in R package \emph{glmnet}.
 }

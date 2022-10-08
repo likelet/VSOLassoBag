@@ -1,12 +1,15 @@
 Package: VSOLassoBag
-Title: A variable-selection oriented LASSO bagging algorithm for biomarker discovery in omic-based translational research
-Version: 1.0.0
+Type: Package
+Title: A variable-selection oriented LASSO bagging algorithm for biomarker 
+        discovery in omic-based translational research
+Version: 0.99.0
+Date: 2022-10-05
+biocViews: Software, StatisticalMethod, FeatureExtraction
 Authors@R: c(
   person('Qi', 'Zhao',  email = 'zhaoqi@sysucc.org.cn', role = c('aut','cre'), comment = c(ORCID = '0000-0002-8683-6145')),
   person('Jiaqi', 'Liang',  email = 'liangjq27@mail2.sysu.edu.cn', role = c('aut')),
   person('Chaoye', 'Wang',  email = 'wangcy1@sysucc.org.cn', role = c('aut'))
   )
-Maintainer: Qi Zhao <zhaoqi@sysucc.org.cn>
 Description: VSOLassoBag is a wrapped LASSO approach by integrating an ensemble learning strategy to help select efficient, stable, and high confidential variables from omics-based data. Using a bagging strategy in combination of a parametric method or inflection point search method for cut-off threshold determination, VSOLassoBag can integrate and vote variables generated from multiple LASSO models to determine the optimal candidates.
 License: GPL-3
 Encoding: UTF-8
@@ -17,6 +20,12 @@ Imports:
     survival,
     ggplot2,
     POT,
-    parallel
+    utils
+Enhances: parallel
 RoxygenNote: 7.2.0
-LazyData: true
+Suggests: 
+    rmarkdown,
+    knitr,
+    rmdformats,
+    qpdf
+VignetteBuilder: knitr

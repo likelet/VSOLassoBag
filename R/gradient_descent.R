@@ -1,11 +1,10 @@
 #this script is for gradient_descent
  # source('pareto_simple_opt_func.R')
-
+utils::globalVariables("runif")
 derivative <- function(theta,X){
   #X should be like c(1,2,3,4,5)
   return(Gprai(theta = theta,X = X))
 }
-
 target_func <- function(theta,X){
   #X should be like c(1,2,3,4,5)
   return(G(theta = theta,X = X))

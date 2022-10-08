@@ -1,9 +1,8 @@
-# for calculating p value with less permutation.
- # source('gradient_descent.R')
- # source('pareto_simple_opt_func.R')
-#' LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data
+#' @title LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data
 #'
 #' This is an internal function utilized by VSOLassoBag.
+#'
+#' @import POT
 #'
 #' @param X a vector of data recording the permutation values
 #' @param x0 observed value
@@ -12,10 +11,14 @@
 #' @param fit.cutoff the cutoff of p value to judge whether it fits well to GPD, default is 0.05
 #' @param when.to.fit a cutoff to tell how many sample values are bigger than the target value then we don't need to fit GPD. it is a portion.Default 0.05
 #' @return p value of the observed value in the permutation test
+#'
 #' @export
-# x <- rgpd(200, 1, 2, 0.25)
-# LessPermutation(x,1,fitting.method='gd')
+#'
+#' @examples
+#' x <- POT::rgpd(200, 1, 2, 0.25)
+#' LessPermutation(x,1,fitting.method='gd')
 
+utils::globalVariables("PSOptTheta")
 LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cutoff=0.05, when.to.fit=0.05) {
   # using General Pareto Distribution to fit the exceedances and return an estimated p value
   #

@@ -4,16 +4,16 @@
 #' The independent variables matrix (X) contains 200 samples (rows) x 500 variates (columns).
 #' The dependent variable(s) matrix (Y) contains same rows as X and 1 variate (column) for gaussian, binomial, possion model application, or 2 variates (columns) for mgaussian, multinomial and cox model application.
 #' The first 1~10 independent variables (X_1~X_10) are simulated to be related to the dependent variable (D_1, first column), and the first 6~15 independent variables (X_6~X_15) are simulated to be related to the second dependent variable (D_2, second column) for mgaussian and multinomial model application.
-#' Survival data for cox model application were simulated with right-censored rate = 0.5 using \code{\link[coxed]{sim.survdata}} of R package \emph{coxed}.
+#' Survival data for cox model application were simulated with right-censored rate = 0.5 using sim.survdata function derived from the coxed R package.
 #'
 #' @docType data
 #' @keywords datasets
 #' @format A list named 'test.df' contains all objects; for details see example codes
 #'
 #' @examples
-#' \dontrun{
 #' data(simulated_example)
 #'
+#' \dontrun{
 #' # binomial
 #' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="PST")
 #' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="CEP")

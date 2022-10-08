@@ -32,3 +32,7 @@ p value of the observed value in the permutation test
 \description{
 This is an internal function utilized by VSOLassoBag.
 }
+\examples{
+x = POT::rgpd(200, 1, 2, 0.25)
+LessPermutation(x,1,fitting.method='gd')
+}

@@ -1,8 +1,9 @@
-
+utils::globalVariables(c("P.adjust", "P", "pdf", "dev.off", "write.table",
+                         "cor.test"))
 singleFilter<-function(mat,out.mat,additional.covariable=NULL,
                        filter.method="spearman",filter.thres.method="fdr",filter.thres.P=0.05,filter.rank.cutoff=0.05,
                        filter.min.variables=-Inf,filter.max.variables=Inf,
-                       rd.seed=10867,parallel=FALSE,n.cores=1,
+                       parallel=FALSE,n.cores=1,
                        silent=FALSE,filter.result.report=TRUE,filter.report.all.variables=TRUE,subdir=""){
 
   ## permutation_distance_cutoff / estimate_loss_cutoff is the rank threshold
@@ -10,7 +11,7 @@ singleFilter<-function(mat,out.mat,additional.covariable=NULL,
   ## filter.thres.P determines the confidence level of the selected features are actually on the level of the filter.rank.cutoff
   time<-0
   sts<-Sys.time()
-  
+
   COX_test<-function(index){
     test<-function(index,surv.y,additional.covariable=NULL){
       if (is.null(additional.covariable)){
@@ -24,13 +25,13 @@ singleFilter<-function(mat,out.mat,additional.covariable=NULL,
       names(p)<-NULL
       return(c(estimate,p))
     }
-    
+
     p_set<-numeric(p)
     estimate_set<-numeric(p)
     y<-out.mat[index,]  # Permutate or not
     marker<-colnames(mat)
     surv.y<-Surv(y[,1],y[,2])
-    
+
     if (parallel & n.cores>1){
       gc()
       res <- mclapply(c(1:ncol(mat)), test,surv.y=surv.y,additional.covariable=additional.covariable,mc.cores = n.cores,mc.preschedule=TRUE,mc.cleanup=TRUE)
@@ -50,7 +51,7 @@ singleFilter<-function(mat,out.mat,additional.covariable=NULL,
       # estimate_set[i]<-cox$coefficients[1]
       # p_set[i]<-summary(cox)$logtest[3]  # Likelihood ratio Test P-value
     # }
-    
+
     names(estimate_set)<-NULL
     names(p_set)<-NULL
     estimate_set<-as.numeric(estimate_set)
@@ -92,29 +93,28 @@ singleFilter<-function(mat,out.mat,additional.covariable=NULL,
       # estimate_set[i]<-r$estimate
     # }
     fdr_set<-p.adjust(p_set,method="fdr")
-    ro<-order(x=abs(estimate_set),decreasing=T)
+    ro<-order(x=abs(estimate_set),decreasing=TRUE)
     ord<-integer(length(ro))
     ord[ro]<-c(1:length(ro))
     report<-data.frame(rank=ord,feature=colnames(mat),estimate=estimate_set,P=p_set,P.adjust=fdr_set)
     return(report)
   }
 
-  set.seed(rd.seed)
-  
+
  if (silent){
-    filter.result.report<-F
+    filter.result.report<-FALSE
   }
-  
+
   if (!is.null(additional.covariable)){
-    if (class(additional.covariable)=="vector"){
+    if (is(additional.covariable, 'vector')){
       additional.covariable<-as.matrix(additional.covariable,ncol=1)
     }
   }
-  
+
   p<-ncol(mat)
   n<-nrow(mat)
   sel<-integer(0)
-  
+
 
   if (filter.method=="spearman" | filter.method=="pearson" | filter.method=="kendall"){
     out.mat<-as.vector(out.mat)
@@ -133,16 +133,16 @@ singleFilter<-function(mat,out.mat,additional.covariable=NULL,
     }
     report<-cor_test(c(1:n))
     estimate_set<-report$estimate
-    ro<-order(x=abs(estimate_set),decreasing=T)
+    ro<-order(x=abs(estimate_set),decreasing=TRUE)
   }
   if (filter.method=="cox"){
     # For cox filter, univariable cox regression is applied
     report<-COX_test(c(1:n))
     ro<-order(report$P.adjust,report$P)
   }
-  
 
-  
+
+
   if (filter.thres.method=="fdr"){
     ## Null hypothesis is estimate==0 and alternative hypothesis!=0
     ## when using adjusted P value method, it is assumed that original P values are uniformly distributed, e.g. the feature with p==0.05 is also ranked top ~5%
@@ -164,7 +164,7 @@ singleFilter<-function(mat,out.mat,additional.covariable=NULL,
       dev.off()
     }
   }
-  
+
   if (filter.thres.method=="rank"){
     ## FDR is ignored in this mode
     if (filter.rank.cutoff*p<filter.min.variables){
@@ -176,7 +176,7 @@ singleFilter<-function(mat,out.mat,additional.covariable=NULL,
         sel<-which(report$rank<=filter.rank.cutoff*p)
       }
     }
-    
+
     if (filter.result.report){
       g4<-ggplot(report)+geom_point(aes(x=(rank/nrow(report)),y=P.adjust),size=0.3,colour="blue")+
         xlim(0,min(1,filter.rank.cutoff))+ylim(0,max(report$P.adjust[sel]))+
@@ -187,27 +187,27 @@ singleFilter<-function(mat,out.mat,additional.covariable=NULL,
       dev.off()
     }
   }
-  
-  
+
+
   if (filter.result.report){
     report_selected<-report[sel,]
     report_selected<-report_selected[order(report_selected$P.adjust,report_selected$rank),]
-    write.table(report_selected,paste0("filter_report_selected",subdir,".txt"),sep="\t",row.names=F,quote=F)  ## output for inspection; selected features only
+    write.table(report_selected,paste0("filter_report_selected",subdir,".txt"),sep="\t",row.names=FALSE,quote=FALSE)  ## output for inspection; selected features only
     if (filter.report.all.variables){  ## if the overall variable No. is too large or set by user, only show the results of selected variables instead
       report$selected<-""
       report$selected[sel]<-"*"
-      write.table(report[order(report$P.adjust,report$rank),],paste0("filter_filter.report.all.variables",subdir,".txt"),sep="\t",row.names=F,quote=F)  ## output final report, all features, sorted according to P.adjust and then rank of |estimate|
+      write.table(report[order(report$P.adjust,report$rank),],paste0("filter_filter.report.all.variables",subdir,".txt"),sep="\t",row.names=FALSE,quote=FALSE)  ## output final report, all features, sorted according to P.adjust and then rank of |estimate|
     }
   }
-  
+
   gc()
   if (!silent){
     cat(paste("In total",length(sel),"features were selected by the filter."),'\n')
   }
-  
+
   time<-time+difftime(Sys.time(),sts,units="min")
   re<-list(sel=sel,rank=report$rank[sel],time=time)
-  
+
   #re<-list(sel=sel,rank=report$rank[sel])
   return(re)
 }
@@ -216,7 +216,7 @@ singleFilter<-function(mat,out.mat,additional.covariable=NULL,
 filters<-function(fmat,fout.mat,additional.covariable=NULL,
                   filter.method="auto",a.family,filter.thres.method="fdr",filter.thres.P=0.05,filter.rank.cutoff=0.05,
                   filter.min.variables=-Inf,filter.max.variables=Inf,
-                  rd.seed=10867,parallel=FALSE,n.cores=1,
+                  parallel=FALSE,n.cores=1,
                   silent=FALSE,filter.result.report=TRUE,filter.report.all.variables=TRUE){
   # A Correlation Filter here to reduce the feature size required to analysis, and thus boost the algorithm; parallel boosting computation allowed
   sel<-integer(0)
@@ -225,7 +225,7 @@ filters<-function(fmat,fout.mat,additional.covariable=NULL,
     n.cores<-1
   }
 
-  
+
   ## The use of filter.min.variables & filter.max.variables is useful especially in Cox filter
   if (filter.min.variables>ncol(fmat)){
     filter.min.variables<-ncol(fmat)
@@ -233,13 +233,13 @@ filters<-function(fmat,fout.mat,additional.covariable=NULL,
   if (filter.max.variables>ncol(fmat)){
     filter.max.variables<-ncol(fmat)
   }
-  
+
   if (is.vector(fout.mat)){  ## Force to be matrix
     fout.mat<-as.matrix(fout.mat,ncol=1)
     colnames(fout.mat)<-"out"
     rownames(fout.mat)<-rownames(fmat)
   }
-  
+
   if (filter.method=="auto"){
     if (a.family=="cox"){
       filter.method<-"cox"
@@ -259,19 +259,19 @@ filters<-function(fmat,fout.mat,additional.covariable=NULL,
     }
     fout.mat<-temp.fout.mat
   }
-  
+
   if (a.family=="cox" & filter.method!="cox"){
     sav<-which(fout.mat[,2]==1) # only retain patients with event happened
     fmat<-fmat[sav,]
     fout.mat<-as.matrix(fout.mat[sav,1])
   }
-  
+
   if (filter.method!="cox"){
     for (i in 1:ncol(fout.mat)){
       filterre<-singleFilter(mat=fmat,out.mat=fout.mat[,i],filter.method=filter.method,filter.thres.method=filter.thres.method,filter.thres.P=filter.thres.P,filter.rank.cutoff=filter.rank.cutoff,
                              filter.min.variables=filter.min.variables,filter.max.variables=filter.max.variables,
                              parallel=parallel,n.cores=n.cores,additional.covariable=additional.covariable,
-                             filter.result.report=filter.result.report,filter.report.all.variables=filter.report.all.variables,silent=silent,rd.seed=rd.seed)
+                             filter.result.report=filter.result.report,filter.report.all.variables=filter.report.all.variables,silent=silent)
       sel<-union(sel,filterre$sel)
       timef<-timef+filterre$time
     }
@@ -279,7 +279,7 @@ filters<-function(fmat,fout.mat,additional.covariable=NULL,
       filterre<-singleFilter(mat=fmat,out.mat=fout.mat,filter.method=filter.method,filter.thres.method=filter.thres.method,filter.thres.P=filter.thres.P,filter.rank.cutoff=filter.rank.cutoff,
                              filter.min.variables=filter.min.variables,filter.max.variables=filter.max.variables,
                              parallel=parallel,n.cores=n.cores,additional.covariable=additional.covariable,
-                             filter.result.report=filter.result.report,filter.report.all.variables=filter.report.all.variables,silent=silent,rd.seed=rd.seed)
+                             filter.result.report=filter.result.report,filter.report.all.variables=filter.report.all.variables,silent=silent)
       sel<-union(sel,filterre$sel)
       timef<-timef+filterre$time
   }

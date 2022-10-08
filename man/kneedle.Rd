@@ -23,6 +23,10 @@ the original input dataframe along with the elbow point indicator "elbow.point" 
 \description{
 This is an internal function utilized by VSOLassoBag.
 }
+\examples{
+data("simulated_example")
+kneedle(test.df$result)
+}
 \references{
 \href{https://ieeexplore.ieee.org/document/5961514}{Original Kneedle Algorithm}, the algorithm utilized in LassoBag has been modified.
 }

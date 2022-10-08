@@ -11,7 +11,12 @@
 #' @param loosing.factor a numeric value range in (0,1), which `kneedle.S` is multiplied by to reduce itself.
 #' @return the original input dataframe along with the elbow point indicator "elbow.point" with elbow point(s) marked with "*", "Diff" the difference curve, "Thres" the threshold.
 #' @references \href{https://ieeexplore.ieee.org/document/5961514}{Original Kneedle Algorithm}, the algorithm utilized in LassoBag has been modified.
+#'
 #' @export
+#'
+#' @examples
+#' data("simulated_example")
+#' kneedle(test.df$result)
 
 kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
   # smoothed spline fitting is applied
@@ -19,12 +24,12 @@ kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
   # Output: return a vector containing the x of elbow point(s)
   # Normalize, Calculate the Difference, and then pick Elbow point(s)
   MM_normalize<-function(x){
-    return((x-min(x,na.rm = T))/(max(x,na.rm = T)-min(x,na.rm = T)))
+    return((x-min(x,na.rm = TRUE))/(max(x,na.rm = TRUE)-min(x,na.rm = TRUE)))
   }
   reverse_MM_normalize<-function(x,mini,maxi){
     return(x*(maxi-mini)+mini)
   }
-  ord<-order(res$Frequency,decreasing=T)
+  ord<-order(res$Frequency,decreasing=TRUE)
   d<-data.frame(x=integer(nrow(res)),y=res$Frequency)
   d<-d[ord,]
   res<-res[ord,]
@@ -56,9 +61,9 @@ kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
   avediffx<-1/(nrow(d)-1)
   reached<-FALSE
   while (!reached){
-    Dlmx$T<-Dlmx$y-S*avediffx
+    Dlmx$`Tx`<-Dlmx$y-S*avediffx
     Dlmx$knee<-FALSE
-    
+
     for (i in 1:nrow(Dlmx)){
       con<-FALSE
       if (i==nrow(Dlmx)){
@@ -71,7 +76,7 @@ kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
         lm<-lm[1]
       }
       for (j in c((Dlmx$i[i]+1):r)){
-        if (D$y[j]<Dlmx$T[i]){
+        if (D$y[j]<Dlmx$`Tx`[i]){
           con<-TRUE
           break
         }
@@ -83,7 +88,7 @@ kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
       }
       Dlmx$knee[i]<-con
     }
-    
+
     knee_x<-Dlmx$i[which(Dlmx$knee)]
     if (length(knee_x)>0){
       reached<-TRUE

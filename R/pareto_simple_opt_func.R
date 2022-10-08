@@ -99,8 +99,8 @@ Gpraisum_p <- function(idx,theta,X,sumlog,sumpow,sum_gprai_p3){
           idx = idx,
           sumpow = sumpow);
   one <- (2*idx-1)*giprai/gi;
-  two <- (2*n+1-2*idx)*giprai/(1-gi); 
-  
+  two <- (2*n+1-2*idx)*giprai/(1-gi);
+
   return(one-two);
 }
 
@@ -123,7 +123,7 @@ Gprai <- function(theta,X){
   sumlog <- sumlogfunc(theta,X);
   sumpow <- sumpowfunc(theta,X);
   sum_gprai_p3 <- sumfunc_gprai_p3(theta,X);
-  
+
   sum_Gp <- 0;
   for(idx in idx_union){
     givalue <- Gpraisum_p(idx = idx,
@@ -152,5 +152,3 @@ G <- function(theta,X){
   }
   return(-n-sum_Gp/n);
 }
-
-
