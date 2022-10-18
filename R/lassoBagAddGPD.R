@@ -55,7 +55,7 @@
 #'
 #' @examples
 #' data("ExpressionData")
-#' set.seed(199810)
+#' set.seed(19084)
 #'
 #' # binomial
 #' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
