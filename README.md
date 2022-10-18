@@ -31,7 +31,7 @@ And the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("likelet/LassoBag")
+devtools::install_github("likelet/VSOLassoBag")
 ```
 
 ## Documentation
