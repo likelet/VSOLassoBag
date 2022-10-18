@@ -24,8 +24,8 @@ the original input dataframe along with the elbow point indicator "elbow.point" 
 This is an internal function utilized by VSOLassoBag.
 }
 \examples{
-data("simulated_example")
-kneedle(test.df$result)
+load(system.file("extdata/Results.RData", package="VSOLassoBag"))
+kneedle(Results)
 }
 \references{
 \href{https://ieeexplore.ieee.org/document/5961514}{Original Kneedle Algorithm}, the algorithm utilized in LassoBag has been modified.

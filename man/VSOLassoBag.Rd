@@ -5,8 +5,8 @@
 \title{VSOLassoBag: one-step main function of VSOLassoBag framework}
 \usage{
 VSOLassoBag(
-  mat,
-  out.mat,
+  ExpressionData,
+  outcomevariable,
   observed.fre = NULL,
   bootN = 1000,
   boot.rep = TRUE,
@@ -46,11 +46,9 @@ VSOLassoBag(
 )
 }
 \arguments{
-\item{mat}{sample matrix that each column represent a variable and rows
-represent sample data points, all the entries in it should be numeric.}
+\item{ExpressionData}{ExpressionData is an object constructed by SummarizedExperiment. It contains the independent variables matrix and outcome variables matrix.}
 
-\item{out.mat}{vector or dataframe with the same rows as the sample size of
-`mat`.}
+\item{outcomevariable}{Variables which must be the column name of the outcome variables matrix were used to construct models.}
 
 \item{observed.fre}{dataframe with columns 'variable' and 'Frequency',
 which can be obtained from existed VSOLassoBag results for re-analysis. A
@@ -206,44 +204,34 @@ Permutation Test)  are provided for the cut-off point decision of the importance
 measure (i.e. observed selection frequency) of variables.
 }
 \examples{
-data(simulated_example)
+data("ExpressionData")
+set.seed(199810)
 
 # binomial
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,
-a.family="binomial",bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,
-a.family="binomial",bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, "label", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, "label", bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 
 \dontrun{
 # gaussian
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$y,bootN=100,
-a.family="gaussian",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$y,bootN=100,
-a.family="gaussian",bagFreq.sigMethod="CEP")
+VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+
 
 # cox
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$surv,bootN=100,
-a.family="cox",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$surv,bootN=100,
-a.family="cox",bagFreq.sigMethod="CEP")
+VSOLassoBag(ExpressionData, c("time","status"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, c("time","status"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 
 # multinomial
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,
-a.family="multinomial",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,
-a.family="multinomial",bagFreq.sigMethod="CEP")
+VSOLassoBag(ExpressionData, c("multi.y.D_1","multi.y.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, c("multi.y.D_1","multi.y.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 
 # mgaussian
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,
-a.family="mgaussian",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,
-a.family="mgaussian",bagFreq.sigMethod="CEP")
+VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 
 # poisson
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$pois,bootN=100,
-a.family="poisson",bagFreq.sigMethod="PST")
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$pois,bootN=100,
-a.family="poisson",bagFreq.sigMethod="CEP")
+VSOLassoBag(ExpressionData, "pois"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, "pois"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 
 # multi-thread processing is supported if run on a multi-thread,
 forking-supported platform (detailed see R package 'parallel'),
@@ -251,8 +239,7 @@ which can significantly accelerate the process
 # you can achieve this by flag 'parallel' to TRUE and set 'n.cores' to an
 integer larger than 1, depending on the available threads
 # multi-thread processing using 2 threads
-res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,
-a.family="binomial",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
+VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
 }
 }
 \seealso{

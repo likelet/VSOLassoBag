@@ -56,7 +56,7 @@ knitr::opts_chunk$set(
 
 ## 1. Introduction
 
-**VSOLassoBag** is a variable-selection oriented Lasso bagging algorithm for biomarker development in omics-based translational research, providing a bagging Lasso framework for **selecting significant variables from multiple models**. A main application of this package is to screen a limited number of variables that are less dependent to the training data sets. Basically, this package was initially developed to adjust Lasso selected results from bootstrapped sample sets. The variables with the highest frequency among several selected results were considered as the stable variables to discriminate different sample sets. However, it is usually difficult to determine the cut-off point in terms of frequency when applied in real data sets. In this package, we introduced several methods, namely (1) **curve elbow point detection**, (2) **parametric statistical test** to help determine the cut-off point for variable selection. The source code and documents are freely available through Github (https://github.com/likelet/LassoBag).
+**VSOLassoBag** is a variable-selection oriented Lasso bagging algorithm for **biomarker development in omics-based translational research**, providing a bagging Lasso framework for **selecting significant variables from multiple models**. A main application of this package is to screen a limited number of variables that are less dependent to the training data sets. Basically, this package was initially developed to adjust Lasso selected results from bootstrapped sample sets. The variables with the highest frequency among several selected results were considered as the stable variables to discriminate different sample sets. However, it is usually difficult to determine the cut-off point in terms of frequency when applied in real data sets. In this package, we introduced several methods, namely (1) **curve elbow point detection**, (2) **parametric statistical test** to help determine the cut-off point for variable selection. The source code and documents are freely available through Github (https://github.com/likelet/LassoBag).
 
 ### 1.1 Citation
 If you find this tool useful, please cite:
@@ -81,39 +81,37 @@ devtools::install_github("likelet/lassoBag")
 ## 3. Prepare input data
 To perform analysis with `VSOLassoBag` function, you need to provide:
 
-* A **matrix** of independent variables as input to the parameter `mat`.
-* A **matrix** of dependent variable(s) as input to the parameter `out.mat`.
-* A **character** indicating the type of dependent variables as input to the parameter `a.family`.
+* **ExpressionData** is an object constructed by  SummarizedExperiment, including independent variables (e.g., expression matrix) and dependent/outcome variable(s). Please view the [SummarizedExperiment doucumention](https://bioconductor.org/packages/release/bioc/vignettes/SummarizedExperiment/inst/doc/SummarizedExperiment.html) for the construction of SummarizedExperiment objects.
+
+* **character** indicating the type of dependent variables as input to the parameter `a.family`.
 
 **Note**: 
 
-* `a.family` is determined entirely by the type of `out.mat`, i.e. the dependent variable(s).
+* `a.family` is determined entirely by the type of `dependent/outcome variable(s)`.
 
 * You can also tune other parameters to better balance the performance and resource required for the analysis. Key parameters include `bootN` for bagging times, and `bagFreq.sigMethod` for the cut-off point decision method.
 
 
-### 3.1 mat
-`mat` is a matrix-like object with variables as columns and observations as rows, all the entries should be numeric.
+### 3.1 Independent variables
+`Independent variables` is a matrix-like object with variables as rows and observations as columns, all the entries should be numeric. It can be obtained by `SummarizedExperiment::assay` function.
 
-**Example `mat` matrix**
+**Example `Independent variables` matrix**
 
 ```{R, echo=FALSE, comment=''}
   library(VSOLassoBag)
-  data(simulated_example)
-  test.df$x[1:6, 1:6]
-  
+  data(ExpressionData)
+  SummarizedExperiment::assay(ExpressionData)[1:6, 1:6]
 ```
 
-
-### 3.2 out.mat
-`out.mat` is a vector or a dataframe with the same rows as the `mat.`.
+### 3.2 dependent/outcome variable(s)
+`dependent/outcome variable(s)` store sample information with the same rows as the samples in the independent variables matrix and can be invoked by `SummarizedExperiment::colData` function.
 
 **Example `out.mat` vector**
 
 ```{R, echo=FALSE, comment=''}
   library(VSOLassoBag)
-  data(simulated_example)
-  test.df$y[1:6]
+  data(ExpressionData)
+  SummarizedExperiment::colData(ExpressionData)$`y`[1:6]
   
 ```
 
@@ -146,17 +144,19 @@ There may be **more than one elbow point** detected on the curve when using loos
 
 ```{R, eval=FALSE}
   library(VSOLassoBag)
-  VSOLassoBag(mat = test.df$x, out.mat = test.df$y, bootN = 100, a.family = "gaussian", bagFreq.sigMethod = "CEP")
+  data(ExpressionData)
+  set.seed(19084)
+  VSOLassoBag(ExpressionData = ExpressionData, outcomevariable = "y", bootN = 100, a.family = "gaussian", bagFreq.sigMethod = "PST", do.plot = TRUE)
 ```
 
 **Results of important variables:**
-```{R, echo=FALSE, comment='', include=FALSE}
-  library(VSOLassoBag)
-  data.CEP <- VSOLassoBag(mat = test.df$x, out.mat = test.df$y, bootN = 100, a.family = "gaussian", bagFreq.sigMethod = "CEP")
-```
 
 ```{R, echo=FALSE, comment=''}
-  print(data.CEP$results[1:14, ])
+  library(VSOLassoBag)
+  data(ExpressionData)
+  set.seed(19084)
+  PSTResults<-VSOLassoBag(ExpressionData = ExpressionData, outcomevariable = "y", bootN = 100, a.family = "gaussian", bagFreq.sigMethod = "PST", do.plot = FALSE)
+  print(PSTResults$results[1:14, ])
 ```
 
 **CEP Observed Frequency Curve (generated by `do.plot = TRUE`):**
@@ -171,17 +171,19 @@ There may be **more than one elbow point** detected on the curve when using loos
 
 ```{R, eval=FALSE}
   library(VSOLassoBag)
-  VSOLassoBag(mat = test.df$x, out.mat = test.df$y, bootN = 100, a.family = "gaussian", bagFreq.sigMethod = "PST")
+  data(ExpressionData)
+  set.seed(19084)
+  VSOLassoBag(ExpressionData = ExpressionData, outcomevariable = "y", bootN = 100, a.family = "gaussian", bagFreq.sigMethod = "CEP", do.plot = TRUE)
 ```
 
 **Results of PST method**
-```{R, echo=FALSE, comment='', include=FALSE}
-  library(VSOLassoBag)
-  data.PST <- VSOLassoBag(mat = test.df$x, out.mat = test.df$y, bootN = 100, a.family = "gaussian", bagFreq.sigMethod = "PST")
-```
 
 ```{R, echo=FALSE, comment=''}
-  print(data.PST$results[1:14, ])
+  library(VSOLassoBag)
+  data(ExpressionData)
+  set.seed(19084)
+  CEPResults<-VSOLassoBag(ExpressionData = ExpressionData, outcomevariable = "y", bootN = 100, a.family = "gaussian", bagFreq.sigMethod = "CEP", do.plot = FALSE)
+  print(CEPResults$results[1:14, ])
 ```
 
 **PST Observed Frequency Distribution (generated by `do.plot = TRUE`):**

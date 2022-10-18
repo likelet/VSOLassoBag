@@ -13,8 +13,8 @@
 #' @export
 #'
 #' @examples
-#' data("simulated_example")
-#' simpleEstimation(test.df$result,10)
+#' load(system.file("extdata/Results.RData", package="VSOLassoBag"))
+#' simpleEstimation(Results, 10)
 
 utils::globalVariables("pbinom")
 simpleEstimation<-function(res.df,bootN){

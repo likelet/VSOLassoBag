@@ -8,8 +8,8 @@
 #' @import POT
 #' @import parallel
 #'
-#' @param mat sample matrix that each column represent a variable and rows represent sample data points, all the entries in it should be numeric.
-#' @param out.mat vector or dataframe with the same rows as the sample size of `mat`.
+#' @param ExpressionData ExpressionData is an object constructed by  SummarizedExperiment. It contains the independent variables matrix and outcome variables matrix.
+#' @param outcomevariable Variables which must be the column name of the outcome variables matrix were used to construct models.
 #' @param observed.fre dataframe with columns 'variable' and 'Frequency', which can be obtained from existed VSOLassoBag results for re-analysis. A warning will be issued if the variables in `observed.fre` not found in `mat`, and these variables will be excluded.
 #' @param bootN the size of re-sampled samples for bagging, default 1000; smaller consumes less processing time but may not get robust results.
 #' @param boot.rep whether sampling with return or not in the bagging procedure
@@ -54,44 +54,45 @@
 #' @export
 #'
 #' @examples
-#' data(simulated_example)
+#' data("ExpressionData")
 #' set.seed(199810)
+#'
 #' # binomial
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 #'
 #' \dontrun{
 #' # gaussian
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$y,bootN=100,a.family="gaussian",bagFreq.sigMethod="PST")
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$y,bootN=100,a.family="gaussian",bagFreq.sigMethod="CEP")
+#' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 #'
 #' # cox
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$surv,bootN=100,a.family="cox",bagFreq.sigMethod="PST")
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$surv,bootN=100,a.family="cox",bagFreq.sigMethod="CEP")
+#' VSOLassoBag(ExpressionData, c("time","status"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, c("time","status"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 #'
 #' # multinomial
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,a.family="multinomial",bagFreq.sigMethod="PST")
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.label,bootN=100,a.family="multinomial",bagFreq.sigMethod="CEP")
+#' VSOLassoBag(ExpressionData, c("multi.y.D_1","multi.y.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, c("multi.y.D_1","multi.y.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 #'
 #' # mgaussian
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,a.family="mgaussian",bagFreq.sigMethod="PST")
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$multi.y,bootN=100,a.family="mgaussian",bagFreq.sigMethod="CEP")
+#' VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 #'
 #' # poisson
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$pois,bootN=100,a.family="poisson",bagFreq.sigMethod="PST")
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$pois,bootN=100,a.family="poisson",bagFreq.sigMethod="CEP")
+#' VSOLassoBag(ExpressionData, "pois"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, "pois"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 #'
 #' # multi-thread processing is supported if run on a multi-thread, forking-supported platform (detailed see R package 'parallel'), which can significantly accelerate the process
 #' # you can achieve this by flag 'parallel' to TRUE and set 'n.cores' to an integer larger than 1, depending on the available threads
 #' # multi-thread processing using 2 threads
-#' res<-VSOLassoBag(mat=test.df$x,out.mat=test.df$label,bootN=100,a.family="binomial",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
+#' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
 #' }
 
 utils::globalVariables(c("coef", "base.exist", "p.adjust", "pdf",
                          "Frequency", "Diff", "Thres", "dev.off",
                          "median", "reorder", "variable", "k_hyb",
                          "sigma_hyb", "stats"))
-VSOLassoBag <- function(mat,out.mat, observed.fre=NULL,
+VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
                       bootN=1000,boot.rep=TRUE,
                       a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),additional.covariable=NULL,
                       bagFreq.sigMethod="CEP",
@@ -104,6 +105,9 @@ VSOLassoBag <- function(mat,out.mat, observed.fre=NULL,
                       filter.result.report=TRUE,filter.report.all.variables=TRUE,
                       post.regression=FALSE,post.LASSO=FALSE,pvalue.cutoff=0.05,used.elbow.point="middle"
                       ) {
+  mat <- t(assay(ExpressionData))
+  out.mat <- colData(ExpressionData)
+  out.mat <- as.matrix(out.mat[ ,outcomevariable])
 
   if (!is.na(output.dir)){
     if (!dir.exists(output.dir)){
@@ -280,9 +284,9 @@ VSOLassoBag <- function(mat,out.mat, observed.fre=NULL,
       selecVlist1 <- mclapply(permutate.index.list, boot.indiv,mc.cores = n.cores,mc.preschedule=TRUE,mc.cleanup=TRUE)  # Slower, but can save some memory
       parallel_time<<-parallel_time+difftime(Sys.time(),parallel_sts,units="min")
     } else {
-      selecVlist1 <- lapply(permutate.index.list, boot.indiv)
+      selecVlist1 <- mclapply(permutate.index.list, boot.indiv)
     }
-    cat(paste(Sys.time(), "One boostrap done.", sep = "--"),'\n')
+    # cat(paste(Sys.time(), "One boostrap done.", sep = "--"),'\n')
     return(selecVlist1)
   }
 
@@ -300,10 +304,9 @@ VSOLassoBag <- function(mat,out.mat, observed.fre=NULL,
     if (parallel & is.null(permutate.index.list)){
       gc()
       parallel_sts<-Sys.time()
-      selecVlist1 <- mclapply(index.list.bootonce, boot.once, permutate.index.list=permutate.index.list,paralleled=TRUE,mc.cores = n.cores,mc.preschedule=TRUE,mc.cleanup=TRUE)
       parallel_time<<-parallel_time+difftime(Sys.time(),parallel_sts,units="min")
     }else{
-      selecVlist1 <- lapply(index.list.bootonce, boot.once, permutate.index.list=permutate.index.list)
+      selecVlist1 <- pblapply(index.list.bootonce, boot.once, permutate.index.list=permutate.index.list)
     }
 
     cat(paste(Sys.time(), "Bagging finished ...", sep = "--"),'\n')

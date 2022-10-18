@@ -14,14 +14,16 @@ Description: VSOLassoBag is a wrapped LASSO approach by integrating an ensemble 
 License: GPL-3
 Encoding: UTF-8
 Depends:
-    R (>= 3.5.0)
+    R (>= 3.6.0)
 Imports: 
     glmnet,
     survival,
     ggplot2,
     POT,
-    utils
-Enhances: parallel
+    parallel,
+    utils,
+    pbapply,
+    SummarizedExperiment
 RoxygenNote: 7.2.0
 Suggests: 
     rmarkdown,
@@ -29,3 +31,4 @@ Suggests:
     rmdformats,
     qpdf
 VignetteBuilder: knitr
+LazyData: true

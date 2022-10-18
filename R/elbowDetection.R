@@ -15,8 +15,8 @@
 #' @export
 #'
 #' @examples
-#' data("simulated_example")
-#' kneedle(test.df$result)
+#' load(system.file("extdata/Results.RData", package="VSOLassoBag"))
+#' kneedle(Results)
 
 kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
   # smoothed spline fitting is applied
