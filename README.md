@@ -4,8 +4,8 @@
 # VSOLassoBag
 
 [VSOLassoBag](https://github.com/likelet/LassoBag) is a variable-selection oriented
-LASSO bagging algorithm for biomarker development in omic-based translational
-research, providing a bagging LASSO framework
+LASSO bagging algorithm for **biomarker development in omic-based translational**
+**research**, providing a bagging LASSO framework
 for selecting important variables from multiple
 models. A main application of this package is to screen limitted number
 of variables that are less dependent to train dataset. Basically, this
@@ -20,14 +20,7 @@ help determine the cut-off point for variables selection.
 
 ## Installation
 
-You can install the released version of lassoBag from
-[CRAN](https://CRAN.R-project.org) with:
-
-``` r
-install.packages("LassoBag")
-```
-
-And the development version from [GitHub](https://github.com/) with:
+You can install the released version of VSOLassoBag from github:
 
 ``` r
 # install.packages("devtools")
