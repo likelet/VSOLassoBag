@@ -3705,7 +3705,7 @@ the latest version of this package, start R and enter:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;devtools&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;devtools&quot;</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;likelet/lassoBag&quot;</span>)</span></code></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;likelet/VSOLassoBag&quot;</span>)</span></code></pre></div>
 </div>
 <div id="prepare-input-data" class="section level2">
 <h2>3. Prepare input data</h2>
@@ -3805,12 +3805,12 @@ loosen the S parameter in case no elbow point can be found.</p>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">19084</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">VSOLassoBag</span>(<span class="at">ExpressionData =</span> ExpressionData, <span class="at">outcomevariable =</span> <span class="st">&quot;y&quot;</span>, <span class="at">bootN =</span> <span class="dv">100</span>, <span class="at">a.family =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="at">bagFreq.sigMethod =</span> <span class="st">&quot;PST&quot;</span>, <span class="at">do.plot =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p><strong>Results of important variables:</strong></p>
-<pre><code>Tue Oct 18 14:00:18 2022 -- INIT process completed, start analyzing  
-Tue Oct 18 14:00:18 2022 -- start calculating observed frequency  
-2022-10-18 14:01:12--Bagging finished ... 
-Tue Oct 18 14:01:12 2022 -- Using Non-permutation method to determine a cutoff point  
+<pre><code>Wed Oct 19 15:17:25 2022 -- INIT process completed, start analyzing  
+Wed Oct 19 15:17:25 2022 -- start calculating observed frequency  
+2022-10-19 15:18:27--Bagging finished ... 
+Wed Oct 19 15:18:28 2022 -- Using Non-permutation method to determine a cutoff point  
 Using Parametric Statistical Test... 
-Tue Oct 18 14:01:12 2022 -- Done 
+Wed Oct 19 15:18:28 2022 -- Done 
     variable Frequency       P.value      P.adjust
 3        X_3       100  0.000000e+00  0.000000e+00
 7        X_7       100  0.000000e+00  0.000000e+00
@@ -3845,13 +3845,13 @@ the statistical significance (p-value) of all variables.</p>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">19084</span>)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">VSOLassoBag</span>(<span class="at">ExpressionData =</span> ExpressionData, <span class="at">outcomevariable =</span> <span class="st">&quot;y&quot;</span>, <span class="at">bootN =</span> <span class="dv">100</span>, <span class="at">a.family =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="at">bagFreq.sigMethod =</span> <span class="st">&quot;CEP&quot;</span>, <span class="at">do.plot =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p><strong>Results of PST method</strong></p>
-<pre><code>Tue Oct 18 14:01:13 2022 -- INIT process completed, start analyzing  
-Tue Oct 18 14:01:13 2022 -- start calculating observed frequency  
-2022-10-18 14:02:07--Bagging finished ... 
-Tue Oct 18 14:02:07 2022 -- Using Non-permutation method to determine a cutoff point  
+<pre><code>Wed Oct 19 15:18:29 2022 -- INIT process completed, start analyzing  
+Wed Oct 19 15:18:29 2022 -- start calculating observed frequency  
+2022-10-19 15:19:25--Bagging finished ... 
+Wed Oct 19 15:19:25 2022 -- Using Non-permutation method to determine a cutoff point  
 Detecting Elbow Points on the Observed Frequency Curve... 
 Using S = 10 for elbow point dection. 
-Tue Oct 18 14:02:07 2022 -- Done 
+Wed Oct 19 15:19:25 2022 -- Done 
     variable Frequency elbow.point Diff     Thres
 3        X_3       100                0  0.000000
 7        X_7       100                0  0.000000
