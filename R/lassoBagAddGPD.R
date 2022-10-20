@@ -356,7 +356,7 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
     rownames(res.df)<-NULL
   } else {
     cat(paste(date(), "", sep=" -- input existed observed frequency "), '\n')
-    if (is(observed.fre, 'data.frame')| length(which(!c("variable","Frequency") %in% colnames(observed.fre)))>0){
+    if (!is(observed.fre, 'data.frame')| length(which(!c("variable","Frequency") %in% colnames(observed.fre)))>0){
       cat("data of observed frequency not correct, must be a data.frame with columns 'variable','Frequency', please check your input data", '\n')
       stop("Input observed frequency Error")
     }
