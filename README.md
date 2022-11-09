@@ -29,7 +29,7 @@ devtools::install_github("likelet/VSOLassoBag")
 
 ## Documentation
 
-A detailed documentation of VSOLassoBag could be found at [here](https://seqworld.com/LassoBag/)
+A detailed documentation of VSOLassoBag could be found at [here](https://seqworld.com/VSOLassoBag/)
 
 ## Authors
 
