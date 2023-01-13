@@ -3621,7 +3621,12 @@ Algorithm</h1>
       <li><a href="#citation" id="toc-citation">1.1 Citation</a></li>
       </ul></li>
       <li><a href="#installation" id="toc-installation">2.
-      Installation</a></li>
+      Installation</a>
+      <ul>
+      <li><a href="#via-cran" id="toc-via-cran">2.1 Via CRAN</a></li>
+      <li><a href="#via-github" id="toc-via-github">2.2 Via
+      GitHub</a></li>
+      </ul></li>
       <li><a href="#prepare-input-data" id="toc-prepare-input-data">3.
       Prepare input data</a>
       <ul>
@@ -3686,26 +3691,36 @@ real data sets. In this package, we introduced several methods, namely
 (1) <strong>curve elbow point detection</strong>, (2) <strong>parametric
 statistical test</strong> to help determine the cut-off point for
 variable selection. The source code and documents are freely available
-through Github (<a href="https://github.com/likelet/LassoBag" class="uri">https://github.com/likelet/LassoBag</a>).</p>
+through Github (<a href="https://github.com/likelet/VSOLassoBag" class="uri">https://github.com/likelet/VSOLassoBag</a>).</p>
 <div id="citation" class="section level3">
 <h3>1.1 Citation</h3>
 <p>If you find this tool useful, please cite:</p>
 <blockquote>
-<p><strong>Jiaqi Liang, Chaoye Wang and Qi Zhao(2022). VSOLassoBag: a
-variable-selection oriented LASSO bagging algorithm for biomarker
-discovery in omic-based translational research. R package version
-1.0.0.</strong></p>
+<p><strong> Liang J, Wang C, Zhang D, Xie Y, Zeng Y, Li T, Zuo Z, Ren J,
+Zhao Q. VSOLassoBag: a variable-selection oriented LASSO bagging
+algorithm for biomarker discovery in omic-based translational research.
+J Genet Genomics. 2023 Jan 3:S1673-8527(22)00285-5. doi:
+10.1016/j.jgg.2022.12.005. Epub ahead of print. PMID: 36608930.
+</strong></p>
 </blockquote>
 </div>
 </div>
 <div id="installation" class="section level2">
 <h2>2. Installation</h2>
-<p>VSOLassoBag can run in both Windows system and most POSIX systems. To
-the latest version of this package, start R and enter:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;devtools&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;devtools&quot;</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;likelet/VSOLassoBag&quot;</span>)</span></code></pre></div>
+<p>VSOLassoBag can run in both Windows system and most POSIX
+systems.</p>
+<div id="via-cran" class="section level3">
+<h3>2.1 Via CRAN</h3>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&quot;VSOLassoBag&quot;</span>)</span></code></pre></div>
+</div>
+<div id="via-github" class="section level3">
+<h3>2.2 Via GitHub</h3>
+<p>To the latest version of this package, start R and enter:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="sc">!</span><span class="fu">requireNamespace</span>(<span class="st">&quot;devtools&quot;</span>, <span class="at">quietly =</span> <span class="cn">TRUE</span>)) {</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">install.packages</span>(<span class="st">&quot;devtools&quot;</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;likelet/lassoBag&quot;</span>)</span></code></pre></div>
+</div>
 </div>
 <div id="prepare-input-data" class="section level2">
 <h2>3. Prepare input data</h2>
@@ -3800,17 +3815,17 @@ point</strong> detected on the curve when using loose threshold,
 therefore it is recommended to use a stricter threshold first (use a
 larger <code>kneedle.S</code>) and the algorithm will automatically
 loosen the S parameter in case no elbow point can be found.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(VSOLassoBag)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data</span>(ExpressionData)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">19084</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">VSOLassoBag</span>(<span class="at">ExpressionData =</span> ExpressionData, <span class="at">outcomevariable =</span> <span class="st">&quot;y&quot;</span>, <span class="at">bootN =</span> <span class="dv">100</span>, <span class="at">a.family =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="at">bagFreq.sigMethod =</span> <span class="st">&quot;PST&quot;</span>, <span class="at">do.plot =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(VSOLassoBag)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data</span>(ExpressionData)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">19084</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">VSOLassoBag</span>(<span class="at">ExpressionData =</span> ExpressionData, <span class="at">outcomevariable =</span> <span class="st">&quot;y&quot;</span>, <span class="at">bootN =</span> <span class="dv">100</span>, <span class="at">a.family =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="at">bagFreq.sigMethod =</span> <span class="st">&quot;PST&quot;</span>, <span class="at">do.plot =</span> <span class="cn">FALSE</span>)</span></code></pre></div>
 <p><strong>Results of important variables:</strong></p>
-<pre><code>Wed Oct 19 15:17:25 2022 -- INIT process completed, start analyzing  
-Wed Oct 19 15:17:25 2022 -- start calculating observed frequency  
-2022-10-19 15:18:27--Bagging finished ... 
-Wed Oct 19 15:18:28 2022 -- Using Non-permutation method to determine a cutoff point  
-Using Parametric Statistical Test... 
-Wed Oct 19 15:18:28 2022 -- Done 
+<pre><code>Fri Jan 13 15:59:00 2023 -- INIT process completed, start analyzing 
+Fri Jan 13 15:59:00 2023 -- start calculating observed frequency 
+2023-01-13 15:59:41--Bagging finished ...
+Fri Jan 13 15:59:41 2023 -- Using Non-permutation method to determine a cutoff point 
+Using Parametric Statistical Test...
+Fri Jan 13 15:59:41 2023 -- Done
     variable Frequency       P.value      P.adjust
 3        X_3       100  0.000000e+00  0.000000e+00
 7        X_7       100  0.000000e+00  0.000000e+00
@@ -3840,18 +3855,18 @@ fast and memory-efficient as “CEP”. It assumes the expected selection
 frequency of all variables follows a binomial distribution, so we can
 first model such a theoretical background distribution, and then obtain
 the statistical significance (p-value) of all variables.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(VSOLassoBag)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data</span>(ExpressionData)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">19084</span>)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">VSOLassoBag</span>(<span class="at">ExpressionData =</span> ExpressionData, <span class="at">outcomevariable =</span> <span class="st">&quot;y&quot;</span>, <span class="at">bootN =</span> <span class="dv">100</span>, <span class="at">a.family =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="at">bagFreq.sigMethod =</span> <span class="st">&quot;CEP&quot;</span>, <span class="at">do.plot =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>  <span class="fu">library</span>(VSOLassoBag)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data</span>(ExpressionData)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set.seed</span>(<span class="dv">19084</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">VSOLassoBag</span>(<span class="at">ExpressionData =</span> ExpressionData, <span class="at">outcomevariable =</span> <span class="st">&quot;y&quot;</span>, <span class="at">bootN =</span> <span class="dv">100</span>, <span class="at">a.family =</span> <span class="st">&quot;gaussian&quot;</span>, <span class="at">bagFreq.sigMethod =</span> <span class="st">&quot;CEP&quot;</span>, <span class="at">do.plot =</span> <span class="cn">TRUE</span>)</span></code></pre></div>
 <p><strong>Results of PST method</strong></p>
-<pre><code>Wed Oct 19 15:18:29 2022 -- INIT process completed, start analyzing  
-Wed Oct 19 15:18:29 2022 -- start calculating observed frequency  
-2022-10-19 15:19:25--Bagging finished ... 
-Wed Oct 19 15:19:25 2022 -- Using Non-permutation method to determine a cutoff point  
-Detecting Elbow Points on the Observed Frequency Curve... 
-Using S = 10 for elbow point dection. 
-Wed Oct 19 15:19:25 2022 -- Done 
+<pre><code>Fri Jan 13 15:59:42 2023 -- INIT process completed, start analyzing 
+Fri Jan 13 15:59:42 2023 -- start calculating observed frequency 
+2023-01-13 16:00:23--Bagging finished ...
+Fri Jan 13 16:00:23 2023 -- Using Non-permutation method to determine a cutoff point 
+Detecting Elbow Points on the Observed Frequency Curve...
+Using S = 10 for elbow point dection.
+Fri Jan 13 16:00:23 2023 -- Done
     variable Frequency elbow.point Diff     Thres
 3        X_3       100                0  0.000000
 7        X_7       100                0  0.000000
@@ -3876,7 +3891,7 @@ Wed Oct 19 15:19:25 2022 -- Done
 </div>
 <div id="session-info" class="section level2">
 <h2>6. Session Info</h2>
-<pre><code>R version 4.0.5 (2021-03-31)
+<pre><code>R version 4.1.1 (2021-08-10)
 Platform: x86_64-w64-mingw32/x64 (64-bit)
 Running under: Windows 10 x64 (build 19044)
 
@@ -3896,42 +3911,42 @@ other attached packages:
 [1] VSOLassoBag_0.99.0
 
 loaded via a namespace (and not attached):
- [1] POT_1.1-10                  Rcpp_1.0.8.3               
- [3] lattice_0.20-41             assertthat_0.2.1           
- [5] glmnet_4.1-4                digest_0.6.27              
- [7] foreach_1.5.2               utf8_1.2.2                 
- [9] R6_2.5.1                    GenomeInfoDb_1.26.7        
-[11] stats4_4.0.5                evaluate_0.14              
-[13] ggplot2_3.3.6               pillar_1.6.4               
-[15] zlibbioc_1.36.0             rlang_0.4.11               
-[17] jquerylib_0.1.4             S4Vectors_0.28.1           
-[19] Matrix_1.3-4                rmarkdown_2.14             
-[21] splines_4.0.5               stringr_1.4.0              
-[23] RCurl_1.98-1.5              munsell_0.5.0              
-[25] DelayedArray_0.16.3         compiler_4.0.5             
-[27] xfun_0.31                   pkgconfig_2.0.3            
-[29] BiocGenerics_0.36.1         shape_1.4.6                
-[31] htmltools_0.5.2             tidyselect_1.1.1           
-[33] SummarizedExperiment_1.20.0 tibble_3.1.4               
-[35] GenomeInfoDbData_1.2.4      bookdown_0.26              
-[37] IRanges_2.24.1              codetools_0.2-18           
-[39] matrixStats_0.61.0          fansi_0.5.0                
-[41] crayon_1.4.2                dplyr_1.0.7                
-[43] bitops_1.0-7                grid_4.0.5                 
-[45] jsonlite_1.7.2              gtable_0.3.1               
-[47] lifecycle_1.0.1             DBI_1.1.1                  
-[49] magrittr_2.0.1              scales_1.1.1               
-[51] rmdformats_1.0.4            stringi_1.7.4              
-[53] pbapply_1.5-0               XVector_0.30.0             
-[55] bslib_0.3.1                 ellipsis_0.3.2             
-[57] generics_0.1.1              vctrs_0.3.8                
-[59] iterators_1.0.14            tools_4.0.5                
-[61] Biobase_2.50.0              glue_1.4.2                 
-[63] purrr_0.3.4                 MatrixGenerics_1.2.1       
-[65] parallel_4.0.5              fastmap_1.1.0              
-[67] survival_3.2-13             yaml_2.2.1                 
-[69] colorspace_2.0-2            GenomicRanges_1.42.0       
-[71] knitr_1.36                  sass_0.4.0                 </code></pre>
+ [1] POT_1.1-10                  lattice_0.20-44            
+ [3] assertthat_0.2.1            glmnet_4.1-2               
+ [5] digest_0.6.27               foreach_1.5.1              
+ [7] utf8_1.2.1                  R6_2.5.1                   
+ [9] GenomeInfoDb_1.28.4         stats4_4.1.1               
+[11] evaluate_0.16               ggplot2_3.3.5              
+[13] pillar_1.6.2                zlibbioc_1.38.0            
+[15] rlang_0.4.11                jquerylib_0.1.4            
+[17] S4Vectors_0.30.0            Matrix_1.3-4               
+[19] rmarkdown_2.16              splines_4.1.1              
+[21] stringr_1.4.0               RCurl_1.98-1.5             
+[23] munsell_0.5.0               DelayedArray_0.18.0        
+[25] compiler_4.1.1              xfun_0.33                  
+[27] pkgconfig_2.0.3             BiocGenerics_0.38.0        
+[29] shape_1.4.6                 htmltools_0.5.2            
+[31] tidyselect_1.1.1            SummarizedExperiment_1.22.0
+[33] tibble_3.1.2                GenomeInfoDbData_1.2.6     
+[35] bookdown_0.29               IRanges_2.26.0             
+[37] codetools_0.2-18            matrixStats_0.60.1         
+[39] fansi_0.5.0                 crayon_1.4.1               
+[41] dplyr_1.0.7                 bitops_1.0-7               
+[43] grid_4.1.1                  jsonlite_1.7.2             
+[45] gtable_0.3.0                lifecycle_1.0.0            
+[47] DBI_1.1.1                   magrittr_2.0.1             
+[49] scales_1.1.1                rmdformats_1.0.4           
+[51] stringi_1.7.4               pbapply_1.5-0              
+[53] XVector_0.32.0              bslib_0.3.0                
+[55] ellipsis_0.3.2              generics_0.1.0             
+[57] vctrs_0.3.8                 iterators_1.0.13           
+[59] tools_4.1.1                 Biobase_2.52.0             
+[61] glue_1.4.2                  purrr_0.3.4                
+[63] MatrixGenerics_1.4.3        parallel_4.1.1             
+[65] fastmap_1.1.0               survival_3.2-13            
+[67] yaml_2.2.1                  colorspace_2.0-2           
+[69] GenomicRanges_1.44.0        knitr_1.40                 
+[71] sass_0.4.0                 </code></pre>
 <hr />
 <p><font color="#969696">@ Copyright 2018-2022, Center of
 Bioinformatics, Sun Yat-sen University Cancer Center Revision
