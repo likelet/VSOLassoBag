@@ -41,3 +41,6 @@ Qi Zhao from SYSUCC, zhaoqi@sysucc.org.cn
 
 ## License 
 GNU General Public License V3
+
+## Citation 
+Liang J, Wang C, Zhang D, Xie Y, Zeng Y, Li T, Zuo Z, Ren J, Zhao Q. VSOLassoBag: a variable-selection oriented LASSO bagging algorithm for biomarker discovery in omic-based translational research. J Genet Genomics. 2023 Jan 3:S1673-8527(22)00285-5. doi: 10.1016/j.jgg.2022.12.005. Epub ahead of print. PMID: 36608930. [link](https://pubmed.ncbi.nlm.nih.gov/36608930/)
