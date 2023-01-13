@@ -20,11 +20,16 @@ help determine the cut-off point for variables selection.
 
 ## Installation
 
-You can install the released version of VSOLassoBag from github:
+You can install the developed version of VSOLassoBag from github:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("likelet/VSOLassoBag")
+```
+`VSOLassoBag` has been released on CRAN, you can also install released version by :
+
+``` r
+install.packages("VSOLassoBag")
 ```
 
 ## Documentation
