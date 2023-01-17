@@ -2,6 +2,7 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # VSOLassoBag
+[![](https://img.shields.io/badge/DOI%3A%20-10.1016%2Fj.jgg.2022.12.005-blue)](https://pubmed.ncbi.nlm.nih.gov/36608930/)
 
 [VSOLassoBag](https://github.com/likelet/LassoBag) is a variable-selection oriented
 LASSO bagging algorithm for **biomarker development in omic-based translational**
