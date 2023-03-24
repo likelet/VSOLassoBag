@@ -2,7 +2,7 @@
 
 #' Kneedle Algorithm: to detect elbow point(s) on the curve
 #'
-#' This is an internal function utilized by VSOLassoBag.
+#' An internal function utilized by VSOLassoBag.
 #'
 #' @param res a dataframe with variables and observed frequency
 #' @param S numeric, determines how aggressive the elbow points on the curve to be called, smaller means more aggressive and larger means more conservative
@@ -92,7 +92,7 @@ kneedle<-function(res,S=10,auto.loose=TRUE,min.S=0.1,loosing.factor=0.5){
     knee_x<-Dlmx$i[which(Dlmx$knee)]
     if (length(knee_x)>0){
       reached<-TRUE
-      cat(paste0("Using S = ",S," for elbow point dection."),'\n')
+      message(paste0("Using S = ",S," for elbow point dection."),'\n')
     }else{
       if (!auto.loose){
         reached<-TRUE

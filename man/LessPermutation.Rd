@@ -2,7 +2,7 @@
 % Please edit documentation in R/LessPermutation.R
 \name{LessPermutation}
 \alias{LessPermutation}
-\title{LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data}
+\title{Reduce permutation times}
 \usage{
 LessPermutation(
   X,
@@ -30,7 +30,7 @@ LessPermutation(
 p value of the observed value in the permutation test
 }
 \description{
-This is an internal function utilized by VSOLassoBag.
+Reduce permutation times by fitting generalized pareto distribution of the right tail data.
 }
 \examples{
 x = POT::rgpd(200, 1, 2, 0.25)

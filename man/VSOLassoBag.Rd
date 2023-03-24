@@ -2,7 +2,7 @@
 % Please edit documentation in R/lassoBagAddGPD.R
 \name{VSOLassoBag}
 \alias{VSOLassoBag}
-\title{VSOLassoBag: one-step main function of VSOLassoBag framework}
+\title{One-step main function of VSOLassoBag framework}
 \usage{
 VSOLassoBag(
   ExpressionData,
@@ -10,6 +10,7 @@ VSOLassoBag(
   observed.fre = NULL,
   bootN = 1000,
   boot.rep = TRUE,
+  sample.size = 1,
   a.family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian"),
   additional.covariable = NULL,
   bagFreq.sigMethod = "CEP",
@@ -59,6 +60,8 @@ and these variables will be excluded.}
 consumes less processing time but may not get robust results.}
 
 \item{boot.rep}{whether sampling with return or not in the bagging procedure}
+
+\item{sample.size}{The sample size in the bagging space, default is 1 (same sample size as the input sample size).}
 
 \item{a.family}{a character determine the data type of out.mat, the same used
 in \code{\link[glmnet]{glmnet}}.}
@@ -197,7 +200,7 @@ results, "permutations", the regression model built on VSOLassoBag results,
 "model".
 }
 \description{
-VSOLassoBag is an one-step function that can be easily utilized for selecting
+An one-step function that can be easily utilized for selecting
 important variables from multiple models inherited from R package \emph{glmnet}.
 Several methods (Parametric Statistical Test, Curve Elbow Point Detection and
 Permutation Test)  are provided for the cut-off point decision of the importance
@@ -208,38 +211,49 @@ data("ExpressionData")
 set.seed(19084)
 
 # binomial
-VSOLassoBag(ExpressionData, "label", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-VSOLassoBag(ExpressionData, "label", bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, "label", bootN=2, a.family="binomial",
+bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
 
-\dontrun{
+\donttest{
 # gaussian
-VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, "y", bootN=2, a.family="gaussian",
+bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, "y", bootN=2, a.family="gaussian",
+bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 
 
 # cox
-VSOLassoBag(ExpressionData, c("time","status"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-VSOLassoBag(ExpressionData, c("time","status"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, c("time","status"), bootN=2,
+a.family="cox", bagFreq.sigMethod="PST", do.plot = FALSE,
+plot.freq = "not")
+VSOLassoBag(ExpressionData, c("time","status"), bootN=2, a.family="cox",
+bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 
-# multinomial
-VSOLassoBag(ExpressionData, c("multi.y.D_1","multi.y.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-VSOLassoBag(ExpressionData, c("multi.y.D_1","multi.y.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+
 
 # mgaussian
-VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=2,
+a.family="mgaussian", bagFreq.sigMethod="PST", do.plot = FALSE,
+plot.freq = "not")
+VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=2,
+a.family="mgaussian", bagFreq.sigMethod="CEP", do.plot = FALSE,
+plot.freq = "not")
 
 # poisson
-VSOLassoBag(ExpressionData, "pois"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-VSOLassoBag(ExpressionData, "pois"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, "pois", bootN=10, a.family="poisson",
+bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+VSOLassoBag(ExpressionData, "pois", bootN=2, a.family="poisson",
+bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 
 # multi-thread processing is supported if run on a multi-thread,
-forking-supported platform (detailed see R package 'parallel'),
-which can significantly accelerate the process
+# forking-supported platform (detailed see R package 'parallel'),
+# which can significantly accelerate the process
 # you can achieve this by flag 'parallel' to TRUE and set 'n.cores' to an
-integer larger than 1, depending on the available threads
+# integer larger than 1, depending on the available threads
 # multi-thread processing using 2 threads
-VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
+VSOLassoBag(ExpressionData, "y", bootN=1000, a.family="binomial",
+bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not",
+parallel=TRUE,n.cores=1)
 }
 }
 \seealso{

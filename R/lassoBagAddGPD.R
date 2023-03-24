@@ -1,18 +1,21 @@
-#' VSOLassoBag: one-step main function of VSOLassoBag framework
+#' One-step main function of VSOLassoBag framework
 #'
-#' VSOLassoBag is an one-step function that can be easily utilized for selecting important variables from multiple models inherited from R package \emph{glmnet}. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test)  are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
+#' An one-step function that can be easily utilized for selecting important variables from multiple models inherited from R package \emph{glmnet}. Several methods (Parametric Statistical Test, Curve Elbow Point Detection and Permutation Test)  are provided for the cut-off point decision of the importance measure (i.e. observed selection frequency) of variables.
 #'
 #' @import glmnet
 #' @import survival
 #' @import ggplot2
 #' @import POT
 #' @import parallel
+#' @import pbapply
+
 #'
 #' @param ExpressionData ExpressionData is an object constructed by  SummarizedExperiment. It contains the independent variables matrix and outcome variables matrix.
 #' @param outcomevariable Variables which must be the column name of the outcome variables matrix were used to construct models.
 #' @param observed.fre dataframe with columns 'variable' and 'Frequency', which can be obtained from existed VSOLassoBag results for re-analysis. A warning will be issued if the variables in `observed.fre` not found in `mat`, and these variables will be excluded.
 #' @param bootN the size of re-sampled samples for bagging, default 1000; smaller consumes less processing time but may not get robust results.
-#' @param boot.rep whether sampling with return or not in the bagging procedure
+#' @param boot.rep whether sampling with return or not in the bagging procedure.
+#' @param sample.size The sample size in the bagging space, default is 1 (same sample size as the input sample size).
 #' @param a.family a character determine the data type of out.mat, the same used in \code{\link[glmnet]{glmnet}}.
 #' @param additional.covariable provide additional covariable(s) to build the cox model, only valid in Cox method (`a.family` == "cox"); a data.frame with same rows as `mat`
 #' @param bagFreq.sigMethod a character to determine the cut-off point decision method for the importance measure (i.e. the observed selection frequency). Supported methods are "Parametric Statistical Test" (abbr. "PST"), "Curve Elbow Point Detection" ("CEP") and "Permutation Test" ("PERT"). The default and preferable method is "CEP". The method "PERT" is not recommended due to consuming time and memmory requirement.
@@ -58,34 +61,48 @@
 #' set.seed(19084)
 #'
 #' # binomial
-#' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-#' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, "y", bootN=1, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
 #'
-#' \dontrun{
+#' \donttest   {
 #' # gaussian
-#' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-#' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, "y", bootN=2, a.family="gaussian",
+#'             bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, "y", bootN=2, a.family="gaussian",
+#'             bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+#'
 #'
 #' # cox
-#' VSOLassoBag(ExpressionData, c("time","status"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-#' VSOLassoBag(ExpressionData, c("time","status"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, c("time","status"), bootN=2,
+#'             a.family="cox", bagFreq.sigMethod="PST", do.plot = FALSE,
+#'             plot.freq = "not")
+#' VSOLassoBag(ExpressionData, c("time","status"), bootN=2, a.family="cox",
+#'             bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 #'
-#' # multinomial
-#' VSOLassoBag(ExpressionData, c("multi.y.D_1","multi.y.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-#' VSOLassoBag(ExpressionData, c("multi.y.D_1","multi.y.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+#'
 #'
 #' # mgaussian
-#' VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-#' VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=2,
+#'             a.family="mgaussian", bagFreq.sigMethod="PST", do.plot = FALSE,
+#'             plot.freq = "not")
+#' VSOLassoBag(ExpressionData, c("multi.label.D_1","multi.label.D_2"), bootN=2,
+#'             a.family="mgaussian", bagFreq.sigMethod="CEP", do.plot = FALSE,
+#'             plot.freq = "not")
 #'
 #' # poisson
-#' VSOLassoBag(ExpressionData, "pois"), bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
-#' VSOLassoBag(ExpressionData, "pois"), bootN=100, a.family="binomial", bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, "pois", bootN=10, a.family="poisson",
+#'             bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not")
+#' VSOLassoBag(ExpressionData, "pois", bootN=2, a.family="poisson",
+#'             bagFreq.sigMethod="CEP", do.plot = FALSE, plot.freq = "not")
 #'
-#' # multi-thread processing is supported if run on a multi-thread, forking-supported platform (detailed see R package 'parallel'), which can significantly accelerate the process
-#' # you can achieve this by flag 'parallel' to TRUE and set 'n.cores' to an integer larger than 1, depending on the available threads
+#' # multi-thread processing is supported if run on a multi-thread,
+#' # forking-supported platform (detailed see R package 'parallel'),
+#' # which can significantly accelerate the process
+#' # you can achieve this by flag 'parallel' to TRUE and set 'n.cores' to an
+#' # integer larger than 1, depending on the available threads
 #' # multi-thread processing using 2 threads
-#' VSOLassoBag(ExpressionData, "y", bootN=100, a.family="binomial", bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not",bagFreq.sigMethod="PST",parallel=TRUE,n.cores=2)
+#' VSOLassoBag(ExpressionData, "y", bootN=1000, a.family="binomial",
+#'             bagFreq.sigMethod="PST", do.plot = FALSE, plot.freq = "not",
+#'             parallel=TRUE,n.cores=1)
 #' }
 
 utils::globalVariables(c("coef", "base.exist", "p.adjust", "pdf",
@@ -93,22 +110,24 @@ utils::globalVariables(c("coef", "base.exist", "p.adjust", "pdf",
                          "median", "reorder", "variable", "k_hyb",
                          "sigma_hyb", "stats"))
 VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
-                      bootN=1000,boot.rep=TRUE,
-                      a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),additional.covariable=NULL,
-                      bagFreq.sigMethod="CEP",
-                      kneedle.S=10,auto.loose=TRUE,loosing.factor=0.5,min.S=0.1,
-                      use.gpd=FALSE, fit.pareto="gd",imputeN=1000,imputeN.max=2000,permut.increase=100,
-                      parallel=FALSE,n.cores=1,
-                      nfolds=4,lambda.type="lambda.1se",
-                      plot.freq="part",plot.out=FALSE, do.plot=TRUE,output.dir=NA,
-                      filter.method="auto",inbag.filter=TRUE,filter.thres.method="fdr",filter.thres.P=0.05,filter.rank.cutoff=0.05,filter.min.variables=-Inf,filter.max.variables=Inf,
-                      filter.result.report=TRUE,filter.report.all.variables=TRUE,
-                      post.regression=FALSE,post.LASSO=FALSE,pvalue.cutoff=0.05,used.elbow.point="middle"
-                      ) {
+                        bootN=1000,boot.rep=TRUE,sample.size=1,
+                        a.family=c("gaussian","binomial","poisson","multinomial","cox","mgaussian"),additional.covariable=NULL,
+                        bagFreq.sigMethod="CEP",
+                        kneedle.S=10,auto.loose=TRUE,loosing.factor=0.5,min.S=0.1,
+                        use.gpd=FALSE, fit.pareto="gd",imputeN=1000,imputeN.max=2000,permut.increase=100,
+                        parallel=FALSE,n.cores=1,
+                        nfolds=4,lambda.type="lambda.1se",
+                        plot.freq="part",plot.out=FALSE, do.plot=TRUE,output.dir=NA,
+                        filter.method="auto",inbag.filter=TRUE,filter.thres.method="fdr",filter.thres.P=0.05,filter.rank.cutoff=0.05,filter.min.variables=-Inf,filter.max.variables=Inf,
+                        filter.result.report=TRUE,filter.report.all.variables=TRUE,
+                        post.regression=FALSE,post.LASSO=FALSE,pvalue.cutoff=0.05,used.elbow.point="middle"
+) {
   mat <- t(assay(ExpressionData))
   out.mat <- colData(ExpressionData)
   out.mat <- as.matrix(out.mat[ ,outcomevariable])
 
+  oldwd <- getwd()
+  on.exit(setwd(oldwd))
   if (!is.na(output.dir)){
     if (!dir.exists(output.dir)){
       dir.create(output.dir)
@@ -132,8 +151,12 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
   }
   all.num <- bootN * imputeN
 
-  if (is.vector(out.mat)){  # force to be matrix
-    out.mat<-as.matrix(out.mat,ncol=1)
+  if (!is.matrix(out.mat)){  # force to be matrix
+    if (is.null(dim(out.mat))){
+      out.mat<-as.matrix(out.mat,ncol=1)
+    }else{
+      out.mat<-as.matrix(out.mat)
+    }
   }
 
   if (!is.null(additional.covariable)){
@@ -189,15 +212,24 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
   colnames(zeromat) <- colnames(out.mat)
   rownames(zeromat) <- rownames(out.mat)
   for (i in 1:ncol(out.mat)) {
-    zeromat[,i] <- as.numeric(out.mat[,i])
+    if (typeof(out.mat[,i]) %in% c('numeric','factor','integer')){
+      zeromat[,i] <- as.numeric(factor(out.mat[,i]))
+    }else{
+      zeromat[,i] <- as.numeric(out.mat[,i])
+    }
+
   }
   out.mat <- zeromat  # it's necessary to substitute in this way for there will be some mistake in later handling if we don't do this
 
   rm(zeromat)
   gc()
 
+  if(sum(is.na(out.mat)) > 0){
+    warning("No characters allowed in the response variable, please convert to numeric format")
+  }
+
   ## INIT end
-  cat(paste(date(), "", sep=" -- INIT process completed, start analyzing "), '\n')
+  message(paste(date(), "", sep=" -- INIT process completed, start analyzing "), '\n')
 
   ## out-bag filter
   if (filter.method!="none" & !inbag.filter){
@@ -207,7 +239,7 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
                parallel=parallel,n.cores=n.cores,
                silent=FALSE,filter.result.report=filter.result.report,filter.report.all.variables=filter.report.all.variables)
     mat<-mat[,o$sel]
-    cat(paste(date(), "", sep=" -- out-bag filter completed "), '\n')
+    message(paste(date(), "", sep=" -- out-bag filter completed "), '\n')
   }
 
   # lasso bag function in individual iteration
@@ -284,9 +316,8 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
       selecVlist1 <- mclapply(permutate.index.list, boot.indiv,mc.cores = n.cores,mc.preschedule=TRUE,mc.cleanup=TRUE)  # Slower, but can save some memory
       parallel_time<<-parallel_time+difftime(Sys.time(),parallel_sts,units="min")
     } else {
-      selecVlist1 <- mclapply(permutate.index.list, boot.indiv)
+      selecVlist1 <- lapply(permutate.index.list, boot.indiv)
     }
-    # cat(paste(Sys.time(), "One boostrap done.", sep = "--"),'\n')
     return(selecVlist1)
   }
 
@@ -297,19 +328,20 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
     #index new list for bagging
     index.list.bootonce<-list()
     for(i in 1:bootN){
-      sampleindex2 <- sample(1:nrow(mat), 1*nrow(mat), replace = boot.rep)  # re-sampling, same size
+      sampleindex2 <- sample(1:nrow(mat), sample.size*nrow(mat), replace = boot.rep)  # re-sampling, same size
       index.list.bootonce[[i]]<-sampleindex2
     }
 
     if (parallel & is.null(permutate.index.list)){
       gc()
       parallel_sts<-Sys.time()
+      selecVlist1 <- mclapply(index.list.bootonce, boot.once, permutate.index.list=permutate.index.list,paralleled=TRUE,mc.cores = n.cores,mc.preschedule=TRUE,mc.cleanup=TRUE)
       parallel_time<<-parallel_time+difftime(Sys.time(),parallel_sts,units="min")
     }else{
       selecVlist1 <- pblapply(index.list.bootonce, boot.once, permutate.index.list=permutate.index.list)
     }
 
-    cat(paste(Sys.time(), "Bagging finished ...", sep = "--"),'\n')
+    message(paste(Sys.time(), "Bagging finished ...", sep = "--"),'\n')
 
     if (is.null(permutate.index.list)){
       # non-permutated bagging results
@@ -342,7 +374,7 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
 
   # get observed frequency
   if (is.null(observed.fre)) {
-    cat(paste(date(), "", sep=" -- start calculating observed frequency "), '\n')
+    message(paste(date(), "", sep=" -- start calculating observed frequency "), '\n')
     observed.fre<-bagging()  # observed frequency. The true freq
 
     # preserve only features selected at least 1 time in the bagging process
@@ -355,9 +387,9 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
     names(res.df$Frequency)<-NULL
     rownames(res.df)<-NULL
   } else {
-    cat(paste(date(), "", sep=" -- input existed observed frequency "), '\n')
-    if (!is(observed.fre, 'data.frame')| length(which(!c("variable","Frequency") %in% colnames(observed.fre)))>0){
-      cat("data of observed frequency not correct, must be a data.frame with columns 'variable','Frequency', please check your input data", '\n')
+    message(paste(date(), "", sep=" -- input existed observed frequency "), '\n')
+    if (is(observed.fre, 'data.frame') | length(which(!c("variable","Frequency") %in% colnames(observed.fre)))>0){
+      warning("data of observed frequency not correct, must be a data.frame with columns 'variable','Frequency', please check your input data", '\n')
       stop("Input observed frequency Error")
     }
     ## read in standard feature_freq.txt output
@@ -374,7 +406,7 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
 
   if (!(bagFreq.sigMethod %in% c("Permutation Test","PERT","Parametric Statistical Test","PST","Curve Elbow Point Detection","CEP"))){
     if (bagFreq.sigMethod!="none"){
-      cat("bagFreq.sigMethod not correctly set, got observed frequency and exit.",'\n')
+      warning("bagFreq.sigMethod not correctly set, got observed frequency and exit.",'\n')
     }
     res.df$ori.region<-NULL
     return(list(results=res.df, permutations=NULL,model=NULL))
@@ -383,7 +415,7 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
   if (bagFreq.sigMethod=="Permutation Test" | bagFreq.sigMethod=="PERT") {
     # Permutation Tests
     #construct datalist with permutation
-    cat(paste(date(), "", sep=" -- permutate index "), '\n')
+    message(paste(date(), "", sep=" -- permutate index "), '\n')
 
     get.permutation <- function(N) {
       # N is how many times to do permutations at this function
@@ -394,7 +426,7 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
         index.list[[i]]<-temp.index
       }  # index.list is of length=imputeN, each index is the random order of the original matrix
 
-      cat(paste(date(), "", sep=" -- permutating "), '\n')
+      message(paste(date(), "", sep=" -- permutating "), '\n')
       # do permutation
 
       # the origin
@@ -409,7 +441,7 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
 
       out.df<-do.call(cbind.data.frame, permut.list)  # output as a data frame
       # features saved in df will be shown else the entities will be 0
-      cat(paste(date(), "", sep=" -- getting pvalue "), '\n')
+      message(paste(date(), "", sep=" -- getting pvalue "), '\n')
 
       #get permutation pvalue
       pvalue.list<-c()
@@ -426,9 +458,9 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
           # show if the GPD
           tryCatch({p.value <- LessPermutation(as.numeric(as.character(temp.list)),observed.value,fitting.method = fit.pareto)
           good.fit <- adtest.gpd(temp.list,observed.fre[i],fitting.method = fit.pareto)},
-                   error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
-                   print(p.value);
-                   print("no data is bigger than threshold, we will use traditional p-value")})
+          error=function(e){p.value<-(length(temp.list[temp.list>observed.fre[i]])+1)/N;
+          message(p.value);
+          message("no data is bigger than threshold, we will use traditional p-value")})
         } else {
           good.fit <- "fit_good_enough"
         }
@@ -479,55 +511,55 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
         pvalue.list <- judgement[[3]]
       }
       #FDR calculation
-      cat(paste(date(), "", sep=" -- Pvalue adjusting "), '\n')
+      message(paste(date(), "", sep=" -- Pvalue adjusting "), '\n')
       # FDR.list<-p.adjust(pvalue.list,method = "bonferroni")
       FDR.list <- p.adjust(pvalue.list,method = "fdr")
       res.df<-data.frame(variable=names(observed.fre),Frequency=observed.fre,ori.region=sav,P.value=pvalue.list,P.adjust=FDR.list)
       names(res.df$Frequency)<-NULL
       rownames(res.df)<-NULL
       res.df<-res.df[order(res.df$Frequency,decreasing=TRUE),]
-      cat(paste(date(), "", sep=" -- Done"), '\n')
+      message(paste(date(), "", sep=" -- Done"), '\n')
     } else {
       out.table<-do.call(cbind.data.frame, permut.list)
-      cat(paste(date(), "", sep=" -- Clean up out.df "), '\n')
+      message(paste(date(), "", sep=" -- Clean up out.df "), '\n')
       res.df <- "Don't care"
-      cat(paste(date(), "", sep=" -- Done"), '\n')
+      message(paste(date(), "", sep=" -- Done"), '\n')
     }
 
   } else {  # do not permutate and output frequency; get P-value w/o permutation tests; use PST or CEP to decide cutoff point
-    cat(paste(date(), "", sep=" -- Using Non-permutation method to determine a cutoff point "), '\n')
+    message(paste(date(), "", sep=" -- Using Non-permutation method to determine a cutoff point "), '\n')
 
     if (bagFreq.sigMethod=="Curve Elbow Point Detection" | bagFreq.sigMethod=="CEP"){
-      cat("Detecting Elbow Points on the Observed Frequency Curve...", '\n')
+      message("Detecting Elbow Points on the Observed Frequency Curve...", '\n')
       # Detect elbow points on the observed frequency curve and consider them as cutoff point
       res.df<-kneedle(res=res.df,S=kneedle.S,auto.loose=auto.loose,loosing.factor=loosing.factor,min.S=min.S)
       if (length(which(res.df$elbow.point=="*"))==0){
-        cat("WARNING: No elbow point detected on the curve, use simple estimation method instead...",'\n')
+        warning("No elbow point detected on the curve, use simple estimation method instead...",'\n')
         bagFreq.sigMethod<-"PST"
       }else{
         if (length(which(res.df$elbow.point=="*"))>5){
-          cat("INFO: >5 elbow points detected on curve, may need to use larger kneedle.S to get a more conservative result; also refer to the 'ObservedFreqCurve' plot for kneedle.S adjustment.",'\n')
+          message("INFO: >5 elbow points detected on curve, may need to use larger kneedle.S to get a more conservative result; also refer to the 'ObservedFreqCurve' plot for kneedle.S adjustment.",'\n')
         }
         if (do.plot){
           pdf("ObservedFreqCurve.pdf")
           x<-c(1:nrow(res.df))
           markPoints<-which(res.df$elbow.point=="*")
           print(ggplot(res.df) +
-            geom_step(aes(x=x,y=Frequency),color="black",size=0.5)+
-            geom_line(aes(x=x,y=Diff),color="red",size=0.5)+
-            geom_step(aes(x=x,y=Thres),color="#6666ff",linetype="twodash",size=0.4)+
-            geom_vline(xintercept=markPoints,color="#0000cc",linetype="dashed",size=0.3) +
-            theme_bw() +
-            theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
-            xlab("Variables Frequency Rank\n(black: frequency; dashed vertical: elbow point;\nred: difference; dashed blue: threshold)")+
-            ylab("Frequency"))
+                  geom_step(aes(x=x,y=Frequency),color="black",size=0.5)+
+                  geom_line(aes(x=x,y=Diff),color="red",size=0.5)+
+                  geom_step(aes(x=x,y=Thres),color="#6666ff",linetype="twodash",size=0.4)+
+                  geom_vline(xintercept=markPoints,color="#0000cc",linetype="dashed",size=0.3) +
+                  theme_bw() +
+                  theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
+                  xlab("Variables Frequency Rank\n(black: frequency; dashed vertical: elbow point;\nred: difference; dashed blue: threshold)")+
+                  ylab("Frequency"))
           dev.off()
         }
       }
     }
 
     if (bagFreq.sigMethod=="Parametric Statistical Test" | bagFreq.sigMethod=="PST"){
-      cat("Using Parametric Statistical Test...", '\n')
+      message("Using Parametric Statistical Test...", '\n')
       # By fitting the observed freq to a binomial distribution model to estimate the significant p-value for each feature being "important" and therefore decide the cutoff
       se<-simpleEstimation(res.df=res.df,bootN=bootN)
       pvalue.list<-se$pvalue
@@ -538,24 +570,24 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
       if (do.plot){
         pdf("ObservedFreqDistribution.pdf")
         print(ggplot(res.df) +
-          geom_histogram(aes(x=Frequency),fill="#ff9999",color="#cc0000")  + geom_text(aes(x=max(Frequency)*0.8,y=nrow(res.df)*0.1,label=paste0("average selection ratio=\n",round(pin,digits=4)))) +
-          theme_bw() +
-          theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
-          xlab("Observed Selection Frequency")+ylab("Variables Count"))
+                geom_histogram(aes(x=Frequency),fill="#ff9999",color="#cc0000")  + geom_text(aes(x=max(Frequency)*0.8,y=nrow(res.df)*0.1,label=paste0("average selection ratio=\n",round(pin,digits=4)))) +
+                theme_bw() +
+                theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
+                xlab("Observed Selection Frequency")+ylab("Variables Count"))
         dev.off()
       }
       res.df<-res.df[order(res.df$Frequency,decreasing=TRUE),]
     }
 
     out.table <- NULL
-    cat(paste(date(), "", sep=" -- Done"), '\n')
+    message(paste(date(), "", sep=" -- Done"), '\n')
   }
 
   model<-NULL
   if (post.regression){
     # Optional, build a regression model based on the features selected by VSOLassoBag with custom-defined (or default) cutoff p-value
     # the features and their coefficient are reported, including the intercept or the coef of additional covariable
-    cat("Building a regression model using features selected by VSOLassoBag...", '\n')
+    message("Building a regression model using features selected by VSOLassoBag...", '\n')
     if (bagFreq.sigMethod=="Permutation Test" | bagFreq.sigMethod=="PERT" | bagFreq.sigMethod=="Parametric Statistical Test" | bagFreq.sigMethod=="PST"){
       post.selected<-res.df$ori.region[which(res.df$P.adjust<pvalue.cutoff)]
     }else{
@@ -580,7 +612,7 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
       effect.mat<-cbind(effect.mat,additional.covariable)
     }
     if (post.LASSO){
-      cat("Using LASSO model...", '\n')
+      message("Using LASSO model...", '\n')
       glm<-try(cv.glmnet(x=effect.mat, y=out.mat, family = a.family,nfolds = nfolds),silent=TRUE)
     }else{
       glm<-try(glmnet(x=effect.mat, y=out.mat, family = a.family,lambda=0),silent=TRUE)  ## a no-penalty regression
@@ -590,7 +622,7 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
     }else{
       model<-glm
     }
-    cat(paste(date(), "", sep=" -- Done"), '\n')
+    message(paste(date(), "", sep=" -- Done"), '\n')
   }
 
   if (do.plot) {
@@ -604,16 +636,16 @@ VSOLassoBag <- function(ExpressionData, outcomevariable, observed.fre=NULL,
       plot.df<-rbind(plot.df,empty.df)
     } else if (plot.freq!=FALSE & plot.freq!="part" & plot.freq!="full"){
       plot.df <- res.df
-      print("Actually you need to set plot.freq correctly, here we will plot all variables.")
+      message("Actually you need to set plot.freq correctly, here we will plot all variables.")
     }
     if (plot.freq!=FALSE) {
       if (plot.out!=FALSE) {  # for saving files
         pdf(plot.out)
         gg<-ggplot(plot.df, aes(reorder(variable, -Frequency), Frequency)) +
-           geom_bar(stat = "identity") +
-           theme_bw() +
-           theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
-           xlab(label = "Variables")
+          geom_bar(stat = "identity") +
+          theme_bw() +
+          theme(axis.text.x  = element_text(angle=45, vjust = 0.9, hjust = 1)) +
+          xlab(label = "Variables")
         if (nrow(plot.df)>=30){
           gg<-gg+theme(axis.text.x=element_blank())
         }

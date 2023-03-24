@@ -19,7 +19,7 @@ target_func <- function(theta,X){
 GradientDescent <- function(X,step=0.0001,acc=10e-06,maxIter=500) {
   #step is learning rate
   #acc means acception
-  print(X)
+  message(X)
   curX <- runif(1,max = 1/max(X))
   foreX <- curX
   iterCount <- 1
@@ -31,18 +31,18 @@ GradientDescent <- function(X,step=0.0001,acc=10e-06,maxIter=500) {
     diff <- abs(curX - foreX)
     foreX <- curX
     funcVal <- target_func(curX,X)
-    print(paste(c("Optimized at Func = ", funcVal), sep = "", collapse = ""))
+    message(paste(c("Optimized at Func = ", funcVal), sep = "", collapse = ""))
     # iterCount <- iterCount + 1
     if (iterCount >= maxIter) {
       optimizedX <- curX
       optimizedVal <- funcVal
-      print(paste(c("Optimization converge at Func = ", funcVal),sep = "", collapse = ""))
+      message(paste(c("Optimization converge at Func = ", funcVal),sep = "", collapse = ""))
       break
     }
     if (diff <= acc) {
       optimizedX <- curX
       optimizedVal <- funcVal
-      print(paste(c("Optimization converge at Func = ", funcVal),sep = "", collapse = ""))
+      message(paste(c("Optimization converge at Func = ", funcVal),sep = "", collapse = ""))
       # break
       iterCount <- iterCount + 1
     }

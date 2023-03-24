@@ -2,7 +2,7 @@
 #'
 #' @docType data
 #' @keywords datasets
-#' @format ExpressionData is an object constructed by  SummarizedExperiment.
+#' @format An object constructed by  SummarizedExperiment.
 #' it contains the Simulated Example Data for VSOLassoBag with two parts.
 #' \describe{
 #'     \item{assay(ExpressionData)}{The independent variables matrix (X)

@@ -1,10 +1,10 @@
-# provide p-value using the statistical method described in RRLASSO (Park H., et al, 2015; doi:10.1371/journal.pone.0141869)
+# Provide p-value using the statistical method described in RRLASSO (Park H., et al, 2015; doi:10.1371/journal.pone.0141869)
 
 # Return a p-value list and the average selection ratio pi
 
 #' Parametric Statistical Test
 #'
-#' This is an internal function utilized by VSOLassoBag.
+#' An internal function utilized by VSOLassoBag.
 #'
 #' @param res.df a dataframe with variables and observed frequency
 #' @param bootN an integer, bagging times

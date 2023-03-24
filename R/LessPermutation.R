@@ -1,6 +1,6 @@
-#' @title LessPermutation: to reduce permutation times by fitting generalized pareto distribution of the right tail data
+#' @title Reduce permutation times
 #'
-#' This is an internal function utilized by VSOLassoBag.
+#' Reduce permutation times by fitting generalized pareto distribution of the right tail data
 #'
 #' @import POT
 #'
@@ -115,9 +115,6 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
   #Make a list of F(z) for AD Test
   adtestGPD.MakeZ <- function(X,thres, k, s) {
     union.Z <- OverThres(X,thres)
-    # print("thres is")
-    # print(thres)
-    # print(union.Z)
     # k <- as.numeric(EstKS["shape"]) * -1
     # s <- as.numeric(EstKS["scale"])
     z <- union.Z - thres
@@ -191,7 +188,6 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
     k <- -1 * as.numeric(estks["shape"])
     s <- as.numeric(estks["scale"])
     z <- x0 - thres
-    # print(thres)
     if(k == 0){
       return(Nexc * (1 - GPD.kZero(z, s)) / N) # according to paper: "Fewer permutations, more accurate P-values"
     } else {
@@ -221,25 +217,21 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
       s <- as.numeric(EstKS["scale"])
       z <- x0 - thres
       if (k > 0 & z < (s/k) & z > 0) {
-        # print("situ1")
         thresInRange <- "YES"
         goodFit <- adtestGPD.IsReach(X, thres, k, s)
         itertimes <- itertimes + 1
         idx <- ceiling(1 + (itertimes * search.step) * length(X))
       } else if (k < 0 & z > 0){
-        # print("situ2")
         thresInRange <- "YES"
         goodFit <- adtestGPD.IsReach(X, thres, k, s)
         itertimes <- itertimes + 1
         idx <- ceiling(1 + (itertimes * search.step) * length(X))
       } else if (k == 0) {
-        # print("situ3")
         thresInRange <- "YES"
         goodFit <- adtestGPD.IsReach(X, thres, k, s)
         itertimes <- itertimes + 1
         idx <- ceiling(1 + (itertimes * search.step) * length(X))
       } else {
-        # print("situ4")
         thresInRange <- "NO"
         itertimes <- itertimes + 1
         idx <- ceiling(1 + (itertimes * search.step) * length(X))
@@ -252,11 +244,11 @@ LessPermutation <- function(X, x0, fitting.method="mle",search.step=0.01,fit.cut
         out.p <- Calp(X, x0, thres)
         return(out.p)
       } else {
-        print("add_more_permutation_or_just_use_the_current_p_value")
+        message("add_more_permutation_or_just_use_the_current_p_value")
         return(length(OverThres(X, x0)) / length(X))
       }
     } else {
-      print("add_more_permutation_or_just_use_the_current_p_value")
+      message("add_more_permutation_or_just_use_the_current_p_value")
       return(length(OverThres(X, x0)) / length(X))
     }
   } else {
@@ -321,9 +313,6 @@ adtest.gpd <- function(X,x0,fitting.method="mle",fit.cutoff=0.05){
     #Make a list of F(z) for AD Test
     adtestGPD.MakeZ <- function(X,thres, k, s) {
       union.Z <- OverThres(X,thres)
-      # print("thres is")
-      # print(thres)
-      # print(union.Z)
       # k <- as.numeric(EstKS["shape"]) * -1
       # s <- as.numeric(EstKS["scale"])
       z <- union.Z - thres

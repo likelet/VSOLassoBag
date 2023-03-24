@@ -21,7 +21,7 @@ kneedle(res, S = 10, auto.loose = TRUE, min.S = 0.1, loosing.factor = 0.5)
 the original input dataframe along with the elbow point indicator "elbow.point" with elbow point(s) marked with "*", "Diff" the difference curve, "Thres" the threshold.
 }
 \description{
-This is an internal function utilized by VSOLassoBag.
+An internal function utilized by VSOLassoBag.
 }
 \examples{
 load(system.file("extdata/Results.RData", package="VSOLassoBag"))

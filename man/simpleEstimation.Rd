@@ -15,7 +15,7 @@ simpleEstimation(res.df, bootN)
 a list of p-value of each variable and the average selection ratio
 }
 \description{
-This is an internal function utilized by VSOLassoBag.
+An internal function utilized by VSOLassoBag.
 }
 \examples{
 load(system.file("extdata/Results.RData", package="VSOLassoBag"))

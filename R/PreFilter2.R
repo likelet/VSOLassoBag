@@ -202,7 +202,7 @@ singleFilter<-function(mat,out.mat,additional.covariable=NULL,
 
   gc()
   if (!silent){
-    cat(paste("In total",length(sel),"features were selected by the filter."),'\n')
+    message(paste("In total",length(sel),"features were selected by the filter."),'\n')
   }
 
   time<-time+difftime(Sys.time(),sts,units="min")
